@@ -7,3 +7,8 @@ torchvision
 openai
 ipykernel
 clingo
+# New additions for local LLM inference and macOS support
+accelerate
+ipywidgets
+sentencepiece
+protobuf
