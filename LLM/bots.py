@@ -297,7 +297,8 @@ def load_pipe(model_checkpoint="meta-llama/Meta-Llama-3-8B-Instruct", local_dir=
 
     # If HF_KEY is present, set HUGGINGFACE_HUB_TOKEN
     if HF_KEY:
-        os.environ.setdefault('HUGGINGFACE_HUB_TOKEN', HF_KEY)
+        print("Using Huggingface Hub Token from .env")
+        #os.environ.setdefault('HUGGINGFACE_HUB_TOKEN', HF_KEY)
     
     # 1. Clear Cache dynamically
     if torch.cuda.is_available():
@@ -306,9 +307,9 @@ def load_pipe(model_checkpoint="meta-llama/Meta-Llama-3-8B-Instruct", local_dir=
         torch.mps.empty_cache()
 
     # 2. Select Dtype dynamically
-    # Use float16 for CUDA or MPS, bfloat16 for others (or if specific hardware requires it)
+    # Only use float16 if you are on an old CUDA card that doesn't support bfloat16
     dtype = torch.bfloat16
-    if torch.cuda.is_available() or torch.backends.mps.is_available():
+    if torch.cuda.is_available() and not torch.cuda.is_bf16_supported():
         dtype = torch.float16
 
     # 3. Check Quantization compatibility
@@ -321,20 +322,20 @@ def load_pipe(model_checkpoint="meta-llama/Meta-Llama-3-8B-Instruct", local_dir=
     if not os.path.exists(model_directory):
         print('downloading model...')
         # Download and save the model and tokenizer locally
-        tokenizer = AutoTokenizer.from_pretrained(model_checkpoint)
+        tokenizer = AutoTokenizer.from_pretrained(model_checkpoint, token=HF_KEY)
 
         # Load model with correct qunatization settings
         if quantization_config == '8bit':
             quantization_config = BitsAndBytesConfig(load_in_8bit=True)
-            model = AutoModelForCausalLM.from_pretrained(model_checkpoint, device_map="auto", trust_remote_code=True, quantization_config=quantization_config)
+            model = AutoModelForCausalLM.from_pretrained(model_checkpoint, device_map="auto", trust_remote_code=True, quantization_config=quantization_config, token=HF_KEY)
         
         elif quantization_config == '4bit':
             quantization_config = BitsAndBytesConfig(load_in_4bit=True, bnb_4bit_compute_dtype=torch.float16)
-            model = AutoModelForCausalLM.from_pretrained(model_checkpoint, device_map="auto", trust_remote_code=True, quantization_config=quantization_config)
+            model = AutoModelForCausalLM.from_pretrained(model_checkpoint, device_map="auto", trust_remote_code=True, quantization_config=quantization_config, token=HF_KEY)
         
         else:
             # use the chosen dtype variable for consistency
-            model = AutoModelForCausalLM.from_pretrained(model_checkpoint, device_map="auto", torch_dtype=dtype)
+            model = AutoModelForCausalLM.from_pretrained(model_checkpoint, device_map="auto", dtype=dtype, token=HF_KEY)
         
         # Save model and tokenizer locally
         if save:
