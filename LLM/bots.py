@@ -309,7 +309,7 @@ def load_pipe(model_checkpoint="meta-llama/Meta-Llama-3-8B-Instruct", local_dir=
     # 2. Select Dtype dynamically
     # Only use float16 if you are on an old CUDA card that doesn't support bfloat16
     dtype = torch.bfloat16
-    if torch.cuda.is_available() and not torch.cuda.is_bf16_supported():
+    if torch.cuda.is_available() or torch.backends.mps.is_available():
         dtype = torch.float16
 
     # 3. Check Quantization compatibility
@@ -318,7 +318,7 @@ def load_pipe(model_checkpoint="meta-llama/Meta-Llama-3-8B-Instruct", local_dir=
         quantization_config = None
 
     # Check if the model and tokenizer are already stored locally
-    model_directory = local_dir + '/' + model_checkpoint
+    model_directory = local_dir + '/' + model_checkpoint + dtype.__str__().split('.')[-1]
     if not os.path.exists(model_directory):
         print('downloading model...')
         # Download and save the model and tokenizer locally
