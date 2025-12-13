@@ -335,7 +335,7 @@ def load_pipe(model_checkpoint="meta-llama/Meta-Llama-3-8B-Instruct", local_dir=
         
         else:
             # use the chosen dtype variable for consistency
-            model = AutoModelForCausalLM.from_pretrained(model_checkpoint, device_map="auto", torch_dtype=dtype, token=HF_KEY)
+            model = AutoModelForCausalLM.from_pretrained(model_checkpoint, device_map="auto", dtype=dtype, token=HF_KEY)
         
         # Save model and tokenizer locally
         if save:
@@ -350,7 +350,7 @@ def load_pipe(model_checkpoint="meta-llama/Meta-Llama-3-8B-Instruct", local_dir=
             "text-generation",
             model=model,
             tokenizer=tokenizer,
-            model_kwargs={"torch_dtype": dtype},
+            model_kwargs={"dtype": dtype},
             device_map="auto",
         )
     else:
@@ -359,7 +359,7 @@ def load_pipe(model_checkpoint="meta-llama/Meta-Llama-3-8B-Instruct", local_dir=
         pipe = pipeline(
             "text-generation",
             model=model_directory,
-            model_kwargs={"torch_dtype": dtype},
+            model_kwargs={"dtype": dtype},
             device_map="auto",
         )
 
