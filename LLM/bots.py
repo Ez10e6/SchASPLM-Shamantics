@@ -318,7 +318,7 @@ def load_pipe(model_checkpoint="meta-llama/Meta-Llama-3-8B-Instruct", local_dir=
         quantization_config = None
 
     # Check if the model and tokenizer are already stored locally
-    model_directory = local_dir + '/' + model_checkpoint + dtype.__str__().split('.')[-1]
+    model_directory = local_dir + '/' + model_checkpoint + '-' + dtype.__str__().split('.')[-1]
     if not os.path.exists(model_directory):
         print('downloading model...')
         # Download and save the model and tokenizer locally
