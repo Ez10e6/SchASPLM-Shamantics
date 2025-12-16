@@ -148,12 +148,19 @@ class Local_Bot():
 
         # If a seed is provided, create a torch.Generator for reproducible sampling
         if self.seed is not None:
-            device = 'cuda' if torch.cuda.is_available() else 'cpu'
+            # DYNAMIC DEVICE SELECTION
+            if torch.cuda.is_available():
+                device = 'cuda'
+            elif torch.backends.mps.is_available():
+                device = 'mps'
+            else:
+                device = 'cpu'
+
             try:
                 gen = torch.Generator(device=device).manual_seed(int(self.seed))
                 outputs = self.pipe(self.messages, do_sample=do_sample, generator=gen, **pipe_kwargs)
-            except Exception:
-                # Fallback to CPU generator if CUDA generator creation fails
+            except Exception as e:
+                print(f"Warning: Failed to create generator on {device}. Fallback to CPU. Error: {e}")
                 gen = torch.Generator(device='cpu').manual_seed(int(self.seed))
                 outputs = self.pipe(self.messages, do_sample=do_sample, generator=gen, **pipe_kwargs)
         else:
@@ -288,16 +295,26 @@ def load_pipe(model_checkpoint="meta-llama/Meta-Llama-3-8B-Instruct", local_dir=
     if model_checkpoint == None:
         return None
 
-    # If HF_KEY is present, set HUGGINGFACE_HUB_TOKEN so transformers/huggingface_hub can authenticate
+    # If HF_KEY is present, set HUGGINGFACE_HUB_TOKEN
     if HF_KEY:
         os.environ.setdefault('HUGGINGFACE_HUB_TOKEN', HF_KEY)
     
-    torch.cuda.empty_cache()
-
-    # prefer float16 on CUDA devices (works on most NVIDIA consumer GPUs); otherwise keep bfloat16
-    dtype = torch.bfloat16
+    # 1. Clear Cache dynamically
     if torch.cuda.is_available():
+        torch.cuda.empty_cache()
+    elif torch.backends.mps.is_available():
+        torch.mps.empty_cache()
+
+    # 2. Select Dtype dynamically
+    # Use float16 for CUDA or MPS, bfloat16 for others (or if specific hardware requires it)
+    dtype = torch.bfloat16
+    if torch.cuda.is_available() or torch.backends.mps.is_available():
         dtype = torch.float16
+
+    # 3. Check Quantization compatibility
+    if quantization_config is not None and not torch.cuda.is_available():
+        print("Warning: Quantization (bitsandbytes) is only supported on CUDA. Disabling quantization.")
+        quantization_config = None
 
     # Check if the model and tokenizer are already stored locally
     model_directory = local_dir + '/' + model_checkpoint
@@ -332,19 +349,18 @@ def load_pipe(model_checkpoint="meta-llama/Meta-Llama-3-8B-Instruct", local_dir=
             "text-generation",
             model=model,
             tokenizer=tokenizer,
-            model_kwargs={"dtype": torch.bfloat16},
+            model_kwargs={"dtype": dtype},  # <--- CHANGED from torch.bfloat16 to dtype
             device_map="auto",
-            )
+        )
     else:
-
         # Load the model and tokenizer
         print('loading model...')
         pipe = pipeline(
             "text-generation",
             model=model_directory,
-            model_kwargs={"dtype": torch.bfloat16},
+            model_kwargs={"dtype": dtype},  # <--- CHANGED from torch.bfloat16 to dtype
             device_map="auto",
-            )
+        )
 
     return pipe
 
