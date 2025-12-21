@@ -1,0 +1,6 @@
+A warehouse bot starts at location A and needs to drop off supplies at two key points
+in the facility. The space has five stations labeled A through E. Movement between
+stations is constrained to marked paths: A connects to B and D, B to C, and D to E.
+It has a total of 6 moves available. Each move takes one time unit. The bot must deliver
+to stations C and E once each. It starts at A and can move to any adjacent node at each
+timestep.

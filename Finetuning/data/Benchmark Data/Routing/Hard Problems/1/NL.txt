@@ -1,0 +1,39 @@
+An autonomous drone is deployed from the CommandCenter to conduct a high-priority
+surveillance operation across a network of facilities connected by directional flight
+corridors. Each corridor imposes a specific energy toll based on its interference
+shielding, altitude, and weather-exposure classification, and all traversals take
+one minute of flight time. From the CommandCenter, the drone can initiate its route
+via either the eastern or western outbound lanes—PathA and PathB—requiring 2 and 3 
+attery units respectively due to differing elevation profiles.
+Once on PathA, a route leads directly to TowerX, whose uplink requires a further 2 
+nits of battery to approach. PathB, while more power-intensive to enter, allows access
+to TowerY at a moderate 2-unit cost and also provides a lateral link back to PathA at
+just 1 battery unit. If needed, the drone may later pivot from TowerX back to PathB,
+though doing so consumes 2 battery units. Continuing from TowerY, the drone may
+proceed to a transmission relay node (MidRelay), incurring a 3-unit toll through the
+restricted airspace corridor. MidRelay provides one-way access to TowerZ, which lies
+deeper within the perimeter and requires 2 additional battery units to reach. 
+TowerZ also offers a long-range return path to TowerX, but this high-bandwidth jump
+imposes a significant 4-unit power penalty due to interference shielding and altitude
+gain.
+The mission begins at time zero.
+While movement between locations always takes one minute, scanning any tower requires
+the drone to remain stationary for two uninterrupted minutes to ensure signal
+acquisition and image stabilization. The drone must complete at least one successful
+scan at both TowerX and TowerY. Due to temporal sensitivity in the data collection
+protocol, the scan of TowerX must be finalized no later than minute 5. TowerZ is
+considered an auxiliary objective that may be scanned, but is not required to be.
+The drone is permitted no more than 20 total stops, including all
+scanning and travel actions. It begins the mission with a fully charged battery,
+capped at 14 units of available power. The aggregate energy cost of the drone’s
+movements must not exceed this capacity.
+To accommodate potential mid-mission power depletion, the drone is allowed to idle
+at MidRelay for exactly two consecutive minutes to restore 4 battery units; however,
+this recovery interrupts the route and consumes valuable time. If the drone ever
+visits MidRelay during the mission, it must reach TowerZ immediately in the following
+minute due to routing constraints and signal lock-on requirements.
+For mission planning, the primary optimization goal is to maximize the total number
+of tower scans conducted, including any optional sites. If multiple strategies yield
+the same number of scans, preference is given to the one that completes a scan at each 
+mandatory scan location in the fewest minutes. Operational protocols also prohibit
+consecutive scans at the same location to prevent data redundancy and sensor overheating.

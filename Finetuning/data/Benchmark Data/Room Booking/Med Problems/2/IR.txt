@@ -1,0 +1,14 @@
+There are 8 graduate workshops.
+Workshops are in AI, Math, or Bio.
+There are 2 days, with 3 time slots per day:
+morning, midday, and afternoon.
+There are 3 rooms.
+Each workshop must be scheduled.
+Only one workshop can be in a room at a time.
+Each room can be used at most twice per day.
+Room 2 is not available in the afternoon.
+AI workshops must be in the morning.
+No two Math workshops can be scheduled at the same time.
+Bio and AI cannot be in the same room on the same day.
+At least one workshop of each topic must be held on each day.
+Try to minimize idle room slots.

@@ -1,0 +1,25 @@
+Nodes: CommandCenter, PathA, PathB, TowerX, TowerY, MidRelay, TowerZ.
+Directed Edges and Movement Costs:
+    CommandCenter → PathA (2 battery)
+    CommandCenter → PathB (3 battery)
+    PathA → TowerX (2 battery)
+    PathB → TowerY (2 battery)
+    PathB → PathA (1 battery)
+    TowerX → PathB (2 battery)
+    TowerY → MidRelay (3 battery)
+    MidRelay → TowerZ (2 battery)
+    TowerZ → TowerX (4 battery).
+The drone starts at CommandCenter at time 0.
+Movement is only possible along directed edges.
+Movement between adjacent nodes takes 1 minute.
+Scans take 2 full minutes.
+The drone must scan TowerX and TowerY at least once.
+TowerX must be scanned by time 5.
+TowerZ can be scanned optionally.
+The total number of location visits must not exceed 20.
+The drone has a maximum battery capacity of 14 units.
+If the drone visits MidRelay, then it must be at TowerZ in the next timestep.
+Maximise the number of scans performed.
+As a secondary priority minimize the time by which the mandatory sites are scanned at least once.
+The drone cannot perform two consecutive scans at the same location.
+The drone can recharge 4 battery units by spending 2 minutes idle at MidRelay.

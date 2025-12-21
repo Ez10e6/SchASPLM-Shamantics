@@ -1,0 +1,11 @@
+You need to schedule four training sessions, each of which covers either Networking
+or Security.
+All sessions take place over a single day, and you have two time slots to work with:
+morning and afternoon. There are also two available rooms.
+Every session must be assigned a specific room and time slot — no session can be
+left out.
+Each room can host only one session at a time, so you can’t schedule two sessions
+in the same room during the same time slot.
+There are also topic-based constraints: all Security sessions must be held in the
+afternoon, and all Networking sessions must be scheduled somewhere other than
+Room 1.

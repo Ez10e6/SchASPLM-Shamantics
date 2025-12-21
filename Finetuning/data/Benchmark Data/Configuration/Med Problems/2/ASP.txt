@@ -1,0 +1,36 @@
+% CPUs: Ryzen9 (performance 95), i7 (performance 85), M1 (performance 70).
+cpu("Ryzen9", 95; "i7", 85; "M1", 70).
+
+% GPUs: RTX3070 (performance 90), RX6700XT (performance 88), IrisXe (performance 65).
+gpu("RTX3070", 90; "RX6700XT", 88; "IrisXe", 65).
+
+% Coolers: AirCool (performance 20), LiquidCool (performance 40), PassiveCool (performance 5).
+cooler("AirCool", 20; "LiquidCool", 40; "PassiveCool", 5).
+
+% Each configuration selects one CPU, one GPU, one cooler.
+1 { selected_cpu(C) : cpu(C, _) } 1.
+1 { selected_gpu(G) : gpu(G, _) } 1.
+1 { selected_cooler(C) : cooler(C, _) } 1.
+
+% High-performance parts: Ryzen9, RTX3070.
+high_perf("Ryzen9").
+high_perf("RTX3070").
+
+% LiquidCool is required for high-performance parts.
+:- selected_cpu(C), high_perf(C), selected_cooler(K), K != "LiquidCool".
+:- selected_gpu(G), high_perf(G), selected_cooler(K), K != "LiquidCool".
+
+% PassiveCool is not allowed with discrete GPUs.
+discrete_gpu("RTX3070"; "RX6700XT").
+:- selected_gpu(G), discrete_gpu(G), selected_cooler("PassiveCool").
+
+% RX6700XT incompatible with M1
+:- selected_gpu("RX6700XT"), selected_cpu("M1").
+
+% Maximize total performance.
+total_perf(P) :-
+    selected_cpu(C), cpu(C, P1),
+    selected_gpu(G), gpu(G, P2),
+    selected_cooler(K), cooler(K, P3),
+    P = P1 + P2 + P3.
+#maximize { P : total_perf(P) }.

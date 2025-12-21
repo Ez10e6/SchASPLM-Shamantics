@@ -1,0 +1,25 @@
+A marine survey drone emerges from SubDock into a labyrinth of 
+undersea currents that define a bidirectional routing graph. 
+Each current lane exacts a heat load on the drone’s systems rather than 
+battery measured in heat units and all traversals take one time unit. 
+The drone starts with a maximum heat tolerance of 10 units; every movement 
+along a lane adds its heat load, and it can shed all heat by lingering in 
+a cool-water eddy at NodeX for two consecutive minutes.
+From SubDock, the drone may navigate the gentle CoralPass (2 units) or the 
+turbulent VentStream (4 units). CoralPass leads to BeaconAlpha (1 unit) or 
+loops via DeepLoop (1 unit) back to VentStream. VentStream leads directly 
+to BeaconBeta (2 units) or to a sensor hub NodeX (1 unit), which branches 
+to BeaconGamma (3 units). BeaconGamma also offers a strong down‑draft 
+conduit back to BeaconAlpha (4 units).
+At each beacon the drone can perform an acoustic pulse that 
+requires 2 minutes and raises heat by 1 unit for data calibration. The 
+mission mandates pulses at BeaconAlpha and BeaconBeta. BeaconAlpha must be 
+pulsed before minute 5. BeaconGamma is optional but must be pulsed iff all 
+mandatory pulses are finised within 8 minutes.
+No more than 16 total actions (moves, pulses, cooldowns) are permitted. 
+If NodeX is entered, the drone must either pulse there immediately or 
+perform a cooldown before moving on. Movements and pulses cannot exceed the 
+heat tolerance at any time. Consecutive pulses without reconfiguring at the VentStream
+are forbidden to avoid signal overlap. The aim which is primary in choosing one 
+of multiple possibe routes must be to avoid wasting time, that is time at which the
+drone is not performing an acoustic pulse at any survey location.

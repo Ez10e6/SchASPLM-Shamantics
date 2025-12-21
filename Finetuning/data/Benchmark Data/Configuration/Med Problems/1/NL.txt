@@ -1,0 +1,24 @@
+You’re assembling a workstation for AI research. You need to pick compatible components:
+a processor, a graphics card, a motherboard, and a power supply unit (PSU).
+Your choices must balance performance and cost, but your primary goal is to
+minimize the overall hardware cost.
+The component options are as follows:
+    Processors: Ryzen7, i9, and Xeon. Ryzen7 is best paired with mainstream boards,
+    while Xeon is strictly a server-grade option.
+    Graphics cards: RTX4060, RTX3090, and Quadro. Both the Quadro and RTX3090 consume
+    significant power.
+    Motherboards: X670, Z690, and C621. The C621 is a workstation-class board.
+    Power supplies: Bronze, Gold, and Platinum, reflecting increasing levels of 
+    efficiency and capacity.
+Keep these compatibility rules in mind:
+    Power-hungry GPUs (RTX3090, Quadro) can’t operate with a Bronze PSU.
+    Xeon must be installed in a C621 motherboard.
+    Ryzen7 works only with the X670 board.
+    The i9 cannot be paired with the X670.
+    Quadro requires a Xeon CPU.
+    Quadro is not compatable with the Z690 motherboard.
+The final build must meet all constraints and minimize cost. Component costs are:
+    Ryzen7: 300, i9: 400, Xeon: 500
+    RTX4060: 350, RTX3090: 700, Quadro: 800
+    X670: 180, Z690: 200, C621: 250
+    Bronze PSU: 80, Gold: 120, Platinum: 160

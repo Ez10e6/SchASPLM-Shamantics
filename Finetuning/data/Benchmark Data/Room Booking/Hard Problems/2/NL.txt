@@ -1,0 +1,24 @@
+You’ve been tasked with laying out a rich three‑day symposium featuring twelve
+workshops in four disciplines — Artificial Intelligence, Physics, Mathematics,
+and Linguistics — across a venue with four rooms. Each day unfolds in three
+sessions — morning, midday, and evening — and every workshop must claim at least 
+one room–time slot without any double‑booking.
+To keep things balanced, no room may see more than two workshops per day, and
+they can’t be back‑to‑back; a break must separate any two uses of the same room.
+Also, Room 2 goes dark at evening, while Room 4’s limited capacity rules out
+any AI or Physics sessions there.
+Your thematic requirements narrow the field further: AI workshops belong
+exclusively in morning sessions, and Physics must stay on Day 1 or Day 2, never
+spilling into the final day. All Mathematics workshops must settle into either
+Room 1 or Room 3, whereas Linguistics sessions need their own moments—no two
+may ever run concurrently.
+Another wrinkle: each room should host only one discipline per day, so you can’t
+mix topics under the same roof in a single day. To guarantee breadth, you’ll
+include at least one workshop from each of the four fields every day. For a 
+neat bookend, the very first workshop must be an AI presentation, 
+and the closing workshop must be a Linguistics talk.
+Beyond satisfying these rules, you should aim to fill as many rooms as possible 
+in every timeslot while keeping unused slots to a minimum—yet stop short of 
+squeezing in extra sessions that would break any of the constraints. In other
+words, maximize room utilization without ever overstepping the scheduling logic
+you’ve been given.

@@ -317,8 +317,14 @@ def load_pipe(model_checkpoint="meta-llama/Meta-Llama-3-8B-Instruct", local_dir=
         print("Warning: Quantization (bitsandbytes) is only supported on CUDA. Disabling quantization.")
         quantization_config = None
 
-    # Check if the model and tokenizer are already stored locally
-    model_directory = local_dir + '/' + model_checkpoint + '-' + dtype.__str__().split('.')[-1]
+    # 1. Check if the checkpoint is already a valid local directory (like your FT folder)
+    if os.path.isdir(model_checkpoint):
+        model_directory = model_checkpoint
+        print(f"--- Loading fine-tuned model from direct path: {model_directory} ---")
+    else:
+        # 2. Fallback to the original management logic for downloaded models
+        model_directory = os.path.join(local_dir, model_checkpoint + '-' + dtype.__str__().split('.')[-1])
+
     if not os.path.exists(model_directory):
         print('downloading model...')
         # Download and save the model and tokenizer locally
@@ -360,7 +366,7 @@ def load_pipe(model_checkpoint="meta-llama/Meta-Llama-3-8B-Instruct", local_dir=
             "text-generation",
             model=model_directory,
             model_kwargs={"dtype": dtype},
-            device_map="auto",
+            device_map="mps" if torch.backends.mps.is_available() else "auto",
         )
 
     return pipe

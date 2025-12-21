@@ -1,0 +1,11 @@
+The rover starts at BaseCamp.
+Inspect OutpostX and OutpostY exactly once each.
+Optionally inspect RelayStation.
+Moves between adjacent nodes takes 1 timestep.
+Each inspection requires 1 full timestep at the inspection site.
+Each movement consumes 1 battery unit.
+The battery stores 6 units.
+Only allow inspection of RelayStation if there are >2 battery units once the other sites are scanned.
+Locations: BaseCamp, Fork1, Fork2, OutpostX, OutpostY, RelayStation.
+Edges: (BaseCamp–Fork1), (BaseCamp–Fork2), (Fork1–OutpostX), (Fork1–RelayStation), (Fork2–OutpostY), (Fork2–RelayStation).
+10 Minutes maximum time.

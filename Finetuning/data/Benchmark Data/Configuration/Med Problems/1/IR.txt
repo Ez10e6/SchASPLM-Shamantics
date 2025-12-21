@@ -1,0 +1,16 @@
+Select one CPU from {Ryzen7, i9, Xeon}, with costs:
+Ryzen7 = 300, i9 = 400, Xeon = 500.
+Select one GPU from {RTX4060, RTX3090, Quadro}, with costs:
+RTX4060 = 350, RTX3090 = 700, Quadro = 800.
+Select one motherboard from {X670, Z690, C621}, with costs:
+X670 = 180, Z690 = 200, C621 = 250.
+Select one PSU from {Bronze, Gold, Platinum}, with costs:
+Bronze = 80, Gold = 120, Platinum = 160.
+Quadro and RTX3090 are HighPower GPUs.
+HighPower GPUs require PSU ∈ {Gold, Platinum}.
+Xeon requires motherboard C621.
+Ryzen7 requires motherboard X670.
+i9 is incompatible with motherboard X670.
+Quadro requires Xeon CPU.
+Quadro is incompatible with Z690.
+Minimize total cost.

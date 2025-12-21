@@ -1,0 +1,11 @@
+You are building a basic smartphone plan for a user. 
+The plan must include one data plan, one phone model, and one accessory.
+The choices are:
+Data Plans: BasicData, PremiumData
+Phone Models: ModelX, ModelY
+Accessories: CaseA, CaseB
+The following compatibility constraints must be respected:
+BasicData is not compatible with ModelY.
+ModelX requires CaseA.
+PremiumData cannot be used with CaseA.
+Choose a valid combination of components satisfying all constraints.

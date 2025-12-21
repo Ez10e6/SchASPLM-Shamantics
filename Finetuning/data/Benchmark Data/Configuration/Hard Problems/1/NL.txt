@@ -1,0 +1,26 @@
+When preparing a workstation tailored for data-intensive simulations, you’re expected to
+select a processor, a graphics card, and a storage unit from a shortlist provided by the
+procurement office. Each category contains exactly three items, all of which vary in
+cost and advertised performance ratings. While only one item from each class can be
+chosen, it's not as simple as picking the best in each—certain budgetary and performance
+considerations are in play.
+Let’s start with the CPUs: the X9 offers moderate speed (score 95) for $300, the ZetaCore is the
+highest-performing chip (score 120) and costs $500, and the Alpha8, while slightly below
+ZetaCore in speed (score 110), still carries a premium at $450. Meanwhile, your GPU choices
+include QuasarRTX (130 points, $700), NovaX (125 points, $600), and the more modest GammaGTX
+(90 points, $450). For storage, there’s UltraSSD (100 points, $250), FusionDrive (95 points,
+$300), and the budget-tier MegaHDD (60 points, $200).
+One of the directives from IT leadership is that your most costly component must also be
+the one delivering the greatest performance in your final selection—presumably to justify
+budget overruns. However, it's frowned upon to pick the single highest-rated part from each
+of the three categories; evidently, they want to avoid over-spec’d builds. There’s also a
+guideline about balance: while you don’t need to match prices perfectly, no component
+should differ in cost from another by more than $250. Consider that a soft constraint, they'll
+reject your build if that balance is off.
+Also, while the graphics team claims that a powerful GPU helps with rendering, you’re not
+allowed to have a GPU that outperforms the CPU. A constraint buried in the procurement
+notes says that the Alpha8 CPU isn’t validated to work with the NovaX GPU due to BIOS
+issues. And for some reason, the FusionDrive isn’t available unless you’re pairing it
+with the ZetaCore.
+Despite the abundance of high-performance hardware, you’ll need to select carefully to
+stay within these constraints.

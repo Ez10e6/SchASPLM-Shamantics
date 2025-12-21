@@ -1,0 +1,14 @@
+Procurement has turned philosophical: “Don’t always buy the most powerful; buy the right
+powerful.” You’re assembling a balanced data-processing workstation, and the specs you must
+navigate are less about raw numbers and more about proportionality.
+CPUs — FalconX ($600, 125 pts), CoreZen ($500, 115 pts), EcoMini ($300, 90 pts)
+GPUs — TitanZ ($700, 135 pts), MidlineGT ($500, 100 pts), Pixie ($400, 95 pts)
+Drives — FlashNova ($250, 110 pts), Terabox ($300, 100 pts), BudgetDisk ($150, 60 pts)
+Each component must be selected from its category. But the trick is in how these relate.
+The component with the middle performance value (not highest or lowest) must be the cheapest
+among the three selected parts.
+If you pick a CPU worth more than $500, you can’t pair it with the Pixie GPU.
+Avoid configurations where the performance spread (max - min) exceeds 50 points.
+If you select the FlashNova SSD, the GPU must score at least 100.
+You must select exactly two components whose price is above $300 and the GPU’s performance
+must fall between the CPU and drive—i.e., not the highest or lowest.

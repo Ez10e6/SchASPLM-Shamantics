@@ -1,0 +1,21 @@
+There are 10 research seminars.
+Seminars are on AI, Bio, Math, or Chem.
+There are 4 time slots per day over two days.
+The time slots are morining, late morning, early afternoon, late afternoon.
+5 Rooms are used.
+Every seminar must be delivered.
+Only one sesion in a room at a time.
+Rooms can only be used twice in a day.
+Rooms can not be used twice in a row.
+Room 3 is not available in the afternoon.
+Room 5 doesn't have a projector.
+AI and Math require a projector.
+AI can only be in the morning or late morning.
+Bio sessions must be spread across both days. 
+Bio sessions can not happen at the same time.
+No two Chem sessions can happen in the same room.
+The first and last sessions must be Math.
+Do not waste any timeslots in rooms unless necessary.
+At most 2 Bio and Chem Sessions may overlap.
+Each timeslot should have seminars from as many topics as possible.
+Bio and Chem may not happen in the same room on the same day.

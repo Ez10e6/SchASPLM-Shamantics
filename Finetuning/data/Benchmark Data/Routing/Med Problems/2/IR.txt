@@ -1,0 +1,24 @@
+Nodes: LaunchPad, Tunnel1, Tunnel2, StationA, StationB, Tunnel3, CalibEdge, StationC.
+Directed Edges & Water Costs (L):
+    LaunchPad → Tunnel1 (2)
+    LaunchPad → Tunnel2 (3)
+    Tunnel1 → StationA (1)
+    StationA → Tunnel3 (1)
+    Tunnel3 → Tunnel2 (1)
+    Tunnel2 → StationB (1)
+    Tunnel2 → CalibEdge (2)
+    CalibEdge → StationC (1)
+    StationC → Tunnel1 (2).
+10 minutes maximum time.
+Start at launchpad.
+Movement: 1 min per edge.
+Sampling: 1 min, +1 L per sample.
+Tank Capacity: 16 L.
+Refill at CalibEdge, 2 min idle refilling capacity by 3L (at most once).
+Mandatory Samples: StationA, StationB.
+StationA sampled by time 6.
+StationC sampled if and only if mandatory samples finish by minute 8.
+Event Limit: ≤ 18 events (moves + samples + refill).
+No consecutive samples at same station.
+Primary: maximize #samples.
+Secondary: minimize max completion time of StationA & StationB.

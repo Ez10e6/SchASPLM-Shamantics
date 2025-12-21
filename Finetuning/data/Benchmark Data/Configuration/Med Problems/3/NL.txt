@@ -1,0 +1,18 @@
+You are configuring a drone for a delivery service. You must choose a frame, motor
+type, and battery.
+The drone’s flight endurance is the primary metric, and you want to maximize it while
+ensuring that power and weight constraints are satisfied.
+Available options:
+    Frames: Lightweight, Standard, Reinforced
+    Motors: Eco, Standard, HighTorque
+    Batteries: SmallCell, MediumCell, LongLife
+Constraints:
+    Lightweight frames can’t handle HighTorque motors.
+    Reinforced frames are required for LongLife batteries.
+    HighTorque motors draw more power and require LongLife batteries.
+    SmallCell batteries can only power Eco motors.
+    MediumCell batteries are compatible with Eco or Standard motors.
+Endurance scores:
+    Lightweight: 50, Standard: 40, Reinforced: 30
+    Eco: 60, Standard: 70, HighTorque: 90
+    SmallCell: 30, MediumCell: 50, LongLife: 80

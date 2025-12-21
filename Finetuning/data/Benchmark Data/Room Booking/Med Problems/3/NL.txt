@@ -1,0 +1,22 @@
+You’ve been asked to organize six workshops taking place over a single
+day. Each workshop focuses on one of three topics: Data, DevOps, or
+User Interface (UI). The day is structured into three time slots
+ — morning, midday, and afternoon — and the venue provides three rooms
+in which the sessions can be held.
+Every workshop must be scheduled at least once, with a clear assignment to
+both a time slot and a room. The scheduling is subject to a few
+logistical limits: each room can be used for no more than two sessions
+over the course of the day, and, naturally, no two workshops can occupy the
+same room at the same time.
+There are also topic-specific restrictions that must be followed. 
+DevOps workshops can only be held during the midday session — no 
+exceptions. Any workshops on Data must avoid Room 3 entirely, 
+regardless of time. In addition, UI and Data workshops are not allowed
+to run concurrently; you’ll need to ensure that those two topics don’t
+appear in different rooms during the same time slot.
+To ensure the day’s agenda is well-rounded, at least one workshop from
+each topic area must appear somewhere on the schedule.
+Lastly, while satisfying all of the above constraints, you should also
+aim to minimize unused room-time slots. The goal is to make efficient
+use of the available space without overstepping any of the scheduling
+rules.

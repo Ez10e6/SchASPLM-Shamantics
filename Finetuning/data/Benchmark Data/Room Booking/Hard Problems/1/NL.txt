@@ -1,0 +1,31 @@
+You’re tasked with planning an intensive two‑day research symposium featuring
+ten seminars, each devoted to one of four fields—Artificial Intelligence,
+Biology, Mathematics, or Chemistry. Both days are sliced into four
+segments — morning, late morning, early afternoon, and late afternoon — and
+you have five distinct rooms at your disposal.
+Naturally, every seminar must find its place in the programme, and no room ever
+hosts more than one talk at once. To keep the flow manageable and give each
+room a little breathing room, no room may be booked for more than half of the 
+time slots in a single day, nor may it run back‑to‑back sessions without a break.
+Also, bear in mind that Room 3 goes offline once afternoon begins,
+and Room 5 lacks any projection equipment, so any seminar requiring slides
+won’t fit there.
+Speaking of equipment, both AI and Mathematics talks rely on a working projector,
+and the AI presentations have an early‑day preference: they’re confined to the
+morning or late‑morning slots. Biology seminars, by contrast, must be sprinkled
+across the two days — never exclusively in one — and you cannot have two bio talks
+taking place simultaneously. Chemistry talks, on the other hand, are social
+in time but solitary in space: no two of them may ever occupy the same
+room. Additionally, you can’t mix a Bio session with a Chem
+session under the same roof on a given day, so those pairings must stay apart.
+There’s also a special framing requirement: the symposium must open and close
+with mathematics, so the very first seminar and the final seminar of are both
+mathematics events. Beyond that, you’ll want to avoid empty slots
+unless there’s simply no alternative. Each time segment should showcase as
+many different topics as possible, and while it’s fine for Biology and Chemistry
+to overlap with other sessions, no more than two Bio‑or‑Chem seminars may ever
+run at the same moment.
+With these guidelines in mind, you’ll blend room capacities, projector access, 
+temporal preferences, and topic distributions into a single, seamless schedule 
+that serves presenters, attendees, and the venues’ technical quirks without leaving
+unnecessary gaps.

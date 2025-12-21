@@ -1,0 +1,17 @@
+# Universal
+python-dotenv
+datasets
+pandas
+tqdm
+
+# PyTorch (Windows/macOS)
+torch
+transformers
+peft
+trl
+accelerate
+# bitsandbytes is for Windows/Linux CUDA only
+bitsandbytes; sys_platform != 'darwin'
+
+# macOS Specific
+mlx-lm; sys_platform == 'darwin'

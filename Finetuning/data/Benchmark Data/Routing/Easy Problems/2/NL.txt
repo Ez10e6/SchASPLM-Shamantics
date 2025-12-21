@@ -1,0 +1,6 @@
+A drone is deployed from headquarters at point 1 to scan a couple of points on a short
+path network. There are four locations in total. Connections exist such that 1 links to 2
+and 3; 2 links to 4. The drone is only allowed to fly between adjacent locations.
+It has exactly 5 time units to complete its path, with each move
+taking 1 unit of time. The scanning task requires it to visit locations 3 and 4, in any 
+order. It begins at 1.

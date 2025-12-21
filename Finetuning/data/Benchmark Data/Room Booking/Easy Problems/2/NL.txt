@@ -1,0 +1,11 @@
+You are responsible for scheduling five lectures, each of which focuses on one of
+three subjects: Artificial Intelligence (AI), Mathematics, or Physics.
+There are two time slots available during the day: morning and afternoon,
+and three rooms in which the lectures can be held.
+Every lecture must be assigned a room and a time slot
+ — no lecture can be skipped or duplicated.
+A room can host at most one lecture in each time slot, so you can’t double-book
+a room.
+There’s one important subject-specific constraint: Math and Physics lectures are
+not allowed to take place in the same room, even if they’re scheduled at
+different times.

@@ -1,0 +1,12 @@
+There are 6 workshops.
+Workshops are in Data, DevOps, or UI.
+There is 1 day with 3 time slots: morning, midday, afternoon.
+There are 3 rooms.
+Each workshop must be scheduled.
+Only one workshop per room‑time.
+Each room can be used at most twice.
+DevOps workshops only in midday.
+Data workshops cannot be in room 3.
+UI and Data cannot be scheduled at the same time.
+At least one workshop of each topic must occur.
+Try to minimize idle room-time slots.

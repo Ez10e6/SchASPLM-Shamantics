@@ -1,0 +1,27 @@
+An autonomous rover is tasked with collecting critical samples in a subterranean Mars base tunnel network. The mission
+begins at the LaunchPad with the rover's water tank fully filled to 16 liters, which serves as both coolant and
+hydraulic fluid for its drilling operations. The rover must navigate through a series of interconnected tunnels and 
+stations within a strict 10-minute timeframe.
+From the LaunchPad, the rover can proceed through either Tunnel1 or Tunnel2, requiring 2 and 3 liters of water 
+respectively due to varying cooling needs across different thermal gradients. Tunnel1 leads to StationA, consuming 
+an additional 1 liter to operate in the station's climate. After completing operations at StationA, the rover can 
+move through Tunnel3 (1 liter) to reach Tunnel2. Alternatively, from the LaunchPad, the rover can proceed directly 
+to Tunnel2, which branches to either StationB (1 liter) or CalibEdge (2 liters). CalibEdge connects to StationC 
+(1 liter), which in turn provides a route back to Tunnel1 (2 liters), completing a potential circuit.
+The rover must collect samples at StationA and StationB exactly once each, with StationA's samples having a 
+time-sensitive composition that degrades rapidly—requiring collection no later than minute 6. There is also a 
+potential third collection site at StationC, which contains valuable but non-essential samples. These must samples must 
+be taken if and only if the other locations are sampled within the first 8 minutes. The mission parameters dictate 
+that StationC must be sampled if and only if both primary stations are sampled by minute 8.
+Each sampling operation requires the rover to remain stationary for precisely one minute, during which its advanced 
+filtration system actually recovers 1 liter of water from the mineral-rich substrates. However, no two consecutive 
+samples can be taken at the same station due to cross-contamination protocols.
+The CalibEdge location houses an emergency water reservoir with filtration capabilities. By spending two consecutive 
+minutes at this location, the rover can replenish 3 liters of water to its tank, though this reservoir can only be 
+accessed once during the mission due to facility lockdown protocols.
+Movement between any two connected locations takes exactly one minute, and the rover can only traverse along the 
+designated tunnel system in the specified directions. The mission controller has imposed a strict limit of 18 total 
+events—including movements, sampling operations, and water refills—to minimize wear on the rover's mechanisms.
+The primary mission objective is to maximize the number of samples collected across all stations. If multiple route 
+plans achieve the same sample count, priority should be given to the plan that completes the mandatory sampling 
+operations (StationA and StationB) in the least amount of time.

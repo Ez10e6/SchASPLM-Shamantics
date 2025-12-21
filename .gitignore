@@ -8,3 +8,6 @@ metrics/
 .github/
 .DS_Store
 local_models/
+Finetuning/notebooks/.ipynb_checkpoints/
+Finetuning/scripts/__pycache__/
+Finetuning/adapters

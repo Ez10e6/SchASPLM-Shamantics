@@ -1,0 +1,22 @@
+Nodes: SubDock, CoralPass, VentStream, BeaconAlpha, DeepLoop, BeaconBeta, NodeX, BeaconGamma.
+Bidirectional Edges & Heat Costs:
+    SubDock - CoralPass (2)
+    SubDock - VentStream (4)
+    CoralPass - BeaconAlpha (1)
+    CoralPass - DeepLoop (1)
+    DeepLoop - VentStream (1)
+    VentStream - BeaconBeta (2)
+    VentStream - NodeX (1)
+    NodeX - BeaconGamma (3)
+    BeaconGamma - BeaconAlpha (4)
+Heat Tolerance: max 10 units.
+Movement takes 1 min, heat increases per edge.
+Pulsing takes 2 minutes and increases heat by 1.
+Pulsing at BeaconAlpha & BeaconBeta is mandatory, BeaconGamma optional.
+BeaconAlpha must be pulsed by time 5.
+Pulse BeaconGamma iff mandatory pulses finish by minute 8.
+Cooldown: stop at NodeX for 2 min and reduce heat to 0.
+When at NodeX next action must be either pulse or cooldown.
+Action Limit: ≤ 16 (moves + pulses + cooldowns).
+Must visit VentStream between each pulsing.
+Objective: minimise time in which not pulsing.

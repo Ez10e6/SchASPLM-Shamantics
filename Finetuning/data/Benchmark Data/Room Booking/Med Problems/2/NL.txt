@@ -1,0 +1,28 @@
+You’re coordinating a series of eight graduate workshops across two days.
+Each workshop focuses on one of three subjects: Artificial Intelligence
+(AI), Mathematics, or Biology. The event spans two full days, and each
+day is divided into three time slots: morning, midday, and afternoon.
+You have access to three rooms where these workshops can be held.
+Every workshop must be placed somewhere in the schedule — that is,
+assigned to at least one session at a specific room and a specific time on
+one of the two days.
+No two workshops can occupy the same room at the same time, and each
+room is limited to a maximum of two workshops per day. So, on any
+given day, each room will have at least one unused time slot.
+However, one of the rooms comes with a constraint: Room 2 is unavailable
+in the afternoon, on both days. You’ll need to avoid scheduling anything
+there during that time.
+Topic-specific requirements further shape the schedule. AI workshops must
+always be held in the morning, so they cannot be scheduled at midday or
+in the afternoon. Math workshops must not overlap with each other in
+time, meaning that no two math sessions can occur simultaneously
+ — even if they’re in different rooms. In addition, AI and Biology
+workshops must not share a room on the same day. If an AI session
+takes place in a given room on a given day, then no Biology session
+can be placed in that room on that day, and vice versa.
+Finally, to ensure balanced subject coverage, each day must include at
+least one workshop from each topic — AI, Math, and Bio — so no subject
+is omitted from a day’s agenda.
+When choosing among valid schedules, it’s preferable to use space
+efficiently: try to fill as many available slots as possible while
+respecting all the constraints. The fewer unused room-times, the better.
