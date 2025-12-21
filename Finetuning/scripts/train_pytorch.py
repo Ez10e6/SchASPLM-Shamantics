@@ -6,7 +6,7 @@ from transformers import (
     AutoTokenizer, 
     TrainingArguments
 )
-from trl import SFTTrainer
+from trl import SFTTrainer, SFTConfig
 from peft import LoraConfig
 from datasets import load_dataset
 from utils_ft import to_relative
@@ -41,7 +41,7 @@ def train_pytorch(model_id, dataset_dir, output_dir, hf_token):
         quantization_config=bnb_config,
         token=hf_token,
         device_map="auto" if is_cuda else None,
-        trust_remote_code=True
+        attn_implementation="sdpa" if (is_cuda or is_mps) else "eager"
     )
     
     # Fallback for Mac (MPS)
@@ -69,17 +69,19 @@ def train_pytorch(model_id, dataset_dir, output_dir, hf_token):
     dataset_valid = load_dataset("json", data_files=os.path.join(dataset_dir, "valid.jsonl"), split="train")
 
     # 6. Training Arguments
-    training_args = TrainingArguments(
+    sft_config = SFTConfig(
         output_dir="./tmp_pytorch_results",
         per_device_train_batch_size=1,
-        gradient_accumulation_steps=4,
-        num_train_epochs=3,
-        learning_rate=2e-4,
+        gradient_accumulation_steps=8,     
+        num_train_epochs=10,               
+        learning_rate=5e-5,                
+        lr_scheduler_type="cosine",        
+        weight_decay=0.01,                 
         logging_steps=5,
-        evaluation_strategy="epoch",  # Run validation at the end of every epoch
-        save_strategy="no",           # Don't save checkpoints, we merge at the end
-        # Use paged optimizer for CUDA to save VRAM; standard for Mac
+        eval_strategy="epoch",             
+        save_strategy="no",
         optim="paged_adamw_32bit" if is_cuda else "adamw_torch",
+        bf16=True,
         report_to="none"
     )
 
@@ -89,10 +91,8 @@ def train_pytorch(model_id, dataset_dir, output_dir, hf_token):
         train_dataset=dataset_train,
         eval_dataset=dataset_valid,
         peft_config=peft_config,
-        tokenizer=tokenizer,
-        args=training_args,
-        max_seq_length=1024,
-        dataset_text_field="messages", # Required for the ChatML format we created
+        processing_class=tokenizer, 
+        args=sft_config
     )
 
     # 8. Execute Training
