@@ -1,15 +1,13 @@
 import os
 import torch
 import json
-import gc
 import matplotlib.pyplot as plt
 from transformers import AutoModelForCausalLM, AutoTokenizer
 from trl import SFTTrainer, SFTConfig
-from peft import LoraConfig, PeftModel
+from peft import LoraConfig
 from datasets import load_dataset
-from utils_ft import to_relative
 
-def plot_loss(report_path, output_dir):
+def plot_loss(report_path, adapter_path):
     """Generates a loss plot from the trainer log history."""
     with open(report_path, "r") as f:
         history = json.load(f)
@@ -24,33 +22,35 @@ def plot_loss(report_path, output_dir):
     if eval_loss:
         plt.plot(eval_steps, eval_loss, label="Validation Loss", color="red", marker="o")
     
-    plt.title("Training and Validation Loss (MLX-Aligned)")
+    plt.title("Training and Validation Loss")
     plt.xlabel("Steps")
     plt.ylabel("Loss")
     plt.legend()
     plt.grid(True)
     
-    plot_path = os.path.join(output_dir, "loss_plot.png")
+    plot_path = os.path.join(adapter_path, "loss_plot.png")
     plt.savefig(plot_path)
     print(f"Loss plot saved to: {plot_path}")
 
-def train_pytorch(model_id, dataset_dir, output_dir, hf_token):
+def train_pytorch(model_path, data_folder, adapter_path, save_path, hf_token, iters=300):
     is_cuda = torch.cuda.is_available()
     is_mps = torch.backends.mps.is_available()
     
-    print(f"--- Initializing PyTorch Training (MLX-Aligned) ---")
+    print(f"--- Initializing PyTorch Training ---")
     print(f"--- Device: {'MPS' if is_mps else 'CUDA' if is_cuda else 'CPU'} ---")
 
     # 1. Unified Model Loading
-    # Integration: 'device' is set during init to avoid redundant CPU-to-device transfers.
     model = AutoModelForCausalLM.from_pretrained(
-        model_id,
-        torch_dtype=torch.bfloat16, # Match MLX native bf16 training
+        model_path,
+        dtype=torch.bfloat16,
         token=hf_token,
-        device="mps" if is_mps else None, # Integrated MPS loading
         device_map="auto" if is_cuda else None,
-        attn_implementation="sdpa" if is_cuda else "eager"
+        attn_implementation="sdpa" if (is_cuda or is_mps) else "eager"
     )
+
+    if is_mps:
+        print("Moving model to MPS...")
+        model.to("mps")
 
     # 2. Dynamic Layer Masking (Top 16 Layers)
     # Aligns with MLX "num_layers: 16"
@@ -61,8 +61,7 @@ def train_pytorch(model_id, dataset_dir, output_dir, hf_token):
     # Scale = alpha/r = 160/16 = 10.0 (Matches MLX 'scale: 10')
     peft_config = LoraConfig(
         r=16,
-        lora_alpha=160, 
-        target_modules=["q_proj", "v_proj", "k_proj", "o_proj"], # MLX default
+        lora_alpha=160,
         layers_to_transform=target_layers,
         lora_dropout=0.05,
         bias="none",
@@ -70,21 +69,18 @@ def train_pytorch(model_id, dataset_dir, output_dir, hf_token):
     )
 
     # 4. Standard Tokenizer & Dataset Setup
-    tokenizer = AutoTokenizer.from_pretrained(model_id, token=hf_token)
-    tokenizer.pad_token = tokenizer.eos_token
-    tokenizer.padding_side = "right" 
-    dataset_train = load_dataset("json", data_files=os.path.join(dataset_dir, "train.jsonl"), split="train")
-    dataset_valid = load_dataset("json", data_files=os.path.join(dataset_dir, "valid.jsonl"), split="train")
+    tokenizer = AutoTokenizer.from_pretrained(model_path, token=hf_token)
+    dataset_train = load_dataset("json", data_files=os.path.join(data_folder, "train.jsonl"), split="train")
+    dataset_valid = load_dataset("json", data_files=os.path.join(data_folder, "valid.jsonl"), split="train")
 
     # 5. Training Args (Standard AdamW to match MLX)
     sft_config = SFTConfig(
-        output_dir="./tmp_pytorch_results",
+        output_dir=adapter_path,
         per_device_train_batch_size=1,
         gradient_accumulation_steps=4,
-        max_steps=300,
+        max_steps=iters, #set to 300 during actual training, for testing its now 30
         learning_rate=5e-5,
         lr_scheduler_type="cosine",
-        weight_decay=0.01,
         logging_steps=10,
         eval_strategy="steps",
         eval_steps=20,
@@ -94,9 +90,7 @@ def train_pytorch(model_id, dataset_dir, output_dir, hf_token):
         bf16=True, 
         report_to="none",
         dataset_text_field="messages",
-        max_length=2048,
-        gradient_checkpointing=True,
-        gradient_checkpointing_kwargs={"use_reentrant": False}
+        max_length=2048
     )
 
     trainer = SFTTrainer(
@@ -112,34 +106,28 @@ def train_pytorch(model_id, dataset_dir, output_dir, hf_token):
     trainer.train()
     
     # 6. Save Logs & Visualizations
-    report_path = os.path.join(output_dir, "report.json")
-    os.makedirs(output_dir, exist_ok=True)
+    report_path = os.path.join(adapter_path, "report.json")
+    os.makedirs(adapter_path, exist_ok=True)
     with open(report_path, "w", encoding="utf-8") as f:
         json.dump(trainer.state.log_history, f, indent=2)
     
-    plot_loss(report_path, output_dir)
+    plot_loss(report_path, adapter_path)
     
-    trainer.model.save_pretrained(output_dir) 
-    tokenizer.save_pretrained(output_dir)
+    trainer.model.save_pretrained(adapter_path) 
+    tokenizer.save_pretrained(adapter_path)
 
-    # 7. CLEANUP & MERGE
-    print("--- Starting Merge Process ---")
-    del model, trainer
-    if is_cuda: torch.cuda.empty_cache()
-    if is_mps: torch.mps.empty_cache()
-    gc.collect()
+    # 7. SIMPLE MERGE & SAVE (In-Place)
+    print("--- Starting Simplified Merge ---")
 
-    base_model = AutoModelForCausalLM.from_pretrained(
-        model_id,
-        torch_dtype=torch.bfloat16,
-        device="mps" if is_mps else None, # Integrated MPS reload
-        device_map="auto" if is_cuda else None,
-        token=hf_token
-    )
+    # Finalize Weights
+    print("Merging adapters into base model...")
+    merged_model = trainer.model.merge_and_unload()
+
+    # Save to the path
+    print(f"Saving final model to: {save_path}")
+    os.makedirs(save_path, exist_ok=True)
     
-    model_to_merge = PeftModel.from_pretrained(base_model, output_dir)
-    merged_model = model_to_merge.merge_and_unload()
+    merged_model.save_pretrained(save_path)
+    tokenizer.save_pretrained(save_path)
     
-    merged_model.save_pretrained(output_dir, safe_serialization=True)
-    tokenizer.save_pretrained(output_dir)
-    print("Merge complete.")
+    print(f"--- Fused model ready at {save_path} ---")

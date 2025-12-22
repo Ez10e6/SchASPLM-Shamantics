@@ -42,7 +42,7 @@ def run_mlx_training(model_path, data_folder, adapter_path, iters=300):
         # Logging & Saving
         "steps_per_report": 10,
         "steps_per_eval": 20,
-        "val_batches": 1,
+        "val_batches": 5,
         "save_every": 100,
         "seed": 42,
         
@@ -52,7 +52,6 @@ def run_mlx_training(model_path, data_folder, adapter_path, iters=300):
         
         "lora_parameters": {
             "rank": 16,
-            "alpha": 32,
             "dropout": 0.05,
             "scale": 10.0
         }
@@ -98,8 +97,6 @@ def fuse_model(base_model, adapter_path, save_path):
         "--model", base_model,
         "--adapter-path", adapter_path,
         "--save-path", save_path,
-        # Note: We do NOT pass --dequantize unless the base model was quantized.
-        # If your base model is bf16/f16, this preserves it.
     ]
     
     try:

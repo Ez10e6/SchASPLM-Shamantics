@@ -10,8 +10,6 @@ transformers
 peft
 trl
 accelerate
-# bitsandbytes is for Windows/Linux CUDA only
-bitsandbytes; sys_platform != 'darwin'
 
 # macOS Specific
 mlx-lm == 0.30.0; sys_platform == 'darwin'
