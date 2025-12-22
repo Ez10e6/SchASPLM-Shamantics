@@ -14,4 +14,4 @@ accelerate
 bitsandbytes; sys_platform != 'darwin'
 
 # macOS Specific
-mlx-lm; sys_platform == 'darwin'
+mlx-lm == 0.30.0; sys_platform == 'darwin'
