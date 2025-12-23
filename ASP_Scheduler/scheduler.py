@@ -43,6 +43,10 @@ def get_hard_constraints(hard_constraint_descriptions, problem_description, inst
         pipe (optional): The pipeline to use for the LLM. Defaults to None.
         printer (bool, optional): Whether to print intermediate results. Defaults to False.
         k (int, optional): The number of retries to get a syntactically correct response. Defaults to 0 (no retries).
+        temperature (float, optional): The temperature setting for the LLM. Defaults to None.
+        top_p (float, optional): The top_p setting for the LLM. Defaults to None.
+        seed (int, optional): The seed for the LLM. Defaults to None.
+        max_new_tokens (int, optional): The maximum number of new tokens to generate. Defaults to 512.
 
     Returns:
         list: A list of hard constraints as strings.
@@ -135,6 +139,10 @@ def get_soft_constraints(soft_constraint_descriptions, problem_description, inst
         pipe (optional): The pipeline to use for the LLM. Defaults to None.
         printer (bool, optional): Whether to print intermediate results. Defaults to False.
         k (int, optional): The number of retries to get a syntactically correct response. Defaults to 0 (no retries).
+        temperature (float, optional): The temperature setting for the LLM. Defaults to None.
+        top_p (float, optional): The top_p setting for the LLM. Defaults to None.
+        seed (int, optional): The seed for the LLM. Defaults to None.
+        max_new_tokens (int, optional): The maximum number of new tokens to generate. Defaults to 512.
 
     Returns:
         list: A list of soft constraints as strings.
@@ -378,6 +386,10 @@ def get_partial_program(system_prompt_path, prompt, system_prompt_variables={}, 
         pipe (optional): The pipeline to use for the LLM. Defaults to None.
         k (int, optional): The number of retries to get a syntactically correct response. Defaults to 0 (no retries).
         printer (bool, optional): Whether to print intermediate results. Defaults to False.
+        temperature (float, optional): The temperature setting for the LLM. Defaults to None.
+        top_p (float, optional): The top_p setting for the LLM. Defaults to None.
+        seed (int, optional): The seed for the LLM. Defaults to None.
+        max_new_tokens (int, optional): The maximum number of new tokens to generate. Defaults to 512.
 
     Returns:
         str: The generated partial ASP program as a string.
@@ -475,6 +487,10 @@ def full_ASP_program(problem, printer=False, pipe=None, k=0, temperature=None, t
         printer (bool, optional): Whether to print intermediate results. Defaults to False.
         pipe (optional): The pipeline to use for the LLM. Defaults to None.
         k (int, optional): The number of retries to get a syntactically correct response. Defaults to 0 (no retries).
+        temperature (float, optional): The temperature setting for the LLM. Defaults to None.
+        top_p (float, optional): The top_p setting for the LLM. Defaults to None.
+        seed (int, optional): The seed for the LLM. Defaults to None.
+        max_new_tokens (int, optional): The maximum number of new tokens to generate. Defaults to 512.
 
     Returns:
         str: The full ASP program as a string.
@@ -518,10 +534,10 @@ def full_ASP_program(problem, printer=False, pipe=None, k=0, temperature=None, t
     print('\n\nGenerator\n' + generator) if printer else None
 
     # Generate hard constraints based on hard constraint descriptions, problem description, instance template and generator
-    hard_constraints = get_hard_constraints(hard_constraint_descriptions, problem_description, instance_template, generator, pipe=pipe, printer=printer, k=k)
+    hard_constraints = get_hard_constraints(hard_constraint_descriptions, problem_description, instance_template, generator, pipe=pipe, printer=printer, k=k, temperature=temperature, top_p=top_p, seed=seed, max_new_tokens=max_new_tokens)
 
     # Generate soft constraints based on soft constraint descriptions, problem description, instance template and generator
-    soft_constraints = get_soft_constraints(soft_constraint_descriptions, problem_description, instance_template, generator, pipe=pipe, printer=printer, k=k)
+    soft_constraints = get_soft_constraints(soft_constraint_descriptions, problem_description, instance_template, generator, pipe=pipe, printer=printer, k=k, temperature=temperature, top_p=top_p, seed=seed, max_new_tokens=max_new_tokens)
 
     # Create a string that contains all hard and soft constraints with descriptions as comments
     hard_constraints_str = extract_constraints(hard_constraint_descriptions, hard_constraints)
