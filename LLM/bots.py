@@ -314,8 +314,9 @@ def load_pipe(model_checkpoint="meta-llama/Meta-Llama-3-8B-Instruct", local_dir=
     # Select Dtype dynamically
     # Only use float16 if you are on an old CUDA card that doesn't support bfloat16
     dtype = torch.bfloat16
-    if not is_cuda or not is_mps:
+    if not is_cuda and not is_mps:
         dtype = torch.float16
+    print(f"Using dtype: {dtype}")
 
     # Check Quantization compatibility
     if quantization_config is not None and not torch.cuda.is_available():
