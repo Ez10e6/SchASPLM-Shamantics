@@ -1,0 +1,49 @@
+### **Exercise: Multi-Constraint Path Optimization in a Thermal-Temporal State Space**
+
+#### **1. System Formalization**
+Let the undersea environment be modeled as an undirected graph $G = (V, E)$, where $V$ represents a set of nodes and $E$ represents bidirectional traversal lanes. Each edge $(u, v) \in E$ is associated with a thermal cost $w(u, v) \in \mathbb{Z}^+$. The state of a marine survey drone at any time $t \in \mathbb{Z}_{\ge 0}$ is defined by the tuple $S_t = (v_t, h_t, P_t, \text{last\_vst})$, where:
+*   $v_t \in V$ is the current node.
+*   $h_t \in [0, 10]$ is the accumulated thermal load.
+*   $P_t \subseteq \{\alpha, \beta, \gamma\}$ is the set of completed acoustic pulses.
+*   $\text{last\_vst}$ is a boolean flag indicating if the node `VentStream` has been visited since the last pulse.
+
+#### **2. Topology and Edge Weights**
+The graph $G$ consists of the following nodes and weighted edges:
+*   **Nodes:** $V = \{\text{SubDock (SD)}, \text{CoralPass (CP)}, \text{VentStream (VS)}, \text{BeaconAlpha (BA)}, \text{BeaconBeta (BB)}, \text{NodeX (NX)}, \text{BeaconGamma (BG)}, \text{DeepLoop (DL)}\}$.
+*   **Edges and Weights (Heat Units):**
+    *   $(\text{SD}, \text{CP}) = 2$
+    *   $(\text{SD}, \text{VS}) = 4$
+    *   $(\text{CP}, \text{BA}) = 1$
+    *   $(\text{CP}, \text{DL}) = 1$
+    *   $(\text{DL}, \text{VS}) = 1$
+    *   $(\text{VS}, \text{BB}) = 2$
+    *   $(\text{VS}, \text{NX}) = 1$
+    *   $(\text{NX}, \text{BG}) = 3$
+    *   $(\text{BG}, \text{BA}) = 4$
+
+#### **3. Operational Constraints**
+The drone’s trajectory is subject to the following logical and physical conditions:
+1.  **Temporal Mechanics:** Every movement (traversal of an edge) consumes exactly $\Delta t = 1$ time unit.
+2.  **Acoustic Pulses:** At nodes $\text{BA}$, $\text{BB}$, and $\text{BG}$, the drone may perform a pulse.
+    *   A pulse consumes $\Delta t = 2$ and increases heat load by $\Delta h = 1$.
+    *   **Signal Overlap Constraint:** Consecutive pulses are prohibited. A pulse at any location must be followed by a visit to node `VS` before another pulse can be initiated.
+3.  **Thermal Management:**
+    *   $h_t$ must never exceed the maximum capacity $H_{max} = 10$.
+    *   **Cooldown:** At node $\text{NX}$, the drone may perform a cooldown action. This requires $\Delta t = 2$ and resets $h_t$ to $0$.
+    *   **Forced Action:** Upon entering node $\text{NX}$, the drone is restricted: it must either perform an acoustic pulse (if at a survey site) or a cooldown before exiting.
+4.  **Mission Objectives and Deadlines:**
+    *   **Mandatory Pulses:** Pulses at $\text{BA}$ and $\text{BB}$ are required.
+    *   **Temporal Hard Constraint:** The pulse at $\text{BA}$ must be completed such that $t_{end} < 5$.
+    *   **Conditional Pulse:** A pulse at $\text{BG}$ is required *if and only if* the mandatory pulses at $\text{BA}$ and $\text{BB}$ are both completed by $t \le 8$.
+5.  **Termination:** The mission must conclude within a total action budget of $N \le 16$, where an action is defined as a move, a pulse, or a cooldown.
+
+#### **4. Optimization Goal**
+Define a path that satisfies all constraints while minimizing **Latency** ($L$), where $L$ is defined as the total time $T$ spent in non-pulse actions (i.e., minimizing the drone's "idle" or traversal time relative to its calibration duties).
+
+---
+
+### **Task for the Student:**
+1.  **State-Space Search:** Construct a state-transition diagram or a search tree starting from $S_0 = (\text{SD}, 0, \emptyset, \text{True})$.
+2.  **Feasibility Analysis:** Determine if a valid sequence of actions exists that satisfies the conditional requirement for $\text{BeaconGamma}$.
+3.  **Path Identification:** Identify the optimal sequence of nodes and actions that minimizes the latency $L$. 
+4.  **Constraint Verification:** Explicitly demonstrate that the thermal load $h_t$ never violates the threshold $H_{max}$ and that the "Signal Overlap" rule is maintained via the `VS` node.

@@ -1,0 +1,7 @@
+Your task is to coordinate a schedule for a series of five academic presentations. Each presentation is categorized into one of three disciplines: Artificial Intelligence (AI), Mathematics, or Physics.
+
+The schedule is built around three distinct auditoriums and two daily periods (an AM session and a PM session). You must adhere to the following operational requirements:
+
+1.  **Placement:** Every presentation must be assigned exactly one auditorium and one time period. No presentation can be omitted or repeated.
+2.  **Capacity:** Auditoriums cannot be double-booked; a single room may host no more than one presentation during any given time period.
+3.  **Subject Separation:** A strict spatial restriction applies to Mathematics and Physics. If an auditorium is used for a Mathematics presentation, it is prohibited from hosting a Physics presentation at any point during the day, and vice versa. (AI presentations, however, do not have this restriction and can share a room with either subject).

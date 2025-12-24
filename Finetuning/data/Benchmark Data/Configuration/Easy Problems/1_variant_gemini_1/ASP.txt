@@ -1,0 +1,20 @@
+% Select exactly one CPU from {Ryzen5, i5}.
+cpu("Ryzen5"; "i5").
+1 { selected_cpu(C) : cpu(C) } 1.
+
+% Select exactly one GPU from {GTX1660, RX580}.
+gpu("GTX1660"; "RX580").
+1 { selected_gpu(G) : gpu(G) } 1.
+
+% Select exactly one motherboard from {B450, Z390}.
+mobo("B450"; "Z390").
+1 { selected_mobo(M) : mobo(M) } 1.
+
+% The Ryzen5 CPU requires the B450 motherboard.
+:- selected_cpu("Ryzen5"), selected_mobo(M), M != "B450".
+
+% The i5 CPU requires the Z390 motherboard.
+:- selected_cpu("i5"), selected_mobo(M), M != "Z390".
+
+% The RX580 GPU is incompatible with the Z390 motherboard.
+:- selected_gpu("RX580"), selected_mobo("Z390").

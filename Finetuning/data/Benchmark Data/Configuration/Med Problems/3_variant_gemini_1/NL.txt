@@ -1,0 +1,34 @@
+A deep-space exploration agency is finalizing the design for a new interstellar probe. The mission's success depends on maximizing the **Total Operational Lifespan**, calculated by summing the durability points of three critical components: the **Chassis**, the **Propulsion System**, and the **Energy Core**.
+
+As the lead engineer, you must select exactly one option from each category while adhering to the rigorous physical and safety specifications provided.
+
+### Component Catalog
+
+**1. Chassis Options**
+*   **Carbon-Fiber:** 50 durability points
+*   **Aluminum-Alloy:** 40 durability points
+*   **Titanium-Grade:** 30 durability points
+
+**2. Propulsion Systems**
+*   **Ion Drive:** 60 durability points
+*   **Plasma Thruster:** 70 durability points
+*   **Nuclear-Thermal:** 90 durability points
+
+**3. Energy Cores**
+*   **Solar Array:** 30 durability points
+*   **Hydrogen Fuel Cell:** 50 durability points
+*   **Radioisotope Generator:** 80 durability points
+
+---
+
+### Engineering Interdependencies
+
+To ensure structural integrity and power regulation, the following design rules must be followed:
+
+1.  **Structural Integrity:** The high-stress vibrations of the Nuclear-Thermal propulsion system are too intense for the Carbon-Fiber chassis to withstand.
+2.  **Shielding Requirements:** The heavy radiation shielding required for the Radioisotope Generator necessitates the use of a Titanium-Grade chassis.
+3.  **Power Draw:** Due to extreme energy demands, the Nuclear-Thermal propulsion system can only be paired with a Radioisotope Generator.
+4.  **Low-Wattage Limitations:** The Solar Array provides limited current and is only capable of powering the Ion Drive.
+5.  **Mid-Range Compatibility:** The Hydrogen Fuel Cell is compatible with either the Ion Drive or the Plasma Thruster, but lacks the output for larger systems.
+
+**Objective:** Determine the configuration that achieves the highest possible total durability score without violating any of the technical interdependencies.

@@ -1,0 +1,8 @@
+A corporate coordinator must organize four distinct workshops on a single calendar day, focusing on either **Systems Interconnectivity** or **Digital Protection**. 
+
+The schedule is divided into two operational periods—**AM** and **PM**—and utilizes two separate **Venues** (Venue 1 and Venue 2). To ensure a successful event, the following parameters must be strictly observed:
+
+1.  **Full Occupancy:** Every one of the four workshops must be designated a specific venue and time period. 
+2.  **No Overlap:** Each venue can host only one workshop per time period; simultaneous bookings in the same location are prohibited.
+3.  **Digital Protection Protocols:** Any workshop categorized under Digital Protection is restricted to the PM time block.
+4.  **Interconnectivity Spatial Limits:** All workshops regarding Systems Interconnectivity are barred from being held in Venue 1.

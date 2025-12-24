@@ -1,0 +1,18 @@
+**Exercise: State-Space Traversal under Temporal and Positional Constraints**
+
+**Problem Definition**
+Let $G = (V, E)$ be an undirected graph representing a facility layout, where the vertex set is defined as $V = \{A, B, C, D, E\}$. The set of permissible transitions (edges) is defined by the adjacency relation:
+$$E = \{(A, B), (B, C), (A, D), (D, E)\}$$
+
+An autonomous agent is initialized at vertex $v_0 = A$ at time $t = 0$. At each discrete time step $t \in \{1, 2, \dots, T\}$, the agent must perform a transition to an adjacent vertex such that $(v_{t-1}, v_t) \in E$.
+
+**Objective**
+The agent is tasked with fulfilling a set of delivery requirements, defined as the visitation of a target subset $V_{target} = \{C, E\}$. A requirement is satisfied if there exists at least one $t \in \{1, \dots, T\}$ such that $v_t \in V_{target}$.
+
+**Constraints**
+1.  **Temporal Bound:** The total number of moves is restricted to $T = 6$.
+2.  **Coverage:** The agent must ensure that $\{C, E\} \subseteq \{v_1, v_2, \dots, v_T\}$.
+3.  **Adjacency:** Every move must satisfy the topological constraints of $G$.
+
+**Task**
+Formally determine whether there exists a walk $W = (v_0, v_1, \dots, v_k)$ of length $k \leq T$ that satisfies the coverage constraint. If such a walk exists, provide the sequence of vertices; if not, provide a proof based on the parity or the minimum Steiner tree distance within the graph.

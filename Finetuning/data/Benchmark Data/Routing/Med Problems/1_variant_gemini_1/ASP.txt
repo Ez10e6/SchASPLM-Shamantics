@@ -1,0 +1,34 @@
+% Locations: Station1, Junction1, Junction2, SubstationA, SubstationB
+loc("Station1"; "Junction1"; "Junction2"; "SubstationA"; "SubstationB").
+
+% Edges: (Station1–Junction1), (Station1–Junction2), (Junction1–SubstationA), (Junction2–SubstationB), (Junction1–Junction2)
+edge("Station1", "Junction1").
+edge("Station1", "Junction2").
+edge("Junction1", "SubstationA").
+edge("Junction2", "SubstationB").
+edge("Junction1", "Junction2").
+
+% Meximum power usage is 8 units.
+power(0..8).
+
+% The drone starts at Station1.
+at("Station1", 0).
+
+% The drone can move between adjacent nodes with one power unit.
+1 { at(L, P) : loc(L) } 1 :- power(P).
+:- at(L1, P), at(L2, P+1), not edge(L1, L2), not edge(L2, L1), L1 != L2.
+
+% The drone must inspect sites: SubstationA, SubstationB.
+inspect("SubstationA"; "SubstationB").
+1 { inspect_at(L, P) : power(P) } 1 :- inspect(L).
+
+% Inspections require spending one power unit at inspection location.
+at(L, P) :- inspect_at(L, P).
+at(L, P+1) :- inspect_at(L, P), P<8.
+
+% Minimize battery usage before both inspections complete.
+latest_inspect(P) :- P = #max{P1: inspect_at(_, P1)}.
+#minimize { P : latest_inspect(P) }.
+
+% If drone visits Junction2 before SubstationA, it may not later visit Junction1.
+:- at("Junction2", P1), at("SubstationA", P2), at("Junction1", P3), P1 < P2 < P3.

@@ -1,0 +1,24 @@
+A robotic probe is deployed into a Martian cavern system to retrieve geological data. It departs from the Deployment Hub with a pressurized reservoir containing 16 units of thermal fluid, which is consumed during navigation and drilling. The probe must conclude its mission within a 10-minute operational window.
+
+**Navigation and Resource Costs:**
+The cavern is structured as a network of sectors and waypoints. Fluid consumption varies based on the thermal intensity of the path:
+*   **From Deployment Hub:** The probe can enter either Sector-Alpha (2 units) or Sector-Beta (3 units).
+*   **Sector-Alpha:** Leads to Waypoint-A (1 unit).
+*   **Waypoint-A:** Following data retrieval, the probe can move through a bypass (1 unit) to reach Sector-Beta.
+*   **Sector-Beta:** This hub branches to either Waypoint-B (1 unit) or the Calibration-Sump (2 units).
+*   **Calibration-Sump:** This location leads to Waypoint-C (1 unit).
+*   **Waypoint-C:** Offers a return path to Sector-Alpha (2 units).
+
+**Data Collection Protocols:**
+*   **Mandatory Sites:** The probe is required to secure one data sample from Waypoint-A and one from Waypoint-B. 
+*   **Waypoint-A Deadline:** Due to atmospheric instability, the sample at Waypoint-A must be secured no later than the 6-minute mark.
+*   **Waypoint-C (Conditional):** Retrieval at Waypoint-C is required if, and only if, the primary samples (A and B) are both secured within the first 8 minutes of the mission.
+*   **Extraction Mechanics:** Each sampling operation takes 1 minute to complete. During this time, the probe’s recycling system recovers 1 unit of thermal fluid from the environment. To prevent sensor fouling, the probe cannot perform two extraction operations consecutively at the same waypoint.
+
+**Maintenance and Limitations:**
+*   **The Calibration-Sump:** This site contains a unique recharge port. If the probe remains stationary here for 2 consecutive minutes, it replenishes 3 units of thermal fluid. This recharge can be performed only once before the port seals.
+*   **Mobility:** Every relocation between any two connected nodes takes exactly 1 minute. The probe must follow the established directional flow of the network.
+*   **Action Cap:** To prevent mechanical fatigue, the probe is limited to a maximum of 18 total discrete actions (moves, extractions, or recharges).
+
+**Mission Optimization:**
+The primary goal is to maximize the total number of samples retrieved. Should different navigational paths yield the same number of samples, the mission profile that completes the mandatory extractions (Waypoint-A and Waypoint-B) in the shortest elapsed time will be selected as the optimal route.

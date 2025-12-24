@@ -1,0 +1,9 @@
+We’re finally getting the green light to assemble that new workstation for our AI research, but there’s a catch: we have to keep the hardware costs as low as humanly possible while ensuring every single part is compatible. We need to select one processor, one graphics card, one motherboard, and a power supply unit to get the rig up and running.
+
+For the brains of the operation, we’re looking at three processors. The Ryzen7 is the budget-friendly choice at 300, but it strictly requires the X670 motherboard. Then there’s the i9 for 400, though we have to remember it is incompatible with that same X670 board. Finally, we have the server-grade Xeon for 500, but if we go that route, it must be installed in the C621 workstation-class motherboard. Speaking of motherboards, the X670 is the cheapest at 180, followed by the Z690 at 200, and the C621 at 250.
+
+The graphics card is where things get a bit more complicated for the budget. We could go with the RTX4060 for 350, the beefier RTX3090 for 700, or the high-end Quadro for 800. If we decide on the Quadro, we are forced to use the Xeon CPU, and we also have to make sure we don't try to pair that Quadro with a Z690 motherboard. Another thing to keep in mind is that both the RTX3090 and the Quadro consume a massive amount of power.
+
+This brings us to our power supply options: Bronze for 80, Gold for 120, and Platinum for 160. Because they are so power-hungry, neither the RTX3090 nor the Quadro can operate with the Bronze PSU; we’d have to step up to at least the Gold or Platinum level for those cards. 
+
+Our goal is to navigate all these technical requirements to find the specific combination of components that results in the lowest total price tag. We need to make sure we don't run into any compatibility dead ends while we're trying to save the department some money.

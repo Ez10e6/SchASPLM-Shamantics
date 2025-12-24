@@ -1,0 +1,11 @@
+An autonomous surveyor is tasked with conducting diagnostics at two specific locations, **Terminal Alpha** and **Terminal Beta**, starting from the central **Hub**. Every movement between nodes consumes 1 unit of power, and performing a diagnostic at a terminal also costs 1 unit. 
+
+The navigational grid is structured as follows: 
+*   The **Hub** is linked to **Relay 1** and **Relay 2**. 
+*   **Relay 1** provides access to **Terminal Alpha**.
+*   **Relay 2** provides access to **Terminal Beta**. 
+*   Furthermore, there is a direct link between **Relay 1** and **Relay 2**. 
+
+The surveyor operates on a maximum reserve of 8 power units. The objective is to identify the path that minimizes total power consumption (the sum of all movement and diagnostic costs) while ensuring both terminals are serviced at least once. 
+
+There is a specific navigational restriction: if the surveyor enters **Relay 2** before reaching **Terminal Alpha**, it is prohibited from transiting through **Relay 1** to reach **Terminal Alpha** because of localized signal interference.

@@ -1,0 +1,17 @@
+**Exercise 4.12: Constrained Pathfinding in a Discrete Spatial Graph**
+
+**Problem Statement:**
+Consider an autonomous agent operating within a discrete environment modeled as an undirected graph $G = (V, E)$. The vertex set is defined as $V = \{A, B, C, D, E\}$, representing distinct spatial locations. The topology of the environment is defined by the following set of edges, representing bidirectional connectivity:
+$$E = \{(A, B), (A, C), (B, D), (C, E)\}$$
+
+Each transition between adjacent vertices $\{u, v\} \in E$ incurs a uniform temporal cost of $t = 1$ minute.
+
+**Constraints and Objectives:**
+The agent is initialized at starting vertex $s = A$. The objective is to achieve a set of delivery requirements defined by the target set $T = \{D, E\}$. A successful execution must satisfy the following formal conditions:
+
+1.  **Coverage:** The agent must visit every vertex $v \in T$.
+2.  **Uniqueness:** Each target vertex $v \in T$ must be visited exactly once during the traversal.
+3.  **Temporal Bound:** The total path cost $C$, defined as the sum of all edge weights in the sequence, must satisfy the constraint $C \leq 6$.
+
+**Task:**
+Formalize the agent's movement as a sequence of vertices (a path) and determine the set of all feasible paths that satisfy the aforementioned constraints. Prove whether the order of visitation between the elements of $T$ affects the feasibility of the solution under the temporal bound.

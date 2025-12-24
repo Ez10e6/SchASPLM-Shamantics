@@ -1,0 +1,40 @@
+% There are 10 seminars
+seminar(1..10).
+
+% Seminars have topics: AI, Bio, or Math
+topic("AI"; "Bio"; "Math").
+1{topicOf(S, T): topic(T)}1 :- seminar(S).
+
+% There are 2 days
+day(1; 2).
+
+% There are 3 time slots per day: morning, midday, afternoon
+timeslot("morning"; "midday"; "afternoon").
+
+% There are 4 rooms
+room(1..4).
+
+% Only one seminar can be scheduled in a room at a time
+1{scheduled(S, R, T, D): room(R), timeslot(T), day(D)} :- seminar(S).
+:- schedule(S1, D, T, R), schedule(S2, D, T, R), S1 != S2.
+
+% AI seminars must be in the morning or midday
+:- scheduled(S, _, "afternoon", _), topicOf(S, "AI").
+
+% Bio seminars must happen in at least 2 different rooms
+bioRoom(R) :- scheduled(S,_,_,R), topicOf(S, "Bio").
+:- #count { R : bioRoom(R) } < 2.
+
+% Room 4 is not available at midday on either day
+:- scheduled(_, 4, "midday", _).
+
+% No two Math seminars can happen at the same time
+:- scheduled(S1, _, T, D), scheduled(S2, _, T, D), S1 != S2,
+topicOf(S1, "Math"), topicOf(S2, "Math").
+
+% Seminar 5 must happen on Day 2 but not in the morning
+1{scheduled(5, R, T, 2): T != "morning", timeslot(T), room(R)}1.
+
+% Seminars 6 and 7 must happen in the same room but on different days
+:- scheduled(6,R1,T1,D1), scheduled(7,R2,T2,D2), R1 != R2.
+:- scheduled(6,R,T1,D), scheduled(7,R,T2,D).

@@ -1,0 +1,14 @@
+An automated underwater vehicle (AUV) is launched from a Surface Hub to perform a critical inspection of several submerged research stations linked by a web of one-way navigational currents. Every movement between locations consumes exactly one minute of operation time. The AUV’s journey begins with two possible exit vectors: Channel Alpha (requiring 2 units of fuel) or Channel Beta (requiring 3 units of fuel).
+
+Once the AUV enters Channel Alpha, it can proceed directly to Station X, a move costing 2 fuel units. Conversely, Channel Beta provides a gateway to Station Y at a cost of 2 fuel units, while also offering a cross-current link to Channel Alpha for a 1-unit fuel expenditure. If the vehicle is at Station X, it may transition back to Channel Beta by spending 2 fuel units. From Station Y, the AUV can navigate to a central Relay Station, which carries a 3-unit fuel penalty. This Relay Station provides a single exit path to Station Z, costing an additional 2 fuel units. Finally, a long-distance return current exists from Station Z back to Station X, though this maneuver requires 4 fuel units due to heavy pressure resistance.
+
+**Operational Parameters:**
+*   **Temporal Costs:** While travel takes one minute per leg, conducting a sensor sweep at any station (X, Y, or Z) requires the AUV to remain docked and stationary for two consecutive minutes.
+*   **Mandatory Objectives:** The AUV must successfully complete a sensor sweep at both Station X and Station Y.
+*   **Time Criticality:** To capture specific tidal data, the sensor sweep at Station X must be finished no later than the 5-minute mark of the mission.
+*   **Optional Objectives:** A sweep of Station Z is encouraged but not required for mission success.
+*   **Endurance Limits:** The AUV’s chassis and mission clock limit it to a maximum of 20 total actions (where each minute of travel or docking counts as one action).
+*   **Energy Constraints:** The AUV starts with a full energy reservoir of 14 units. Total fuel consumption across all movements cannot exceed this 14-unit ceiling.
+*   **Replenishment Protocol:** The AUV may opt to remain idle at the Relay Station for exactly two minutes to recover 4 units of fuel. However, if the AUV enters the Relay Station for any reason, it is forced by the prevailing currents to proceed to Station Z in the very next minute.
+*   **Optimization Hierarchy:** The primary goal is to maximize the total number of unique sensor sweeps performed. If two paths result in the same number of sweeps, the strategy that completes the mandatory sweeps (X and Y) in the shortest total time is preferred.
+*   **Sensor Safety:** To prevent equipment fatigue, the AUV is strictly forbidden from performing back-to-back sensor sweeps at the same station.

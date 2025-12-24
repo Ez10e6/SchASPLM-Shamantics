@@ -1,0 +1,19 @@
+Your objective is to organize an eight-part academic seminar series distributed across a two-day itinerary. Each seminar pertains to one of three specific disciplines: Artificial Intelligence (AI), Mathematics, or Biology. 
+
+The schedule for both days is partitioned into three distinct periods: Morning, Midday, and Afternoon. You have three available venues (Rooms 1, 2, and 3) to host these sessions. Every one of the eight seminars must be assigned a unique combination of room, day, and time slot.
+
+To ensure proper management, the following logistical parameters must be strictly observed:
+
+**Facility Constraints:**
+*   **Occupancy Limits:** No more than two seminars may be hosted in any single room during a given day. Consequently, every room must remain vacant for at least one of its three time slots daily.
+*   **Concurrent Use:** Only one seminar can occupy a specific room at any given time.
+*   **Room 2 Restriction:** Room 2 is strictly off-limits during the Afternoon period on both Day 1 and Day 2.
+
+**Disciplinary Constraints:**
+*   **AI Scheduling:** All AI-related seminars are restricted to the Morning time slot. They are prohibited during Midday or Afternoon periods.
+*   **Math Scheduling:** Mathematics seminars are subject to a non-concurrency rule. No two Math sessions may occur simultaneously, regardless of which rooms are being used.
+*   **Inter-Subject Compatibility:** AI and Biology sessions are mutually exclusive within a single room-day pair. If a room hosts an AI seminar on a particular day, it cannot host a Biology seminar on that same day, and vice versa.
+*   **Curriculum Balance:** Every day’s agenda must be comprehensive, featuring at least one seminar from each of the three disciplines (AI, Math, and Biology).
+
+**Optimization Goal:**
+While several configurations may satisfy these rules, you should prioritize "high-density" scheduling. Aim to minimize the total number of empty room-slots while remaining within the mandated maximum of two seminars per room per day.

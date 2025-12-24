@@ -1,0 +1,38 @@
+### Exercise: Constrained Pathfinding and Resource Management in Heterogeneous Terrains
+
+**1. Context and System Definition**
+Consider an autonomous agent $\mathcal{A}$ (a maintenance rover) operating within a discrete topological space represented by an undirected graph $G = (V, E)$. The vertex set $V$ represents physical locations, and the edge set $E$ represents traversable paths of unit distance.
+
+The vertex set is defined as:
+$V = \{v_{BC}, v_{F1}, v_{F2}, v_{OX}, v_{OY}, v_{RS}\}$
+where:
+*   $v_{BC}$: BaseCamp (Initial State)
+*   $v_{F1}, v_{F2}$: Intermediate Junctions (Fork1, Fork2)
+*   $v_{OX}, v_{OY}$: Mandatory Inspection Targets (OutpostX, OutpostY)
+*   $v_{RS}$: Optional Diagnostic Node (RelayStation)
+
+The adjacency relations are defined by the set $E$:
+$E = \{(v_{BC}, v_{F1}), (v_{BC}, v_{F2}), (v_{F1}, v_{OX}), (v_{F1}, v_{RS}), (v_{F2}, v_{OY}), (v_{F2}, v_{RS})\}$
+
+**2. State Variables and Constraints**
+The agent is subject to two primary resource constraints: Temporal ($T$) and Energetic ($B$).
+
+*   **Initial State:** At $t=0$, the agent is positioned at $v_{BC}$ with an initial battery capacity $B_0 = 6$ units and elapsed time $T_0 = 0$ minutes.
+*   **Temporal Costs:** 
+    *   Movement between any two adjacent vertices $v_i, v_j \in V$ incurs a cost $\Delta T_{move} = 1$ minute.
+    *   The inspection process at any node $v \in \{v_{OX}, v_{OY}, v_{RS}\}$ requires a stationary duration of $\Delta T_{inspect} = 1$ minute.
+*   **Energy Costs:** Each movement action consumes $\Delta B = 1$ unit of battery. Stationary inspections do not deplete battery resources.
+*   **Global Bounds:** The total elapsed time must satisfy $T_{final} \le 10$. The battery level must satisfy $B_t \ge 0$ for all $t$.
+
+**3. Objectives and Task Requirements**
+The agent must execute a path $P$ that satisfies the following conditions:
+1.  **Mandatory Coverage:** The set of visited and inspected nodes must include $\{v_{OX}, v_{OY}\}$. Each mandatory node must be inspected exactly once.
+2.  **Optional Reward Condition:** The agent may optionally inspect $v_{RS}$. Let $t_{req}$ be the timestamp at which the second of the two mandatory inspections ($v_{OX}, v_{OY}$) is completed. A diagnostic reward is granted for inspecting $v_{RS}$ if and only if $B_{t_{req}} > 2$.
+
+**4. Problem Statement**
+Formalize the agent's movement as a sequence of states. Determine the feasibility of completing all mandatory inspections while maximizing the diagnostic reward. 
+
+**Tasks:**
+*   (a) Construct a state-transition diagram or a search tree representing the possible trajectories of the rover.
+*   (b) Identify if there exists a valid path $P$ such that $v_{RS}$ is inspected and the diagnostic reward condition ($B_{t_{req}} > 2$) is satisfied within the global temporal bound $T \le 10$.
+*   (c) If such a path exists, provide the sequence of vertices and actions (Move/Inspect). If not, provide a formal proof of infeasibility based on the energy constraints.

@@ -1,0 +1,16 @@
+An engineer is configuring a high-end workstation by selecting one processor (CPU), one graphics card (GPU), and a corresponding thermal management solution. The objective is to maximize the combined efficiency rating of the assembly while strictly adhering to hardware compatibility and heat dissipation protocols.
+
+**Available Components and Efficiency Ratings:**
+
+*   **Processors:** Ryzen9 (95), i7 (85), and M1 (70).
+*   **Graphics Cards:** RTX3070 (90), RX6700XT (88), and IrisXe (65).
+*   **Thermal Management:** LiquidCool (40), AirCool (20), and PassiveCool (5).
+
+**System Integration Constraints:**
+
+1.  **High-Thermal Demand:** The installation of either a Ryzen9 CPU or an RTX3070 GPU mandates the use of the LiquidCool system.
+2.  **Discrete GPU Limits:** PassiveCooling is insufficient for discrete graphics hardware; therefore, it cannot be paired with the RTX3070 or the RX6700XT.
+3.  **Low-Power Exception:** The M1 processor is the only chipset thermally efficient enough to be compatible with a PassiveCool setup.
+4.  **Architecture Conflict:** The RX6700XT graphics card cannot be interfaced with the M1 processor due to a driver mismatch.
+
+Find the configuration that yields the highest total score without violating any of the listed operational rules.

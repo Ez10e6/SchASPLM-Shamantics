@@ -1,0 +1,38 @@
+**Exercise 4.12: Autonomous Path Planning with Resource and Temporal Constraints**
+
+**Problem Statement:**
+An autonomous underwater vehicle (AUV) is deployed into a subterranean hydraulic network, modeled as a directed graph $G = (V, E)$. The agent must execute a sampling mission subject to strict volumetric, temporal, and operational constraints.
+
+**1. Network Topology and Edge Weights:**
+The vertex set is defined as $V = \{v_{LP}, v_A, v_B, v_C, v_{CE}\}$, representing the LaunchPad, Station A, Station B, Station C, and a Calibration Shaft, respectively. The directed edges $E$ and their associated volumetric costs $w(e)$ (reduction in tank capacity) are defined as follows:
+*   $e_1: (v_{LP}, v_A), w(e_1) = 2\,\text{L}$
+*   $e_2: (v_{LP}, v_B), w(e_2) = 3\,\text{L}$
+*   $e_3: (v_A, v_B), w(e_3) = 1\,\text{L}$
+*   $e_4: (v_{LP}, v_{CE}), w(e_4) = 3\,\text{L}$
+*   $e_5: (v_{CE}, v_C), w(e_5) = 2\,\text{L}$
+*   $e_6: (v_C, v_A), w(e_6) = 2\,\text{L}$
+
+**2. State Variables and Agent Capabilities:**
+*   **Time ($t$):** The mission begins at $t=0$. Every traversal of an edge $e \in E$ consumes $\Delta t = 1$ minute.
+*   **Tank Capacity ($C$):** The agent possesses an internal reservoir with a maximum capacity $C_{max} = 16\,\text{L}$. The initial state is $C_0 = 16\,\text{L}$.
+*   **Sampling:** Collecting a specimen at any station $v \in \{v_A, v_B, v_C\}$ consumes $\Delta t = 1$ minute and reduces $C$ by $1\,\text{L}$.
+*   **Refilling:** At $v_{CE}$, the agent may perform a one-time refill operation, increasing $C$ by $3\,\text{L}$ (not to exceed $C_{max}$). This operation requires $\Delta t = 2$ consecutive minutes of idling.
+*   **Event Counter ($k$):** The total sequence of discrete actions (traversals, samplings, and refills) is limited to $k \le 18$.
+
+**3. Mission Constraints:**
+The agent’s path must satisfy the following conditions:
+*   **Mandatory Samples:** The agent must successfully perform at least one sampling operation at $v_A$ and $v_B$.
+*   **Temporal Deadlines:** The first sampling operation at $v_A$ must be completed such that $t \le 6$.
+*   **Optional Sampling:** A sampling operation at $v_C$ is permissible **if and only if** the first instances of sampling at both $v_A$ and $v_B$ are completed within the interval $t \in [0, 8]$.
+*   **Resource Integrity:** At no point in the mission may $C < 0$.
+*   **Cross-Contamination Protocol:** The agent is prohibited from performing two consecutive sampling operations at the same vertex.
+
+**4. Optimization Objectives:**
+Formulate a path $\mathcal{P}$ that satisfies all constraints while optimizing the following criteria in lexicographical order:
+1.  **Maximize** the total number of samples collected $N_{total}$.
+2.  **Minimize** the completion time $t_{final}$ of the last mandatory sample ($v_A$ or $v_B$).
+
+**Required:**
+a) Provide the state-space representation of the AUV.
+b) Determine if an optimal path exists that includes Station C. If so, provide the sequence of actions and the final state $(t, C, k)$.
+c) Prove whether the volume constraint $C_{max}$ or the temporal constraint $t_{max}=10$ is the primary limiting factor for $N_{total}$.

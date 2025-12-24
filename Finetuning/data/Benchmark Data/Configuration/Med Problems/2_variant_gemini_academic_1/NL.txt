@@ -1,0 +1,43 @@
+### Exercise 4.2: Combinatorial Optimization in Hardware Configuration
+
+**Problem Statement:**
+An engineer is tasked with the optimal configuration of a mobile computing workstation. The objective is to select a triplet of components—a Central Processing Unit (CPU), a Graphics Processing Unit (GPU), and a Thermal Management System (TMS)—from a finite set of available hardware. The selection must maximize the aggregate performance metric of the system while satisfying a set of discrete thermal and architectural compatibility constraints.
+
+**1. Definitions and Notation:**
+Let the system configuration be defined by the tuple $(c, g, k)$, where:
+*   $c \in \mathcal{C} = \{\text{Ryzen9, i7, M1}\}$
+*   $g \in \mathcal{G} = \{\text{RTX3070, RX6700XT, IrisXe}\}$
+*   $k \in \mathcal{K} = \{\text{AirCool, LiquidCool, PassiveCool}\}$
+
+Each component $x$ is associated with a performance weight $P(x)$, as defined in Table 1.1.
+
+**Table 1.1: Performance Metrics**
+| Category | Component ($x$) | $P(x)$ |
+| :--- | :--- | :--- |
+| **CPU** ($\mathcal{C}$) | Ryzen9 | 95 |
+| | i7 | 85 |
+| | M1 | 70 |
+| **GPU** ($\mathcal{G}$) | RTX3070 | 90 |
+| | RX6700XT | 88 |
+| | IrisXe | 65 |
+| **TMS** ($\mathcal{K}$) | LiquidCool | 40 |
+| | AirCool | 20 |
+| | PassiveCool | 5 |
+
+**2. Objective Function:**
+Maximize the total system performance $Z$, defined as the summation of the weights of the selected components:
+$$Z = P(c) + P(g) + P(k)$$
+
+**3. Constraints:**
+The selection of components is subject to the following logical conditions:
+
+*   **C1 (Thermal Requirement):** The selection of a high-thermal-output component ($c = \text{Ryzen9}$ or $g = \text{RTX3070}$) necessitates the inclusion of the LiquidCool thermal management system ($k = \text{LiquidCool}$).
+*   **C2 (Cooling Sufficiency):** Discrete graphics processing units ($g \in \{\text{RTX3070, RX6700XT}\}$) are incompatible with passive cooling solutions ($k \neq \text{PassiveCool}$).
+*   **C3 (Architectural Compatibility):** The CPU $c = \text{M1}$ is architecturally incompatible with the GPU $g = \text{RX6700XT}$.
+*   **C4 (Low-Power Exception):** The CPU $c = \text{M1}$ is designated as a low-thermal-envelope chip, rendering it compatible with $k = \text{PassiveCool}$ (subject to GPU constraints).
+
+**Tasks:**
+1.  **Formulate** the problem as a Constraint Satisfaction Problem (CSP).
+2.  **Identify** the feasible region by enumerating all valid tuples $(c, g, k)$ that satisfy constraints C1 through C4.
+3.  **Determine** the optimal configuration $(c^*, g^*, k^*)$ that yields the maximum aggregate performance $Z$.
+4.  **Justify** why the highest-rated individual components do not necessarily form the optimal valid configuration.

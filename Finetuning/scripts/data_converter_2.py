@@ -1,7 +1,6 @@
 import os
 import json
 import random
-import re
 
 def parse_asp_to_steps(asp_content):
     """
@@ -103,7 +102,7 @@ def generate_asp_dataset_2(data_root, output_dir, split_ratio=0.8):
                 conversation = [
                     {
                         "role": "system", 
-                        "content": f"You are an expert AI researcher. Translate the following problem description into syntactically correct Clingo ASP code step-by-step.\n\n### Problem Description:\n{nl_content}"
+                        "content": f"You are an expert programmer, specializing in Answer set Programming. Translate the following problem description into syntactically correct Clingo ASP code step-by-step.\n\n### Problem Description:\n{nl_content}"
                     }
                 ]
 
@@ -153,7 +152,7 @@ if __name__ == "__main__":
     data_out = os.path.join(root_dir, "data")
     
     try:
-        t, v = generate_asp_dataset(data_in, data_out)
+        t, v = generate_asp_dataset_2(data_in, data_out)
         print(f"Generated {t} training and {v} validation examples.")
     except Exception as e:
         print(f"Execution failed: {e}")

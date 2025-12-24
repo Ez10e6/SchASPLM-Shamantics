@@ -1,0 +1,13 @@
+Your objective is to assemble a functional three-piece entertainment rig. A complete set must include exactly one acoustic driver, one power stage, and one source unit.
+
+The warehouse stocks the following hardware:
+*   **Acoustic Drivers:** Alpha, Beta
+*   **Power Stages:** AmpX, AmpY
+*   **Source Units:** Streamer1, Streamer2
+
+To ensure the system operates correctly, you must adhere to these technical specifications:
+1.  The Alpha driver is exclusively operational when paired with the AmpX power stage.
+2.  Technical interference prevents the AmpY power stage from functioning alongside the Streamer1 source unit.
+3.  Selecting Streamer2 as your source unit mandates the use of the Beta acoustic driver.
+
+Propose a single three-component assembly that satisfies all listed operational requirements.

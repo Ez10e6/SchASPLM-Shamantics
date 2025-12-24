@@ -1,0 +1,8 @@
+A conference coordinator is tasked with assigning six distinct workshops to a specific venue and period. The schedule consists of three temporal blocks—early morning, lunch hour, and late day—and utilizes three separate conference halls.
+
+The following logistical requirements must be satisfied:
+
+1.  **Capacity:** Every workshop must be assigned a slot. To prevent overcrowding, a single hall cannot host more than one workshop during the same temporal block.
+2.  **Facility Outage:** Due to maintenance, Hall 3 is strictly unavailable for any workshops during the late-day period.
+3.  **Fixed Location:** Workshop 1 is pre-assigned to Hall 1, regardless of which of the three periods it is scheduled for.
+4.  **Temporal Separation:** Workshop 2 and Workshop 3 are prohibited from occurring simultaneously; they must be allocated to different temporal blocks, even if they occupy different halls.

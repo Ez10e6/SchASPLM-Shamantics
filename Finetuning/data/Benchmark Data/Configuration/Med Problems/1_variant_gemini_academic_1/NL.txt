@@ -1,0 +1,46 @@
+**Exercise: Constrained Optimization in Heterogeneous System Configuration**
+
+**Problem Statement:**
+A system architect is tasked with configuring a high-performance workstation for deep learning research. The configuration requires the selection of exactly one entity from each of four discrete component categories: Processor ($P$), Graphics Processing Unit ($G$), Motherboard ($M$), and Power Supply Unit ($S$). Each component is associated with a specific cost, and the objective is to identify a feasible configuration $(p, g, m, s)$ that minimizes the total cost function, $\mathcal{C}_{total} = c(p) + c(g) + c(m) + c(s)$, subject to a set of logical and hardware compatibility constraints.
+
+**Component Domains and Cost Functions:**
+Let the sets of available components and their corresponding costs (in arbitrary currency units) be defined as follows:
+
+1.  **Processors ($P$):**
+    *   $p_1$: Ryzen7 ($c = 300$)
+    *   $p_2$: i9 ($c = 400$)
+    *   $p_3$: Xeon ($c = 500$)
+2.  **Graphics Processing Units ($G$):**
+    *   $g_1$: RTX4060 ($c = 350$)
+    *   $g_2$: RTX3090 ($c = 700$)
+    *   $g_3$: Quadro ($c = 800$)
+3.  **Motherboards ($M$):**
+    *   $m_1$: X670 ($c = 180$)
+    *   $m_2$: Z690 ($c = 200$)
+    *   $m_3$: C621 ($c = 250$)
+4.  **Power Supply Units ($S$):**
+    *   $s_1$: Bronze ($c = 80$)
+    *   $s_2$: Gold ($c = 120$)
+    *   $s_3$: Platinum ($c = 160$)
+
+**System Constraints:**
+The selection must satisfy the following logical predicates:
+
+1.  **Power Capacity Constraint:** High-wattage GPUs ($g_2, g_3$) are incompatible with the entry-level power supply ($s_1$).
+    *   $(g \in \{g_2, g_3\}) \implies (s \neq s_1)$
+2.  **Processor-Socket Compatibility:** The server-grade processor ($p_3$) necessitates the workstation-class motherboard ($m_3$).
+    *   $(p = p_3) \implies (m = m_3)$
+3.  **Chipset Specificity (AMD):** The $p_1$ architecture is strictly limited to the $m_1$ motherboard.
+    *   $(p = p_1) \implies (m = m_1)$
+4.  **Chipset Specificity (Intel):** The $p_2$ processor cannot be paired with the $m_1$ motherboard.
+    *   $(p = p_2) \implies (m \neq m_1)$
+5.  **Workstation GPU Dependency:** The use of a Quadro GPU ($g_3$) requires the installation of a Xeon processor ($p_3$).
+    *   $(g = g_3) \implies (p = p_3)$
+6.  **Motherboard Incompatibility:** The Quadro GPU ($g_3$) is incompatible with the $m_2$ motherboard.
+    *   $(g = g_3) \implies (m \neq m_2)$
+
+**Required:**
+1.  Formulate the problem as a Constraint Satisfaction Problem (CSP).
+2.  Evaluate the feasible region by identifying all combinations that satisfy the constraints.
+3.  Determine the optimal configuration $(p^*, g^*, m^*, s^*)$ that yields the global minimum cost.
+4.  Provide the total cost of the optimal system.

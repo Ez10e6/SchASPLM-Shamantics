@@ -1,0 +1,20 @@
+% Select exactly one speaker from {Alpha, Beta}.
+speaker("Alpha"; "Beta").
+1 { selected_speaker(S) : speaker(S) } 1.
+
+% Select exactly one amplifier from {AmpX, AmpY}.
+amplifier("AmpX"; "AmpY").
+1 { selected_amplifier(A) : amplifier(A) } 1.
+
+% Select exactly one media player from {Streamer1, Streamer2}.
+player("Streamer1"; "Streamer2").
+1 { selected_player(P) : player(P) } 1.
+
+% Speaker Alpha is only compatible with AmpX.
+:- selected_speaker("Alpha"), selected_amplifier(A), A != "AmpX".
+
+% AmpY is incompatible with Streamer1.
+:- selected_amplifier("AmpY"), selected_player("Streamer1").
+
+% Streamer2 can only be used with Speaker Beta.
+:- selected_player("Streamer2"), selected_speaker(S), S != "Beta".

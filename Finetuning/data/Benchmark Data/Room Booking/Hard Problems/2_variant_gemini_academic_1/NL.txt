@@ -1,0 +1,34 @@
+**Exercise: Constrained Optimization in Symposium Scheduling**
+
+**Problem Statement:**
+Consider a scheduling problem for a three-day academic symposium. The objective is to assign a set of twelve distinct workshops, $W = \{w_1, w_2, \dots, w_{12}\}$, representing four discrete disciplines, $S = \{\text{AI, Physics, Mathematics, Linguistics}\}$, to a spatio-temporal grid. The grid is defined by the Cartesian product of Days $D = \{d_1, d_2, d_3\}$, Time Slots $T = \{t_1, t_2, t_3\}$ (Morning, Midday, Evening), and Rooms $R = \{r_1, r_2, r_3, r_4\}$.
+
+Let $x_{d,t,r} \in S \cup \{\emptyset\}$ be a decision variable representing the discipline assigned to a specific room-time slot. The schedule must satisfy the following system of constraints:
+
+### 1. Spatial and Temporal Allocation Constraints
+*   **Workshop Coverage:** Each workshop $w \in W$ must be allocated to at least one slot $(d, t, r)$.
+*   **Occupancy Limit:** Each room $r \in R$ may host a maximum of two workshops per day $d \in D$.
+*   **Temporal Separation:** For any room $r$ on day $d$, consecutive time slots $(t_i, t_{i+1})$ cannot both be occupied. A minimum of one vacant slot must separate any two sessions in the same room.
+*   **Room Availability:** Room $r_2$ is unavailable during all evening slots $t_3$. Formally, $x_{d,t_3,r_2} = \emptyset$ for all $d$.
+*   **Capacity Constraints:** Room $r_4$ is prohibited from hosting workshops in the disciplines of Artificial Intelligence (AI) or Physics.
+
+### 2. Discipline-Specific Constraints
+*   **AI Temporal Restriction:** AI workshops must be scheduled exclusively during morning sessions ($t_1$).
+*   **Physics Temporal Restriction:** Physics workshops are restricted to $d_1$ and $d_2$; they may not be scheduled on $d_3$.
+*   **Mathematics Spatial Restriction:** Mathematics workshops must be assigned exclusively to $r_1$ or $r_3$.
+*   **Linguistics Concurrency:** Linguistics workshops are subject to a non-concurrency constraint. For any $(d, t)$, there exists at most one $r$ such that $x_{d,t,r} = \text{Linguistics}$.
+
+### 3. Homogeneity and Diversity Requirements
+*   **Daily Room Homogeneity:** Each room $r$ on day $d$ must be dedicated to exactly one discipline $s \in S$ for all sessions occurring in that room on that day.
+*   **Daily Discipline Breadth:** For every day $d \in D$, the schedule must include at least one workshop from each of the four disciplines $s \in S$.
+*   **Boundary Conditions:**
+    *   The initial session of the symposium $(d_1, t_1)$ must include at least one AI workshop.
+    *   The terminal session of the symposium $(d_3, t_3)$ must include at least one Linguistics workshop.
+
+### 4. Optimization Objective
+Define an objective function to maximize the total room utilization $U$, where $U = \sum_{d,t,r} \mathbb{1}(x_{d,t,r} \neq \emptyset)$. The goal is to maximize $U$ subject to the constraints above, ensuring the highest possible density of sessions without violating the logical framework of the symposium.
+
+**Task:**
+1.  Formulate the integer programming model for this scheduling problem.
+2.  Determine if a feasible solution exists that accommodates all twelve workshops while adhering to the temporal separation and room homogeneity constraints.
+3.  Identify the maximum possible value for $U$ under the given constraints.

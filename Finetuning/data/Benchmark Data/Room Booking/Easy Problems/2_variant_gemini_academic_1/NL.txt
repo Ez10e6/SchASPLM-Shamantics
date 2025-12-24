@@ -1,0 +1,22 @@
+**Exercise 4.12: Constrained Resource Allocation in Academic Scheduling**
+
+Consider a scheduling problem involving a set of five distinct lectures, denoted by $\mathcal{L} = \{l_1, l_2, l_3, l_4, l_5\}$. Each lecture $l_i$ is associated with a specific subject $s \in \mathcal{S}$, where $\mathcal{S} = \{\text{Artificial Intelligence, Mathematics, Physics}\}$. 
+
+The objective is to define a feasible assignment of these lectures into a spatio-temporal domain defined by:
+1.  A set of discrete time slots $\mathcal{T} = \{t_{morning}, t_{afternoon}\}$.
+2.  A set of physical venues $\mathcal{R} = \{r_1, r_2, r_3\}$.
+
+Let an assignment be a function $\sigma: \mathcal{L} \to \mathcal{T} \times \mathcal{R}$, where each lecture is mapped to a unique (time, room) tuple. A valid schedule must satisfy the following formal conditions:
+
+**Condition I: Resource Uniqueness (Injective Mapping)**
+The mapping $\sigma$ must be injective with respect to the codomain $\mathcal{T} \times \mathcal{R}$. Formally, for any two distinct lectures $l_i, l_j \in \mathcal{L}$, $\sigma(l_i) \neq \sigma(l_j)$. This precludes the simultaneous occupancy of a single room by multiple lectures.
+
+**Condition II: Subject-Based Spatial Exclusion**
+Define a function $f: \mathcal{L} \to \mathcal{S}$ that maps each lecture to its respective subject. For any pair of lectures $(l_i, l_j)$, if $f(l_i) = \text{Mathematics}$ and $f(l_j) = \text{Physics}$, their assigned rooms must be disjoint, regardless of the temporal component. That is:
+$$\text{proj}_{\mathcal{R}}(\sigma(l_i)) \neq \text{proj}_{\mathcal{R}}(\sigma(l_j))$$
+where $\text{proj}_{\mathcal{R}}$ denotes the projection of the assignment onto the set of rooms.
+
+**Task:**
+1.  Represent this problem as a **Constraint Satisfaction Problem (CSP)**, identifying the variables, domains, and specific constraints.
+2.  Determine the total number of possible configurations in the search space, ignoring constraints.
+3.  Discuss how the subject-specific spatial exclusion constraint impacts the pruning of the search tree during a back-tracking search.

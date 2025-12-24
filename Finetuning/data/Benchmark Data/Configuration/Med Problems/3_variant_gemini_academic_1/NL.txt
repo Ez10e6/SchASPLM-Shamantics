@@ -1,0 +1,34 @@
+**Exercise: Combinatorial Optimization of Modular Unmanned Aerial Vehicle (UAV) Configurations**
+
+**Problem Statement:**
+An aerospace engineer is tasked with determining the optimal configuration for a delivery drone. The system design is partitioned into three distinct component sets: Frames ($\mathcal{F}$), Propulsion Motors ($\mathcal{M}$), and Energy Storage Units ($\mathcal{B}$). Each configuration is defined as an ordered triple $(f, m, b)$ such that $f \in \mathcal{F}$, $m \in \mathcal{M}$, and $b \in \mathcal{B}$.
+
+The primary objective is to maximize the **Total Flight Endurance Score** ($E$), defined as the scalar sum of the endurance coefficients associated with each selected component:
+$$E(f, m, b) = v(f) + v(m) + v(b)$$
+
+**Available Components and Associated Values:**
+1.  **Frames ($\mathcal{F}$):** $\mathcal{F} = \{\text{Lightweight } (f_1), \text{Standard } (f_2), \text{Reinforced } (f_3)\}$
+    *   $v(f_1) = 50, v(f_2) = 40, v(f_3) = 30$
+2.  **Motors ($\mathcal{M}$):** $\mathcal{M} = \{\text{Eco } (m_1), \text{Standard } (m_2), \text{HighTorque } (m_3)\}$
+    *   $v(m_1) = 60, v(m_2) = 70, v(m_3) = 90$
+3.  **Batteries ($\mathcal{B}$):** $\mathcal{B} = \{\text{SmallCell } (b_1), \text{MediumCell } (b_2), \text{LongLife } (b_3)\}$
+    *   $v(b_1) = 30, v(b_2) = 50, v(b_3) = 80$
+
+**System Constraints:**
+The selection of components is subject to the following logical predicates and structural dependencies:
+*   **C1 (Mechanical Integrity):** The selection of $f_1$ precludes the selection of $m_3$. 
+    $$(f = f_1) \implies (m \neq m_3)$$
+*   **C2 (Structural Requirement):** The selection of $b_3$ necessitates the selection of $f_3$.
+    $$(b = b_3) \implies (f = f_3)$$
+*   **C3 (Power Demand):** The selection of $m_3$ necessitates the selection of $b_3$.
+    $$(m = m_3) \implies (b = b_3)$$
+*   **C4 (Voltage Compatibility I):** The selection of $b_1$ restricts the propulsion system to $m_1$.
+    $$(b = b_1) \implies (m = m_1)$$
+*   **C5 (Voltage Compatibility II):** The selection of $b_2$ restricts the propulsion system to the subset $\{m_1, m_2\}$.
+    $$(b = b_2) \implies (m \in \{m_1, m_2\})$$
+
+**Tasks:**
+1.  **Formulate** the problem as a constrained optimization search space.
+2.  **Identify** all feasible configurations $(f, m, b)$ that satisfy the full set of constraints $\{C1, C2, C3, C4, C5\}$.
+3.  **Determine** the optimal configuration $(f^*, m^*, b^*)$ that yields the maximum value for $E$.
+4.  **Justify** why higher-performing individual components (e.g., $f_1$) might be excluded from the global optimum due to the propagation of constraints.

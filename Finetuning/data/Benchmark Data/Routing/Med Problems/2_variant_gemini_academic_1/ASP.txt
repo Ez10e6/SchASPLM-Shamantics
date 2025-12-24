@@ -1,0 +1,37 @@
+% Locations: HubWest, NodeA, NodeB, Sensor1, Sensor2
+loc("HubWest"; "NodeA"; "NodeB"; "Sensor1"; "Sensor2").
+
+% Edges: (HubWest–NodeA), (HubWest–NodeB), (NodeA–Sensor1), (NodeB–Sensor2), (NodeA–NodeB)
+edge("HubWest", "NodeA").
+edge("HubWest", "NodeB").
+edge("NodeA", "Sensor1").
+edge("NodeB", "Sensor2").
+edge("NodeA", "NodeB").
+
+% Max duration: 9 minutes
+time(0..9).
+
+% Start location: HubWest
+at("HubWest", 0).
+
+% Movement between adjacent nodes costs 1 minute
+1 { at(L, T) : loc(L) } 1 :- time(T).
+:- at(L1, T), at(L2, T+1), not edge(L1, L2), not edge(L2, L1), L1 != L2.
+
+% Sampling targets: Sensor1, Sensor2
+inspect("Sensor1"; "Sensor2").
+
+% Each sample requires a full minute
+1 { inspect_at(L, T) : time(T) } 1 :- inspect(L).
+at(L, T) :- inspect_at(L, T).
+at(L, T+1) :- inspect_at(L, T), T < 9.
+
+% Minimize time by which both samples are completed
+latest_inspect(T) :- T = #max { T1 : inspect_at(_, T1) }.
+#minimize { T : latest_inspect(T) }.
+
+% A minimum of three timesteps between samples
+:- inspect_at(_, T1), inspect_at(_, T2), 0 < T1 - T2 < 3.
+
+% If NodeB is visited before Sensor1, then NodeA may not be visited afterward
+:- at("NodeB", T1), at("Sensor1", T2), at("NodeA", T3), T1 < T2 < T3.

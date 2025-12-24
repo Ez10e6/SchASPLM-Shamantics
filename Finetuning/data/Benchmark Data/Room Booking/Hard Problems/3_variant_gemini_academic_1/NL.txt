@@ -1,0 +1,36 @@
+**Exercise: Constrained Optimization in Resource Allocation and Scheduling**
+
+**Problem Statement**
+A technical symposium requires the scheduling of a set of ten presentations, denoted by $P = \{p_1, p_2, \dots, p_{10}\}$. Each presentation $p_i$ is associated with exactly one domain $k$ from the set $K = \{\text{Artificial Intelligence (AI), Cloud Computing (C), Internet of Things (IoT), Virtual Reality (VR)}\}$. 
+
+The event occurs over a temporal horizon of four days, $D = \{1, 2, 3, 4\}$, with each day partitioned into four discrete, sequential sessions: $S = \{\text{early morning}, \text{late morning}, \text{early afternoon}, \text{late afternoon}\}$. Five distinct physical venues (rooms), $R = \{1, 2, 3, 4, 5\}$, are available for allocation.
+
+A feasible schedule must map every presentation $p \in P$ to a unique triplet $(d, s, r) \in D \times S \times R$ such that all following constraints are satisfied:
+
+### 1. Resource and Temporal Constraints
+*   **Unique Occupancy:** Each room-time coordinate $(d, s, r)$ may host at most one presentation.
+*   **Room Utilization Limits:** For any room $r$ on any day $d$, the total number of assigned sessions $n_{r,d}$ must satisfy $n_{r,d} \le 3$.
+*   **Temporal Contiguity:** To prevent back-to-back scheduling, no room $r$ may host presentations in consecutive sessions $(s_j, s_{j+1})$ within the same day $d$.
+
+### 2. Domain-Specific Spatial Constraints
+*   **Equipment Requirements:** Room $r=2$ is designated as lacking projection hardware. Consequently, sessions belonging to domains $\{AI, C\}$ are prohibited from this venue.
+*   **Venue Exclusion:** Presentations in the domain $\{VR\}$ are strictly prohibited from Room $r=1$ for the duration of the event.
+*   **Spatial Separation:** Sessions belonging to the domains $\{AI\}$ and $\{VR\}$ are mutually exclusive with respect to room-day pairings. Formally, for any $r \in R$ and $d \in D$, if an $\{AI\}$ presentation is scheduled, no $\{VR\}$ presentation may occur in the same room on that day, and vice versa.
+
+### 3. Distribution and Concurrency Constraints
+*   **Temporal Dispersion:** The subset of presentations $P_{IoT} \subseteq P$ must be distributed across at least three distinct days $d \in D$.
+*   **Bounded Concurrency:** For any specific time slot $(d, s)$, the total number of concurrent presentations from the union of domains $\{C \cup IoT\}$ across all rooms $R$ must not exceed two.
+*   **Topical Diversity:** In any session $(d, s)$ where presentations are occurring, at least two distinct domains $k \in K$ must be represented. No single domain may hold a monopoly over a specific time slot.
+*   **Daily Minimum Activity:** Every day $d \in D$ must host at least one presentation.
+
+### 4. Boundary Conditions
+*   **Initialization:** The session $(d=1, s=\text{early morning})$ is reserved exclusively for a presentation from the $\{AI\}$ domain.
+*   **Termination:** The session $(d=4, s=\text{early afternoon})$ is reserved exclusively for a presentation from the $\{VR\}$ domain.
+
+### 5. Optimization Objectives
+In the event that multiple feasible schedules exist, the optimal schedule shall be determined by the following lexicographical preference order:
+1.  **Maximize Spatial Parallelism:** Maximize the number of rooms utilized during each active session $(d, s)$.
+2.  **Maximize Efficiency:** Minimize the total number of idle (unassigned) room-time slots across the global schedule, subject to the preservation of all primary constraints.
+
+**Task:**
+Formalize the above as a Constraint Satisfaction Problem (CSP). Provide a valid assignment of $P$ to the domain $D \times S \times R$ that satisfies all conditions, or prove that no such assignment exists given the strictness of the non-contiguity and diversity constraints.

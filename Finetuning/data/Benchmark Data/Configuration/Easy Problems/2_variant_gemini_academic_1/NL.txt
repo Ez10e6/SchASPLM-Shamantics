@@ -1,0 +1,16 @@
+**Exercise 4.2: Constraint Satisfaction in System Configuration**
+
+Consider a hardware configuration problem involving the selection of a compatible heterogeneous triplet. Let the system be defined by three finite sets of entities:
+
+*   **Speakers ($S$):** $\{s_1, s_2\}$, where $s_1 = \text{Alpha}$ and $s_2 = \text{Beta}$.
+*   **Amplifiers ($A$):** $\{a_1, a_2\}$, where $a_1 = \text{AmpX}$ and $a_2 = \text{AmpY}$.
+*   **Media Players ($M$):** $\{m_1, m_2\}$, where $m_1 = \text{Streamer1}$ and $m_2 = \text{Streamer2}$.
+
+A valid system configuration is represented by the 3-tuple $(s, a, m) \in S \times A \times M$. The selection process is subject to a set of compatibility constraints defined by the following logical implications:
+
+1.  **Speaker-Amplifier Dependency:** The selection of $s_1$ necessitates the selection of $a_1$ ($s = s_1 \implies a = a_1$).
+2.  **Amplifier-Player Mutual Exclusion:** The selection of $a_2$ precludes the selection of $m_1$ ($a = a_2 \implies m \neq m_1$).
+3.  **Player-Speaker Dependency:** The selection of $m_2$ is conditionally dependent on the selection of $s_2$ ($m = m_2 \implies s = s_2$).
+
+**Problem:** 
+Formally identify a configuration $(s, a, m)$ that satisfies the conjunction of the aforementioned constraints. Provide the logical derivation or state space search used to arrive at a feasible solution.

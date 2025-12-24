@@ -1,0 +1,21 @@
+An autonomous subsurface probe is deployed from a central Deployment Hub into a complex grid of one-way irrigation conduits. The mission parameters involve gathering liquid specimens at Site Alpha and Site Beta, with an additional specimen from Site Gamma being authorized only if the schedule permits. 
+
+**System Topology and Expenditure:**
+The probe’s propulsion and storage system has a maximum capacity of 16 energy/volume units. Every movement between nodes takes exactly 1 minute, while the act of extracting a specimen takes 1 minute and consumes 1 unit of capacity.
+*   **From Deployment Hub:** Two primary arteries diverge. Arterial Path 1 (2-unit cost) reaches Site Alpha (1-unit access cost). Arterial Path 2 (3-unit cost) leads toward Site Beta or a Calibration Shaft.
+*   **From Site Alpha:** The probe can take Connector 3 (1-unit cost) to merge into Arterial Path 2.
+*   **From Arterial Path 2:** The probe may proceed to Site Beta (1-unit access cost) or enter the Calibration Shaft (2-unit access cost).
+*   **From Calibration Shaft:** Entry is permitted into Site Gamma (1-unit access cost).
+*   **From Site Gamma:** A return flow allows the probe to re-enter Arterial Path 1 at a cost of 2 units.
+
+**Operational Constraints:**
+1.  **Temporal & Volumetric Limits:** The probe begins at T-0 with 16 units. It must conclude all operations within a 10-minute window. It cannot exceed its 16-unit storage limit at any time.
+2.  **Maintenance Protocol:** While at the Calibration Shaft, the probe may remain idle for 2 consecutive minutes to recover 3 units of capacity. This recharge protocol is restricted to a single occurrence.
+3.  **Mission Requirements:** Samples from Site Alpha and Site Beta are compulsory. The Alpha specimen must be secured no later than the 6-minute mark.
+4.  **Conditional Objective:** Sampling Site Gamma is mandatory if, and only if, the two compulsory samples (Alpha and Beta) are successfully collected within the first 8 minutes of the mission.
+5.  **Event Cap:** The cumulative total of all discrete actions—movements, sampling procedures, and recharge idles—is strictly capped at 18 events.
+6.  **Purity Protocol:** To prevent cross-contamination, the probe is prohibited from performing back-to-back sampling actions at the same location.
+
+**Success Criteria:**
+*   **Primary Priority:** Maximize the total quantity of specimens collected (Compulsory + Optional).
+*   **Secondary Priority:** Minimize the timestamp at which the final compulsory sample is obtained.

@@ -1,0 +1,12 @@
+Configure a bespoke mobile subscription by selecting exactly one item from each of the three following categories:
+
+*   **Connectivity Tiers:** LiteLink, UltraNet
+*   **Hardware:** Phono-1, Phono-2
+*   **Protective Gear:** Shield-Pro, Skin-Lite
+
+Your selection must adhere to these technical limitations:
+1.  LiteLink connectivity is unsupported on the Phono-2 hardware.
+2.  Any Phono-1 hardware configuration mandates the use of Shield-Pro protective gear.
+3.  UltraNet connectivity cannot be bundled with Shield-Pro protective gear.
+
+Identify a viable trio that satisfies every rule mentioned above.

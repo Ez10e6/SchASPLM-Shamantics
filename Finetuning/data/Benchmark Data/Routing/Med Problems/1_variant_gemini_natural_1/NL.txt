@@ -1,0 +1,7 @@
+Our mobile inspection drone is currently stationed at the main hub, Station1, and is tasked with surveying two key areas: SubstationA and SubstationB. To successfully complete its mission, the drone must visit and inspect both of these substations at least once. Every movement the drone makes between any two facilities consumes exactly one kilojoule of energy, and performing the actual inspection at each substation requires an additional kilojoule.
+
+The industrial site is laid out such that Station1 is directly adjacent to two transit points: Junction1 and Junction2. If the drone travels through Junction1, it has direct access to SubstationA. Conversely, Junction2 provides the primary path to SubstationB. To allow for cross-site travel, a direct connection also exists between Junction1 and Junction2.
+
+While the drone is equipped with a total energy capacity of eight kilojoules, efficiency is our primary objective. We are looking for a route that minimizes the total power usage—including both movement and inspection costs—by the time the required tasks are finished. 
+
+However, we must account for a specific operational constraint caused by signal interference. If the drone’s flight path takes it to Junction2 at any time before it has reached SubstationA, it is strictly prohibited from backtracking through Junction1 to get to SubstationA. We need to plan the most energy-efficient route possible while adhering to these navigational and power limits.

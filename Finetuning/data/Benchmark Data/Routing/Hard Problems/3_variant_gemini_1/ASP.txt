@@ -1,0 +1,62 @@
+% Nodes: SubDock, CoralPass, VentStream, BeaconAlpha, DeepLoop, BeaconBeta, NodeX, BeaconGamma.
+loc("SubDock"; "CoralPass"; "VentStream"; "BeaconAlpha"; "DeepLoop"; "BeaconBeta"; "NodeX"; "BeaconGamma").
+
+% Bidirectional Edges & Heat Costs:
+edge("SubDock","CoralPass",2).
+edge("SubDock","VentStream",4).
+edge("CoralPass","BeaconAlpha",1). 
+edge("CoralPass","DeepLoop",1). 
+edge("DeepLoop","VentStream",1).
+edge("VentStream","BeaconBeta",2). 
+edge("VentStream","NodeX",1).      
+edge("NodeX","BeaconGamma",3).   
+edge("BeaconGamma","BeaconAlpha",4). 
+
+% Heat Tolerance: max 10 units.
+heat(0,0).
+:- heat(_, H), H > 10.
+
+% Movement takes 1 min, heat increases per edge.
+time(0..15).
+1{ at(L, T): loc(L) }1 :- time(T).
+:- at(L1, T), at(L2, T+1), not edge(L1, L2, _), not edge(L2, L1, _), L1 != L2.
+heat(T+1,H2) :- at(L1,T), at(L2,T+1), edge(L1,L2,Cost), heat(T,H1), H2=H1+Cost.
+
+% Scans take 2 minutes and increase heat by 1.
+at(L,T)        :- pulse_at(L,T).
+at(L,T+1)      :- pulse_at(L,T), T < 15.
+heat(T+2,H+1)   :- pulse_at(_,T), heat(T,H), T < 14.
+
+% Pulsing at BeaconAlpha & BeaconBeta is mandatory, BeaconGamma optional.
+1 { pulse_at("BeaconAlpha",T) : time(T) }.
+1 { pulse_at("BeaconBeta", T) : time(T) }.
+
+% BeaconAlpha must be pulsed by time 5.
+:- not pulse_at("BeaconAlpha",T): time(T), T<5.
+
+% Pulse BeaconGamma iff mandatory pulses finish by minute 8.
+mand_done :- pulse_at("BeaconAlpha",TA), pulse_at("BeaconBeta",TB), max(TA,TB) <= 8.
+:- pulse_at("BeaconGamma",_), not mand_done.
+:- mand_done, not pulse_at("BeaconGamma",_).
+
+% Cooldown: stop at NodeX for 2 min and reduce heat to 0.
+cooldown(T) :- at("NodeX",T), at("NodeX",T+1), T < 15.
+heat(T+2,0) :- cooldown(T), T < 14.
+
+% When at NodeX next action must be either pulse at NodeX or cooldown.
+:- at("NodeX",T), T < 15, not cooldown(T), not pulse_at(_,T+1).
+
+% Action Limit: ≤ 16 (moves + pulses + cooldowns).
+action(T)   :- at(L1, T), at(L2, T+1), L1 != L2.            
+action(T)   :- pulse_at(_,T).                  
+action(T) :- cooldown(T).            
+:- #count {A : action(A)} > 16.
+
+% Must visit VentStream between each pulsing.
+vent_between(L, H) :-  at("VentStream",T), L < T < H, time(L), time(H).
+:- pulse_at(_,T1), pulse_at(_,T2), not vent_between(T1, T2), T1 < T2.
+
+% Objective: minimise time in which not pulsing.
+non_pulse(T) :- time(T), not pulse_at(_,T).
+non_pulses(N) :- N = #count{ T: non_pulse(T) }.
+#minimize { N: non_pulses(N) }.

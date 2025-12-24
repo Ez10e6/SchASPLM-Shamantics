@@ -1,0 +1,24 @@
+Your objective is to coordinate a ten-lecture academic forum distributed across a two-day itinerary. Each lecture focuses on one of four disciplines: Artificial Intelligence (AI), Biology, Mathematics, or Chemistry. The daily schedule is partitioned into four distinct blocks—Morning, Mid-morning, Early Afternoon, and Late Afternoon—utilizing five available venues.
+
+While populating the schedule, you must adhere to the following operational protocols:
+
+**Venue and Scheduling Constraints**
+*   **Occupancy:** No venue may host more than one session at any given time.
+*   **Rest Periods:** To allow for turnover, no venue can host consecutive sessions; a block of vacancy must follow every scheduled talk.
+*   **Daily Limits:** A single venue is restricted to a maximum of two sessions per day.
+*   **Venue 3 Limitations:** This location is unavailable for the duration of both afternoon blocks.
+*   **Venue 5 Limitations:** This hall lacks a projector. Consequently, any discipline requiring slides—specifically AI and Mathematics—is barred from this room.
+
+**Disciplinary Requirements**
+*   **Artificial Intelligence:** These sessions are restricted to the Morning or Mid-morning blocks only.
+*   **Biology:** These lectures must appear on both days of the forum (not exclusively on one). Only one Biology session may occur during any single time block.
+*   **Chemistry:** No venue may host more than one Chemistry talk over the entire two-day period. 
+*   **Cross-Disciplinary Restrictions:** A Biology session and a Chemistry session cannot be scheduled in the same venue on the same calendar day.
+*   **The "Bookend" Rule:** The forum’s inaugural session (Day 1, Morning) and its concluding session (Day 2, Late Afternoon) must both be Mathematics lectures.
+
+**Density and Distribution Rules**
+*   **Subject Concurrency:** During any single time block, the combined total of Biology and Chemistry sessions running across all rooms cannot exceed two.
+*   **Optimization:** You are expected to minimize idle time by avoiding empty slots wherever feasible. 
+*   **Diversity:** Within each time block, aim to feature the highest possible variety of disciplines.
+
+Construct a comprehensive timetable that satisfies all equipment needs, room availability, and thematic distribution requirements.
