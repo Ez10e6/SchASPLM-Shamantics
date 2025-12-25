@@ -26,10 +26,30 @@ The pipeline utilizes **Parameter-Efficient Fine-Tuning (PEFT)** via **LoRA (Low
 *   **Gradients:** Training uses a micro-batch size of 1 with **Gradient Accumulation** set to 4.
     *   *Reason:* This setup simulates a stable batch size of 4, providing necessary gradient stability for small datasets while staying within the memory limits of consumer-grade GPUs.
 
-### 3. Data Processing
-The `data_converter.py` script transforms raw benchmark data into the **ChatML JSONL** format.
-*   **Format:** Each entry includes a "system" role (persona of an ASP expert), a "user" role (the NL/IR problem), and an "assistant" role (the gold-standard ASP code).
-*   **Splitting:** Data is automatically split 80/20 into training and validation sets.
+### 3. Data Preparation & Augmentation
+The pipeline employs a sophisticated data generation strategy designed to overcome the limitations of small datasets and prevent overfitting to specific variable names or problem structures.
+
+#### A. Step-by-Step Reasoning (Multi-Turn)
+Instead of training the model to generate a full program in one pass, `data_converter.py` parses annotated ASP files to create **multi-turn conversations**:
+*   **System Context:** Contains the expert persona and the full Natural Language (NL) problem description.
+*   **User Turn:** A specific constraint instruction (extracted from comments in the Intermediate Representation).
+*   **Assistant Turn:** The corresponding single ASP logic rule.
+This aligns the training objective with the iterative nature of the inference feedback loop.
+
+#### B. Structural Augmentation
+To force the model to learn abstract logic structures (ASTs) rather than memorizing token sequences, we apply algorithmic augmentations during conversion:
+1.  **Step Shuffling:** Exploiting the declarative nature of ASP, we generate permutations of the constraint ordering within the conversation history.
+2.  **Variable Renaming (Alpha-Conversion):** Variables in ASP rules are locally renamed per rule. We use a dynamic pool of **Canonical** (`V0`, `V1`), **Abstract** (`X`, `Y`), and **Semantic** terms (e.g., `Course`, `Time` extracted from the NL description). This teaches the model that variable names are local placeholders.
+3.  **Input Noise:** Creating variations with lowercased or unpunctuated user prompts to improve robustness against imperfect inputs.
+
+#### C. Synthetic Repair Training
+The pipeline generates specific **Debugging Tasks** where valid ASP code is algorithmically corrupted (e.g., removing periods, creating unsafe variables, breaking operators) to mimic realistic Clingo compiler errors. The model is explicitly trained to map `[Broken Code + Clingo Error]` $\to$ `[Fixed Code]`, directly optimizing it for the solver-in-the-loop workflow.
+
+#### D. Synthetic Data Generation (LLM Paraphrasing)
+The `paraphraser_gemini.py` script uses **Google Gemini 3 Flash** to rewrite problem descriptions in distinct styles (**Natural**, **Instructional**, **Academic**) while preserving logic. This expands the linguistic diversity of the input space and prevents stylistic overfitting.
+
+#### E. Leakage Prevention
+Data splitting is performed at the **Problem ID level**. All variations (Original, Shuffled, Renamed, Paraphrased) of a specific problem are kept together in either the Train or Validation set to ensure the validation metrics reflect true generalization.
 
 ---
 
@@ -39,58 +59,3 @@ The `data_converter.py` script transforms raw benchmark data into the **ChatML J
 Install the specific fine-tuning dependencies:
 ```bash
 pip install -r requirements_ft.txt
-```
-Ensure your `.env` file in the project root contains a valid `HF_KEY` if using gated models (like Llama-3).
-
-### 2. Prepare the Dataset
-1.  Place your raw problem files in `Finetuning/data/Benchmark Data/`. Each problem folder should contain `NL.txt` OR `IR.txt`, and `ASP.txt`.
-2.  Open and run `notebooks/data_converter.ipynb`. 
-3.  This will generate `train.jsonl` and `valid.jsonl` in the `Finetuning/data/` folder.
-
-### 3. Run Fine-tuning
-
-#### Option A: Using PyTorch (NVIDIA GPU / Windows / Linux)
-1.  Open `notebooks/ft_pytorch_qlora.ipynb`.
-2.  Set the `MODEL_TYPE` (e.g., "llama" or "qwen").
-3.  Set the amount of iterations.
-3.  Execute the training cell to start training. The script will train for the specified iterations, save the adapters to `Finetuning/adapters/`, and automatically save a fused version of the model to `local_models/`.
-
-#### Option B: Using MLX (Apple Silicon macOS)
-1.  Open `notebooks/ft_mlx_lora.ipynb`.
-2.  Set the `MODEL_TYPE` (e.g., "llama" or "qwen").
-3.  Set the amount of iterations.
-4.  Execute the cells to run the MLX CLI training. 
-5.  Run the final "Fusion" cell to merge the adapters into a new model directory in `local_models/`.
-
-### 4. Inference with the Fine-tuned Model
-Once training and fusion are complete, you can use the new model in the main application:
-1.  Go to the main `1_ASP_Scheduler.ipynb` notebook.
-2.  Update the `CHECKPOINT` path to point to your new fused model (e.g., `./local_models/ft_llama_pytorch`).
-3.  Run the scheduler to generate ASP programs using your specialized model.
-
----
-
-## Folder Structure
-
-*   **`data/`**: Contains the generated `train.jsonl` and `valid.jsonl` files.
-*   **`adapters/`**: Storage for LoRA weight checkpoints during and after training.
-*   **`notebooks/`**: Interactive jupyter notebooks for data conversion and training.
-*   **`scripts/`**: Python implementations for the PyTorch and MLX training logic.
-*   **`utils_ft.py`**: Shared utility functions for pathing and environment management.
-
-## Repository Structure
-
-```
-Finetuning/
-├── data/                   # Processed JSONL datasets (Train/Validation splits)
-├── adapters/               # Checkpoints and saved LoRA adapters
-├── notebooks/
-│   ├── data_converter.ipynb   # Script to convert raw benchmarks to JSONL
-│   ├── ft_pytorch_qlora.ipynb # Training notebook for PyTorch/CUDA
-│   └── ft_mlx_lora.ipynb      # Training notebook for MLX/macOS
-├── scripts/
-│   ├── train_pytorch.py       # SFTTrainer implementation using PyTorch
-│   ├── train_mlx.py           # Wrapper for mlx_lm.lora CLI
-│   └── data_converter.py      # Dataset parsing and formatting logic
-└── utils_ft.py                # Environment setup and path management
-```
