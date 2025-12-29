@@ -139,10 +139,7 @@ def check_syntax_string(program: str):
         str: An error message if syntax errors are found, otherwise an empty string.
     """
     # Split the program string into lines
-    program_lines = program.splitlines()
-
-    # Use Clingo parse_string to check syntax
-    #error = 
+    raise NotImplementedError("This function is not implemented yet.")
 
 def split_ASP_code_into_statement_blocks(code: list):
     """
