@@ -83,14 +83,15 @@ def train_pytorch(model_path, data_folder, adapter_path, save_path, hf_token, it
         lr_scheduler_type="cosine",
         logging_steps=10,
         eval_strategy="steps",
-        eval_steps=20,
+        eval_steps=50,
         save_strategy="steps",
         save_steps=100,
         optim="adamw_torch", 
         bf16=True, 
         report_to="none",
         dataset_text_field="messages",
-        max_length=2048
+        max_length=4096,
+        neftune_noise_alpha=5
     )
 
     trainer = SFTTrainer(

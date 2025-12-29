@@ -30,7 +30,7 @@ def run_mlx_training(model_path, data_folder, adapter_path, iters=300):
         "batch_size": 1,
         "grad_accumulation_steps": 4,  
         "grad_checkpoint": True,       
-        "max_seq_length": 2048,
+        "max_seq_length": 4096,
         
         # Optimization
         "optimizer": "adamw",
@@ -41,7 +41,7 @@ def run_mlx_training(model_path, data_folder, adapter_path, iters=300):
         
         # Logging & Saving
         "steps_per_report": 10,
-        "steps_per_eval": 20,
+        "steps_per_eval": 50,
         "val_batches": 5,
         "save_every": 100,
         "seed": 42,
