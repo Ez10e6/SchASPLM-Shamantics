@@ -47,7 +47,7 @@ def run_mlx_training(model_path, data_folder, adapter_path, iters=12000, num_lay
         "optimizer": "adamw",
         "lr_schedule": {
             "name": "cosine_decay",  
-            "arguments": [1e-4, decay_steps],
+            "arguments": [5e-5, decay_steps],
         },
         
         # Logging & Saving
