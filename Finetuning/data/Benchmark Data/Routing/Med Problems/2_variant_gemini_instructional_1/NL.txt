@@ -1,0 +1,55 @@
+### **System Specification: Subterranean Aqueduct Sampling Mission**
+
+#### **1. System Definition**
+*   **Agent:** Autonomous water-sampling drone.
+*   **Environment:** A directed branching network of subterranean aqueducts.
+*   **Initial State:**
+    *   **Location:** `LaunchPad`
+    *   **Time ($T$):** 0 minutes.
+    *   **Internal Tank Capacity ($V$):** 16 L (Current volume = 0 L; Capacity utilized = 0/16 L). 
+    *   **Event Counter ($E$):** 0.
+*   **Maximum Constraints:**
+    *   **Temporal Limit ($T_{max}$):** 10 minutes.
+    *   **Volumetric Capacity ($V_{max}$):** 16 L.
+    *   **Event Limit ($E_{max}$):** 18 discrete actions (movement, sampling, or refilling).
+
+#### **2. Topology and Navigation**
+The network consists of directed edges (Tunnels/Edges) and nodes (Stations/Calibration Shafts). 
+*   **LaunchPad $\rightarrow$ Tunnel1:** Cost = 2 L, Duration = 1 min. Leads to `StationA`.
+*   **LaunchPad $\rightarrow$ Tunnel2:** Cost = 3 L, Duration = 1 min. Leads to `StationB` or `CalibEdge`.
+*   **StationA $\rightarrow$ Tunnel3:** Cost = 1 L, Duration = 1 min. Leads to `Tunnel2`.
+*   **Tunnel2 $\rightarrow$ StationB:** Duration = 1 min (Cost included in Tunnel2 entry).
+*   **Tunnel2 $\rightarrow$ CalibEdge:** Cost = 2 L, Duration = 1 min.
+*   **CalibEdge $\rightarrow$ StationC:** Duration = 1 min.
+*   **StationC $\rightarrow$ Tunnel1:** Cost = 2 L, Duration = 1 min.
+
+#### **3. Operational Actions**
+*   **Movement ($M$):** Traversal of any tunnel/connector.
+    *   $\Delta T = +1$ minute.
+    *   $\Delta V = +[\text{Tunnel Cost}]$ L.
+    *   $\Delta E = +1$.
+*   **Sampling ($S$):** Collection of water at a station node.
+    *   $\Delta T = +1$ minute.
+    *   $\Delta V = +1$ L.
+    *   $\Delta E = +1$.
+    *   **Constraint:** The agent shall not perform consecutive sampling actions at the same station.
+*   **Refilling ($R$):** Reduction of utilized tank volume at `CalibEdge`.
+    *   **Process:** Idle for 2 consecutive minutes.
+    *   **Effect:** $\Delta V = -3$ L.
+    *   $\Delta T = +2$ minutes.
+    *   $\Delta E = +1$.
+    *   **Constraint:** This action is permitted only once per mission.
+
+#### **4. Mission Requirements and Constraints**
+*   **Mandatory Objectives:**
+    *   The agent must collect at least one sample from `StationA`.
+    *   The agent must collect at least one sample from `StationB`.
+*   **Temporal Constraints:**
+    *   **StationA Deadline:** Completion of at least one sample at `StationA` must occur at $T \le 6$.
+    *   **StationC Eligibility:** Sampling at `StationC` is permitted **if and only if** at least one sample from `StationA` and one sample from `StationB` are completed at $T \le 8$.
+*   **Volumetric Integrity:** At no point shall $V$ exceed $V_{max}$ (16 L).
+
+#### **5. Optimization Criteria**
+The mission success is evaluated based on a lexicographical preference ordering:
+1.  **Primary Objective:** Maximize the total count of samples collected ($S_{total}$).
+2.  **Secondary Objective:** Minimize the completion time ($T_{final}$) of the last required mandatory sample (`StationA` or `StationB`).

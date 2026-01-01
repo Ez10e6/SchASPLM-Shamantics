@@ -1,0 +1,5 @@
+We’ve been handed a bit of a mathematical scavenger hunt to work through today. The goal is to sift through a sequence of integers, starting right at the beginning with one and moving all the way up to a specific maximum limit that we’ve designated as "n." Our objective is to identify every single "perfect number" that exists within this specific range.
+
+To decide if a number qualifies as perfect, we have to look closely at its proper divisors, which are simply all the positive integers that can divide into it evenly, excluding the number itself. The process is straightforward: we gather all those smaller divisors and calculate their total sum. If that sum turns out to be exactly equal to the original number we are testing, then we have officially found a perfect number.
+
+As we move through the range from one to "n," we’ll need to apply this rule to every integer we encounter. We are essentially looking for those rare moments of mathematical balance where the components of a number, when added together, perfectly mirror the value of the whole.

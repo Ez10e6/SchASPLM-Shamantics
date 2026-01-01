@@ -1,0 +1,27 @@
+### Specification: Equal Sum Partition System
+
+#### 1. System Overview
+The system shall execute a partitioning algorithm on a provided set of integers to determine if they can be divided into two subsets with identical arithmetic sums.
+
+#### 2. Input Definition
+*   **Input Set ($S$):** A collection of $n$ integer values $\{v_1, v_2, \dots, v_n\}$.
+
+#### 3. Functional Requirements
+The system must partition $S$ into two distinct subsets, designated as Subset $A$ and Subset $B$, subject to the following constraints:
+
+*   **Constraint 1: Exhaustive Membership**
+    Every element $v_i \in S$ must be assigned to either Subset $A$ or Subset $B$.
+    $$A \cup B = S$$
+*   **Constraint 2: Mutual Exclusivity**
+    The subsets must be disjoint; no element $v_i$ may belong to both subsets simultaneously.
+    $$A \cap B = \emptyset$$
+*   **Constraint 3: Sum Equivalence**
+    The arithmetic sum of all elements in Subset $A$ must equal the arithmetic sum of all elements in Subset $B$.
+    $$\sum_{x \in A} x = \sum_{y \in B} y$$
+
+#### 4. Output Specification
+The system shall output the resulting partition by explicitly mapping each integer $v_i$ from the input set to its corresponding subset label:
+*   **Subset A:** $\{a_1, a_2, \dots, a_k\}$
+*   **Subset B:** $\{b_1, b_2, \dots, b_m\}$
+
+If no such partition exists that satisfies all constraints, the system shall return a null result or indicate that the set is non-partitionable.

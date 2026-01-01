@@ -5,25 +5,27 @@ import re
 import string
 
 # --- CONFIGURATION ---
-NUM_SHUFFLES = 2
-ADD_NOISE = True 
-ADD_REPAIR_TASKS = True 
+ADD_NOISE = True        # Add lowercased/unpunctuated variations
+ADD_REPAIR_TASKS = True # Add synthetic "Fix this code" examples
 
-STOPWORDS = {
-    "The", "And", "For", "But", "With", "From", "This", "That", "Each", "Every", 
-    "All", "Some", "Any", "Not", "Given", "When", "Then", "If", "Where", "Such",
-    "There", "Here", "What", "Which", "While", "Since", "After", "Before"
-}
-
-# --- ERROR INJECTION HELPERS ---
+# --- ERROR INJECTION HELPERS (Synthetic Repairs) ---
 
 def corrupt_asp_code(code):
+    """
+    Takes valid ASP code and returns a LIST of all possible corrupted versions
+    paired with their specific Clingo error messages.
+    Includes distinct error patterns based on common errors and also based on
+    errors that can be expected of models that we mostly trained on other more
+    popular languages.
+    """
     corruptions = []
     
+    # --- 1. TERMINATION ---
     if code.strip().endswith('.'):
         broken = code.strip()[:-1]
         corruptions.append((broken, "error: syntax error, unexpected <EOF>, expecting ."))
 
+    # --- 2. SAFETY (Unsafe Variables) ---
     if ":-" in code and "." in code:
         parts = code.split(":-")
         head = parts[0].strip()
@@ -33,54 +35,128 @@ def corrupt_asp_code(code):
             msg = f"error: unsafe variables in: {broken}\nnote: '{var}' is unsafe"
             corruptions.append((broken, msg))
 
+    # --- 3. RULE OPERATORS ---
     if ":-" in code:
+        # Mistake: Colon only (Python dictionary style)
         broken = code.replace(":-", ":")
         corruptions.append((broken, "error: syntax error, unexpected :, expecting . or ; or :-"))
+        
+        # Mistake: "if" keyword (Python style)
+        broken_if = code.replace(":-", " if ")
+        corruptions.append((broken_if, "error: syntax error, unexpected <IDENTIFIER> 'if', expecting . or ; or :-"))
+        
+        # Mistake: Implication arrows (Math style)
+        broken_arrow = code.replace(":-", " <= ")
+        corruptions.append((broken_arrow, "error: syntax error, unexpected <=, expecting . or ; or :-"))
 
+    # --- 4. NEGATION ---
     if " not " in code:
+        # Mistake: C-style bang
         broken = code.replace(" not ", " ! ")
         corruptions.append((broken, "error: lexer error, unexpected !"))
+        
+        # Mistake: Tilde (Bitwise/Math)
+        broken_tilde = code.replace(" not ", " ~ ")
+        corruptions.append((broken_tilde, "error: lexer error, unexpected ~"))
 
+    # --- 5. COMPARISON OPERATORS ---
     if "!=" in code:
-        broken = code.replace("!=", "\\=")
+        broken = code.replace("!=", "\\=") # Prolog style
         corruptions.append((broken, "error: syntax error, unexpected \\="))
+        
+        broken_sql = code.replace("!=", "<>") # SQL style
+        corruptions.append((broken_sql, "error: syntax error, unexpected <>, expecting !="))
 
     if " = " in code:
-        broken = code.replace(" = ", " := ")
-        corruptions.append((broken, "error: syntax error, unexpected :="))
+        broken = code.replace(" = ", " == ") # Python style
+        corruptions.append((broken, "error: syntax error, unexpected ==, expecting ="))
+        
+        broken_assign = code.replace(" = ", " := ") # Pascal/Go style
+        corruptions.append((broken_assign, "error: syntax error, unexpected :="))
 
+    # --- 6. LOGIC OPERATORS ---
+    if ", " in code:
+        # Mistake: "and" keyword
+        broken = code.replace(", ", " and ", 1)
+        corruptions.append((broken, "error: syntax error, unexpected <IDENTIFIER> 'and'"))
+
+    if ", " in code and ":-" in code:
+        parts = code.split(":-")
+        if ", " in parts[1]:
+            # Mistake: "or" keyword in body
+            broken = parts[0] + ":-" + parts[1].replace(", ", " or ", 1)
+            corruptions.append((broken, "error: syntax error, unexpected <IDENTIFIER> 'or'"))
+
+    # --- 7. AGGREGATES & SETS ---
+    # Mistake: Double Braces {{ }} (F-string hallucination)
     if "{" in code and "}" in code and "{{" not in code:
         broken = code.replace("{", "{{").replace("}", "}}")
         corruptions.append((broken, "error: syntax error, unexpected {"))
 
+    # Mistake: Set-Builder Pipe "|" instead of Colon ":"
+    if ":" in code and "{" in code:
+        broken = code.replace(":", "|")
+        corruptions.append((broken, "error: syntax error, unexpected |"))
+
+    # Mistake: Missing #count/#sum keyword
+    if "#count" in code:
+        broken = code.replace("#count", "")
+        corruptions.append((broken, "error: syntax error, unexpected {"))
+    if "#sum" in code:
+        broken = code.replace("#sum", "")
+        corruptions.append((broken, "error: syntax error, unexpected {"))
+
+    # --- 8. ARITHMETIC ---
+    # Mistake: Modulo keyword
     if "\\" in code:
         broken = code.replace("\\", " mod ")
         corruptions.append((broken, "error: syntax error, unexpected <IDENTIFIER> 'mod'"))
 
-    if "," in code and ":-" in code:
-        parts = code.split(":-")
-        if "," in parts[1]:
-            broken = parts[0] + ":-" + parts[1].replace(",", " or ", 1)
-            corruptions.append((broken, "error: syntax error, unexpected <IDENTIFIER> 'or'"))
+    # Mistake: Hallucinated Operator =#
+    if re.search(r'\b[A-Z0-9]+\s*=\s*[A-Z0-9]+', code):
+        broken = code.replace("=", "=#", 1)
+        corruptions.append((broken, "error: lexer error, unexpected #"))
+
+    # --- 9. PRIMITIVES ---
+    # Mistake: Single Quotes for strings (Python/SQL style)
+    if '"' in code:
+        broken = code.replace('"', "'")
+        corruptions.append((broken, "error: lexer error, unexpected '"))
+
+    # Mistake: Wildcard * instead of _
+    if "_" in code:
+        broken = code.replace("_", "*")
+        corruptions.append((broken, "error: syntax error, unexpected *"))
+
+    # Mistake: C-Style Comments
+    if "%" in code:
+        broken = code.replace("%", "//")
+        corruptions.append((broken, "error: lexer error, unexpected /"))
+
+    # Mistake: "minimize {...}" instead of "#minimize {...}"
+    directives = ["minimize", "maximize", "show", "const"]
+    for d in directives:
+        target = f"#{d}"
+        if target in code:
+            broken = code.replace(target, d)
+            corruptions.append((broken, f"error: syntax error, unexpected <IDENTIFIER> '{d}'"))
 
     return corruptions
 
 # --- AUGMENTATION HELPERS ---
 
-def extract_domain_terms(nl_text):
-    matches = re.findall(r'\b[A-Z][a-z]{2,}\b', nl_text)
-    domain_terms = list(set([m for m in matches if m not in STOPWORDS]))
-    if len(domain_terms) < 3: return ["Item", "Node", "Object", "Value", "Element"]
-    return domain_terms
-
-def get_local_variable_map(code_snippet, domain_pool):
+def get_local_variable_map(code_snippet):
+    """
+    Finds ASP variables and maps them to Abstract (X, Y) or Canonical (V0, V1) names.
+    Purely structural, NO semantic domain terms to prevent overfitting.
+    """
     code_no_strings = re.sub(r'".*?"', '', code_snippet)
     vars_found = set(re.findall(r'\b[A-Z][a-zA-Z0-9_]*\b', code_no_strings))
     if not vars_found: return {}
 
     canonical_pool = [f"V{i}" for i in range(20)]
     alphabet_pool = list("XYZABCDEFGHIJKLMNOPQRSTUVW")
-    combined_pool = canonical_pool + alphabet_pool + domain_pool
+    combined_pool = canonical_pool + alphabet_pool
     random.shuffle(combined_pool)
     
     vars_list = list(vars_found)
@@ -109,11 +185,14 @@ def add_input_noise(text):
     text = text.translate(str.maketrans('', '', string.punctuation))
     return text
 
+# --- CORE PARSING ---
+
 def parse_asp_to_steps(asp_content):
     lines = asp_content.splitlines()
     steps = []
     current_ir = None
     current_code_buffer = []
+
     for line in lines:
         line = line.strip()
         if not line: continue
@@ -125,6 +204,7 @@ def parse_asp_to_steps(asp_content):
             current_code_buffer = []
         else:
             current_code_buffer.append(line)
+
     if current_ir is not None:
         code_block = "\n".join(current_code_buffer).strip()
         if code_block: steps.append((current_ir, code_block))
@@ -139,13 +219,9 @@ def create_conversation(system_prompt, steps, apply_noise=False):
         conv.append({"role": "assistant", "content": code})
     return {"messages": conv}
 
-# --- CORE PROCESSING ---
+# --- CORE PROCESSING LOGIC ---
 
 def process_single_problem(nl_path, asp_path, include_repairs=True):
-    """
-    Generates examples for one problem file. 
-    include_repairs: If False, skips generating synthetic syntax error tasks.
-    """
     examples = []
     try:
         with open(nl_path, 'r', encoding='utf-8') as f: nl_content = f.read().strip()
@@ -157,41 +233,28 @@ def process_single_problem(nl_path, asp_path, include_repairs=True):
     steps = parse_asp_to_steps(asp_content)
     if not steps: return []
 
-    domain_pool = extract_domain_terms(nl_content)
     sys_msg = f"You are an expert Clingo programmer. Translate the following problem description into syntactically correct Answer Set Programming (ASP) code step-by-step.\n\n### Problem Description:\n{nl_content}"
 
-    # 1. Original (Multi-turn)
+    # 1. ORIGINAL (Multi-Turn)
     examples.append(create_conversation(sys_msg, steps))
 
-    # 2. Shuffled (Multi-turn)
-    if len(steps) > 2:
-        for _ in range(NUM_SHUFFLES):
-            shuffled_steps = steps[:] 
-            first = shuffled_steps.pop(0) 
-            random.shuffle(shuffled_steps)
-            shuffled_steps.insert(0, first)
-            examples.append(create_conversation(sys_msg, shuffled_steps))
-
-    # 3. Renamed (Multi-turn)
+    # 2. RENAMED (Multi-Turn)
     renamed_steps = []
     for ir, code in steps:
-        mapping = get_local_variable_map(code, domain_pool)
+        mapping = get_local_variable_map(code) 
         new_code = apply_variable_renaming(code, mapping)
         renamed_steps.append((ir, new_code))
     examples.append(create_conversation(sys_msg, renamed_steps))
 
-    # 4. Noisy (Multi-turn)
+    # 3. NOISY (Multi-Turn)
     if ADD_NOISE:
         examples.append(create_conversation(sys_msg, steps, apply_noise=True))
-
-    # 5. REPAIR TRAINING (Conditional)
-    # Only run this if it's an original file (not a variant), to avoid duplicate repair data.
+        
+    # 4. REPAIR TRAINING (Independent Single-Turn Examples)
     if ADD_REPAIR_TASKS and include_repairs:
         debug_sys_msg = "You are an expert Clingo code debugger. Fix the syntax errors in the following ASP rules."
-        
         for ir, code in steps:
             possible_corruptions = corrupt_asp_code(code)
-            
             for bad_code, error_msg in possible_corruptions:
                 repair_example = {
                     "messages": [
@@ -204,64 +267,64 @@ def process_single_problem(nl_path, asp_path, include_repairs=True):
 
     return examples
 
-def generate_asp_dataset_max(data_root, output_dir, split_ratio=0.8):
+# --- MAIN ---
+
+def generate_asp_dataset(data_root, output_dir, split_ratio=0.8):
     if not os.path.exists(data_root):
         raise FileNotFoundError(f"Data root not found at: {data_root}")
 
-    print(f"Traversing {data_root}...")
-    
-    # Dictionary to group variants together
-    # Key: Base Problem Path (without _variant), Value: List of (NL, ASP) pairs
+    print(f"Traversing {data_root} recursively...")
+
     problem_groups = {}
 
-    for category in os.listdir(data_root):
-        cat_path = os.path.join(data_root, category)
-        if not os.path.isdir(cat_path): continue
-        for difficulty in os.listdir(cat_path):
-            diff_path = os.path.join(cat_path, difficulty)
-            if not os.path.isdir(diff_path): continue
-            
-            for problem_folder in os.listdir(diff_path):
-                prob_path = os.path.join(diff_path, problem_folder)
-                nl_file = os.path.join(prob_path, "NL.txt")
-                asp_file = os.path.join(prob_path, "ASP.txt")
-                
-                if os.path.exists(nl_file) and os.path.exists(asp_file):
-                    # Identify the "Base" ID
-                    # If folder is "Prob1_variant_gemini", base is "Prob1"
-                    base_name = problem_folder.split("_variant")[0] 
-                    group_id = f"{category}/{difficulty}/{base_name}"
-                    
-                    if group_id not in problem_groups:
-                        problem_groups[group_id] = []
-                    
-                    problem_groups[group_id].append({
-                        "folder_name": problem_folder,
-                        "nl_path": nl_file,
-                        "asp_path": asp_file
-                    })
+    # Recursive Walk to find ALL problems regardless of folder depth
+    for root, dirs, files in os.walk(data_root):
+        if "NL.txt" in files and "ASP.txt" in files:
+            nl_path = os.path.join(root, "NL.txt")
+            asp_path = os.path.join(root, "ASP.txt")
+            folder_name = os.path.basename(root)
 
-    # Convert dictionary to list of groups
+            # Identify Base Name (remove _variant_...)
+            if "_variant" in folder_name:
+                base_name = folder_name.split("_variant")[0]
+            else:
+                base_name = folder_name
+            
+            # Unique ID for grouping (Parent path + Base Name)
+            # This ensures "Routing/TSP" and "Manually/TSP" are treated distinct if desired,
+            # but variants like "Routing/TSP_variant_1" stay glued to "Routing/TSP"
+            parent_dir = os.path.dirname(root)
+            group_id = os.path.join(parent_dir, base_name)
+            
+            if group_id not in problem_groups:
+                problem_groups[group_id] = []
+            
+            problem_groups[group_id].append({
+                "folder_name": folder_name,
+                "nl_path": nl_path,
+                "asp_path": asp_path
+            })
+
     all_groups = list(problem_groups.values())
-    print(f"Found {len(all_groups)} unique logical problems (spanning {sum(len(g) for g in all_groups)} folders).")
-    
-    # Shuffle GROUPS to prevent leakage
+    print(f"Found {len(all_groups)} unique logical problems (spanning {sum(len(g) for g in all_groups)} total folder variants).")
+
+    # Shuffle GROUPS
     random.seed(42)
     random.shuffle(all_groups)
 
+    # Split Groups
     split_idx = int(len(all_groups) * split_ratio)
     train_groups = all_groups[:split_idx]
     valid_groups = all_groups[split_idx:]
 
-    print(f"Splitting: {len(train_groups)} Problem Groups for Training, {len(valid_groups)} for Validation.")
+    print(f"Splitting: {len(train_groups)} Training Groups, {len(valid_groups)} Validation Groups.")
 
-    # Helper to process a list of groups
     def process_groups(groups):
         dataset = []
         for group in groups:
             for item in group:
                 folder_name = item["folder_name"]
-                # Only generate repairs if it is the ORIGINAL folder (no _variant in name)
+                # Only generate repairs for the ORIGINAL folder
                 is_original = "_variant" not in folder_name
                 
                 data = process_single_problem(
@@ -275,7 +338,7 @@ def generate_asp_dataset_max(data_root, output_dir, split_ratio=0.8):
     train_data = process_groups(train_groups)
     valid_data = process_groups(valid_groups)
 
-    # Final Shuffle of examples
+    # Final Shuffle
     random.shuffle(train_data)
     random.shuffle(valid_data)
 
@@ -296,7 +359,7 @@ if __name__ == "__main__":
     data_in = os.path.join(root_dir, "data", "Benchmark Data")
     data_out = os.path.join(root_dir, "data")
     try:
-        t, v = generate_asp_dataset_max(data_in, data_out)
+        t, v = generate_asp_dataset(data_in, data_out)
         print(f"Done. Final Dataset Size -> Train: {t} examples, Valid: {v} examples")
     except Exception as e:
         print(f"Error: {e}")

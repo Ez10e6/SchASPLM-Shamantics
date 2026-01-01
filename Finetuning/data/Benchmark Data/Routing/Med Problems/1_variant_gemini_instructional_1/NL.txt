@@ -1,0 +1,42 @@
+### **System Specification: Autonomous Inspection Drone Routing**
+
+#### **1. System Entities and Environment**
+*   **Agent:** Mobile Inspection Drone.
+*   **Environment:** Industrial facility graph comprising five nodes:
+    *   **Stations:** {Station1}
+    *   **Junctions:** {Junction1, Junction2}
+    *   **Substations:** {SubstationA, SubstationB}
+*   **Topology (Bidirectional Edges):**
+    *   (Station1, Junction1)
+    *   (Station1, Junction2)
+    *   (Junction1, SubstationA)
+    *   (Junction2, SubstationB)
+    *   (Junction1, Junction2)
+
+#### **2. Operational Parameters**
+*   **Energy Capacity ($E_{max}$):** 8 kJ.
+*   **Movement Cost ($C_m$):** 1 kJ per traversal between adjacent nodes.
+*   **Inspection Cost ($C_i$):** 1 kJ per substation visit (required for SubstationA and SubstationB).
+*   **Initial State:**
+    *   Position: Station1.
+    *   Energy Consumed: 0 kJ.
+    *   Inspection Status: {SubstationA: Incomplete, SubstationB: Incomplete}.
+
+#### **3. Execution Constraints**
+*   **Mission Completion:** The drone must visit and perform inspections at both SubstationA and SubstationB.
+*   **Energy Ceiling:** Total energy consumption (cumulative movement and inspection costs) must not exceed 8 kJ.
+*   **Signal Interference Constraint:** If the drone occupies Junction2 at any time step $t$ prior to completing the inspection at SubstationA, the subsequent path segment to SubstationA must not include Junction1.
+*   **Node Revisit:** The drone is permitted to revisit nodes and edges, provided all other constraints are satisfied.
+
+#### **4. Objective Function**
+*   **Primary Goal:** Identify a valid path $P = (v_0, v_1, \dots, v_n)$ such that $v_0 = \text{Station1}$ and all mission requirements are met.
+*   **Optimization:** Minimize the total energy expenditure $E_{total}$, where:
+    $$E_{total} = \sum (\text{Movements}) + \sum (\text{Required Inspections})$$
+*   **Selection Criterion:** Among all feasible paths, the system shall execute the path with the lowest $E_{total}$.
+
+#### **5. Formal Logic Summary**
+*   **Let $S$** be the sequence of nodes visited.
+*   **Let $Inspected(x)$** be true if node $x$ is visited and 1 kJ is deducted.
+*   **Constraint 1:** $(SubstationA \in S) \land (SubstationB \in S)$.
+*   **Constraint 2:** $E_{total} \le 8$.
+*   **Constraint 3:** $\forall t : (S[t] = Junction2 \land (\forall t' < t : S[t'] \neq SubstationA)) \implies (\nexists t'' : t < t'' < t_{A} \land S[t''] = Junction1)$, where $t_{A}$ is the index of the first visit to SubstationA.

@@ -1,0 +1,15 @@
+**Exercise 4.12: Determination of the Chromatic Number in Finite Graphs**
+
+**Problem Statement:**
+Let $G = (V, E)$ be an undirected simple graph, where $V$ represents a finite set of vertices (entities) and $E \subseteq \{\{u, v\} \mid u, v \in V, u \neq v\}$ represents the set of edges (adjacencies) connecting them. 
+
+**Objective:**
+Define a coloring function $f: V \rightarrow C$, where $C = \{1, 2, \dots, k\}$ is a set of $k$ discrete labels. The mapping must constitute a *proper coloring*, subject to the following adjacency constraint:
+$$\forall \{u, v\} \in E, \quad f(u) \neq f(v)$$
+
+The goal of this optimization problem is to identify the **chromatic number** of the graph, denoted as $\chi(G)$. This is defined as the minimum cardinality of the set $C$ such that a proper coloring exists. 
+
+**Requirements:**
+1. Formulate an algorithm to determine $\chi(G)$ for an arbitrary input graph.
+2. Formally prove that the resulting assignment satisfies the condition that no two adjacent vertices are mapped to the same element in $C$.
+3. Discuss the computational complexity of your approach, noting the implications of the problem's membership in the NP-hard complexity class.

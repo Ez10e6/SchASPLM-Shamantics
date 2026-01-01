@@ -1,0 +1,28 @@
+### Specification: Maximum Flow Optimization System
+
+#### 1. System Definition
+The system shall solve the Maximum Flow problem within a directed network defined by the tuple $\mathcal{G} = (V, E, c, s, t)$, where:
+*   $V$ is a finite set of **Nodes**.
+*   $E \subseteq V \times V$ is a set of **Directed Edges**.
+*   $c: E \to \mathbb{R}_{\geq 0}$ is a **Capacity Function** assigning a non-negative maximum value to each edge.
+*   $s \in V$ is the designated **Source Node**.
+*   $t \in V$ is the designated **Terminal (Sink) Node**.
+
+#### 2. Objective
+Identify a **Flow Function** $f: E \to \mathbb{R}_{\geq 0}$ that maximizes the total value $|f|$, defined as the net flow out of the source node:
+$$\text{Maximize } |f| = \sum_{\{v \in V \mid (s, v) \in E\}} f(s, v) - \sum_{\{v \in V \mid (v, s) \in E\}} f(v, s)$$
+
+#### 3. Operational Constraints
+The system must ensure the flow function $f$ adheres to the following rigorous constraints for all elements in $\mathcal{G}$:
+
+*   **C1: Capacity Constraint**
+    For every edge $(u, v) \in E$, the assigned flow must be non-negative and shall not exceed the edge's defined capacity:
+    $$0 \leq f(u, v) \leq c(u, v)$$
+
+*   **C2: Flow Conservation Constraint**
+    For every node $i \in V \setminus \{s, t\}$ (all nodes excluding the source and terminal), the sum of flow entering the node must equal the sum of flow exiting the node:
+    $$\sum_{\{u \in V \mid (u, i) \in E\}} f(u, i) = \sum_{\{v \in V \mid (i, v) \in E\}} f(i, v)$$
+
+#### 4. Execution Requirements
+*   **Input Validation:** Verify that $s \neq t$ and that all capacities $c(u, v)$ are non-negative.
+*   **Output Generation:** Return the optimal flow value $|f|$ and the specific flow assignment $f(u, v)$ for every edge $(u, v) \in E$.

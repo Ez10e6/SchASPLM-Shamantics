@@ -1,0 +1,38 @@
+**Exercise: The Curriculum-Based Course Timetabling Problem (CB-CTT)**
+
+**Problem Description**
+Formulate a discrete optimization model for the Curriculum-Based Course Timetabling Problem. Given a set of courses, curricula, time periods, and rooms, the objective is to determine a feasible assignment that satisfies all hard constraints while minimizing the weighted sum of violations of soft constraints.
+
+Let the problem be defined by the following sets:
+*   $C$: The set of courses, where each course $c \in C$ consists of a set of lectures $L_c$.
+*   $P$: The set of time periods, partitioned into a set of days $D$.
+*   $R$: The set of available rooms, each with a capacity $Cap_r$ and a location (building) $B_r$.
+*   $S$: The set of curricula, where each curriculum $s \in S$ is a subset of courses $C_s \subseteq C$ that students must attend.
+*   $T$: The set of teachers.
+
+### I. Hard Constraints (Feasibility Conditions)
+A solution is considered feasible if and only if it satisfies the following conditions $\forall c \in C, \forall p \in P, \forall r \in R$:
+
+1.  **Lecture Completeness:** Every lecture $l \in L_c$ for every course $c$ must be assigned to exactly one pair $(p, r)$.
+2.  **Course Conflict Avoidance:** No two lectures of the same course $c$ may be scheduled within the same period $p$.
+3.  **Curriculum and Teacher Exclusivity:** Lectures sharing the same teacher $t \in T$ or belonging to the same curriculum $s \in S$ must be assigned to distinct periods $p$.
+4.  **Spatial Exclusivity:** No more than one lecture may be assigned to the same room $r$ during the same period $p$.
+5.  **Availability Constraints:** A lecture for course $c$ cannot be scheduled in period $p$ if the assigned teacher $t$ is designated as unavailable for that period.
+
+### II. Soft Constraints (Optimization Criteria)
+The objective function seeks to minimize the total penalty incurred by the violation of the following preferences:
+
+1.  **Capacity Constraints:** For each lecture of course $c$ assigned to room $r$, the number of enrolled students $Enr_c$ should not exceed $Cap_r$.
+2.  **Temporal Spreading (Minimum Working Days):** The lectures of course $c$ should be distributed over a minimum number of distinct days $MinDays_c$.
+3.  **Isolated Lectures:** In a given curriculum $s$, a lecture in period $p$ should ideally be adjacent (in time) to at least one other lecture of the same curriculum on the same day.
+4.  **Temporal Continuity (Windows):** For any curriculum $s$ on any day $d$, there should be no unoccupied periods between the first and last scheduled lectures (i.e., avoid "dead time" or gaps).
+5.  **Room Stability:** All lectures of a single course $c$ should ideally be assigned to the same room $r$.
+6.  **Curriculum Daily Load:** The number of lectures assigned to a curriculum $s$ on any day $d$ must fall within a prescribed range $[MinLoad_s, MaxLoad_s]$.
+7.  **Geographic Proximity (Travel Distance):** Consecutive lectures within the same curriculum $s$ should not be scheduled in rooms located in different buildings.
+8.  **Room Suitability:** Courses should be assigned to rooms that possess specific required attributes or equipment (e.g., laboratories, multimedia capabilities).
+9.  **Lecture Grouping (Double Lectures):** If specified for course $c$, lectures should be scheduled in contiguous periods (couplets) to ensure instructional continuity.
+
+**Task:** 
+1. Define the decision variables required to model this problem as an Integer Linear Program (ILP).
+2. Formulate the objective function as a minimization of the weighted penalty costs $\sum w_i \cdot V_i$, where $V_i$ represents the violation count for soft constraint $i$.
+3. Discuss the computational complexity of this problem with respect to the NP-hard class.

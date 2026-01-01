@@ -1,0 +1,17 @@
+**Exercise 4.12: The Bi-Partitioning of Multisets via Additive Equivalence**
+
+**Problem Statement:**
+Given a multiset $S = \{x_1, x_2, \dots, x_n\}$ consisting of $n$ positive integers, formulate a procedure to determine the existence of, and subsequently construct, an equal-sum partition. 
+
+**Formal Constraints:**
+The objective is to partition $S$ into two disjoint subsets, denoted $A$ and $B$, such that the following conditions are strictly satisfied:
+
+1.  **Exhaustive and Disjoint Partitioning:** The subsets must satisfy the properties of a formal partition, namely that $A \cup B = S$ and $A \cap B = \emptyset$. This implies that every element $x_i \in S$ is assigned to exactly one subset.
+2.  **Equivalence of Cardinal Sums:** The arithmetic sum of the entities within subset $A$ must be equal to the arithmetic sum of the entities within subset $B$. Formally, this is expressed as:
+    $$\sum_{a \in A} a = \sum_{b \in B} b$$
+
+**Task:**
+Identify the membership of each entity $x_i$ relative to the subsets $A$ and $B$. If a valid partition exists, provide the mapping $f: S \to \{A, B\}$ that satisfies the aforementioned conditions. 
+
+**Note on Computational Complexity:**
+Students should observe that this problem is a restricted case of the Subset Sum Problem. In your response, consider the implications of the total sum $\sum_{x \in S} x$ being odd and discuss the pseudo-polynomial time complexity of potential dynamic programming approaches.

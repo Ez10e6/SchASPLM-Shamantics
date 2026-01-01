@@ -1,0 +1,5 @@
+You are tasked with solving the N-Queens problem on a square board of size 'n'.
+The rows and columns are indexed from 1 to 'n'.
+
+The objective is to place exactly 'n' queens on the board such that no two queens attack each other.
+According to the rules of chess, a queen attacks any piece in the same row, same column, or on the same diagonal.

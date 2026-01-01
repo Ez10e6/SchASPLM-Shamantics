@@ -1,0 +1,8 @@
+% Define the domain of numbers from 1 to n.
+num(1..n).
+
+% Define proper divisors: M is a divisor of N if N is divisible by M and M is not N.
+divisor(M, N) :- num(N), num(M), N!=M, N\M==0.
+
+% Define perfect numbers: N is perfect if the sum of its divisors equals N.
+perfect(N) :- num(N), #sum {M : divisor(M, N)} == N.

@@ -1,0 +1,52 @@
+### **Autonomous Surveillance Mission Specification**
+
+#### **1. System Architecture and Topology**
+The mission environment is modeled as a directed graph $G = (V, E)$, where $V$ represents nodes (locations) and $E$ represents flight corridors (transitions).
+
+**1.1 Nodes ($V$):**
+*   **CommandCenter (CC):** Mission origin.
+*   **PathA (PA), PathB (PB):** Intermediate transit waypoints.
+*   **TowerX (TX), TowerY (TY):** Primary surveillance objectives.
+*   **MidRelay (MR):** Power restoration and relay node.
+*   **TowerZ (TZ):** Auxiliary surveillance objective.
+
+**1.2 Directed Edges and Energy Costs ($E$):**
+*   $(CC \to PA):$ 2 units
+*   $(CC \to PB):$ 3 units
+*   $(PA \to TX):$ 2 units
+*   $(PB \to TY):$ 2 units
+*   $(PB \to PA):$ 1 unit
+*   $(TX \to PB):$ 2 units
+*   $(TY \to MR):$ 3 units
+*   $(MR \to TZ):$ 2 units
+*   $(TZ \to TX):$ 4 units
+
+#### **2. Operational Parameters**
+*   **Temporal Unit:** All traversals between nodes consume exactly 1 minute.
+*   **Initial State:** $T = 0$; Battery $= 14$ units; Location $= CC$.
+*   **Resource Ceiling:** Maximum battery capacity is capped at 14 units.
+*   **Scanning Protocol:** 
+    *   A scan requires the drone to remain stationary at a Tower node ($TX, TY, TZ$) for 2 consecutive minutes.
+    *   Scanning is prohibited at non-tower nodes.
+    *   Consecutive scans at the same node are prohibited (no redundant data acquisition).
+*   **Mission Endurance:** Total actions (moves and stationary minutes) must not exceed 20 increments.
+
+#### **3. Constraints and Logic**
+*   **Mandatory Objectives:** The drone must successfully complete at least one 2-minute scan at both **TowerX** and **TowerY**.
+*   **Temporal Deadline:** The scan at **TowerX** must be completed (finalized) by $T \le 5$.
+*   **Auxiliary Objective:** A scan at **TowerZ** is optional but contributes to the mission score.
+*   **MidRelay Recovery Protocol:**
+    *   The drone may idle at **MidRelay** for exactly 2 consecutive minutes to restore 4 battery units.
+    *   If the drone enters **MidRelay**, the subsequent move must be to **TowerZ** in the immediately following minute.
+*   **Energy Constraint:** The cumulative energy cost of all traversals must not exceed the current battery level. The drone cannot execute a move if the cost exceeds available power.
+
+#### **4. Optimization Objectives**
+The system shall evaluate valid flight paths based on the following hierarchical priorities:
+
+1.  **Primary Objective:** Maximize the total count of completed tower scans ($TX, TY, TZ$).
+2.  **Secondary Objective:** In the event of a tie in total scans, minimize the time ($T$) at which the final mandatory scan (at either $TX$ or $TY$) is completed.
+
+#### **5. Execution Constraints**
+*   **Pathing:** The drone must strictly follow the directional links defined in Section 1.2.
+*   **Battery Management:** Battery replenishment at **MidRelay** cannot exceed the 14-unit maximum capacity.
+*   **Stationary Actions:** Only scanning and the defined **MidRelay** idle period permit the drone to remain at a node for more than the 1-minute traversal time.

@@ -1,0 +1,6 @@
+You are tasked with solving the Bin Packing optimization problem.
+The input consists of a set of items, each with a specific cost (or weight), and a maximum capacity 'n' for the bins.
+
+The objective is to assign every item to a bin.
+The assignment must satisfy the condition that the sum of the costs of items in any single bin does not exceed the capacity 'n'.
+To find the optimal solution, you must minimize the total number of bins used.

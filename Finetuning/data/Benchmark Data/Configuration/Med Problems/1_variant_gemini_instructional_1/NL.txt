@@ -1,0 +1,47 @@
+### System Specification: AI Workstation Configuration Optimization
+
+#### 1. Objective
+Design a hardware configuration for an AI research workstation that satisfies all inter-component compatibility requirements while minimizing the total capital expenditure (CAPEX).
+
+#### 2. Component Domain and Valuation ($V$)
+The system shall consist of exactly one element from each of the following sets:
+
+*   **Processors ($C$):**
+    *   Ryzen7: 300
+    *   i9: 400
+    *   Xeon: 500
+*   **Graphics Processing Units ($G$):**
+    *   RTX4060: 350
+    *   RTX3090: 700
+    *   Quadro: 800
+*   **Motherboards ($M$):**
+    *   X670: 180
+    *   Z690: 200
+    *   C621: 250
+*   **Power Supply Units ($P$):**
+    *   Bronze: 80
+    *   Gold: 120
+    *   Platinum: 160
+
+#### 3. Operational Constraints
+The selection of components must adhere to the following logical dependencies:
+
+*   **C1 (Power Capacity):** If $G \in \{\text{RTX3090, Quadro}\}$, then $P \neq \text{Bronze}$.
+*   **C2 (Server Architecture):** If $C = \text{Xeon}$, then $M$ must be $\text{C621}$.
+*   **C3 (Socket Compatibility A):** If $C = \text{Ryzen7}$, then $M$ must be $\text{X670}$.
+*   **C4 (Socket Compatibility B):** If $C = \text{i9}$, then $M \neq \text{X670}$.
+*   **C5 (Workstation GPU Requirement):** If $G = \text{Quadro}$, then $C$ must be $\text{Xeon}$.
+*   **C6 (Chipset Exclusion):** If $G = \text{Quadro}$, then $M \neq \text{Z690}$.
+
+#### 4. Optimization Objective
+Minimize the Objective Function ($Z$):
+$$Z = V(C) + V(G) + V(M) + V(P)$$
+
+Subject to:
+*   $\text{Selection} \in \{C \times G \times M \times P\}$
+*   Constraints $\text{C1}$ through $\text{C6}$
+
+#### 5. Execution Instructions
+1.  Identify all valid combinations of $(C, G, M, P)$ that satisfy the constraints in Section 3.
+2.  Calculate the total cost for each valid configuration.
+3.  Select the configuration with the global minimum cost.

@@ -1,0 +1,41 @@
+### **System Specification: Autonomous Rover Mission Protocol**
+
+#### **1. System Topology**
+The operational environment is defined as a non-directed graph $G = (V, E)$, where:
+*   **Nodes ($V$):** {BaseCamp, Fork1, Fork2, OutpostX, OutpostY, RelayStation}
+*   **Edges ($E$):** 
+    *   (BaseCamp, Fork1)
+    *   (BaseCamp, Fork2)
+    *   (Fork1, OutpostX)
+    *   (Fork1, RelayStation)
+    *   (Fork2, OutpostY)
+    *   (Fork2, RelayStation)
+
+#### **2. Initial State**
+*   **Starting Location:** BaseCamp
+*   **Battery Capacity ($B_{init}$):** 6 units
+*   **Elapsed Time ($T_{total}$):** 0 minutes
+*   **Task Status:** {OutpostX: Incomplete, OutpostY: Incomplete, RelayStation: Incomplete}
+
+#### **3. Operational Parameters**
+*   **Movement Cost:** Each traversal of an edge $(u, v) \in E$ consumes 1 unit of battery and 1 minute of time.
+*   **Inspection Cost:** Each inspection action at a node $v$ consumes 1 minute of time (stationary) and 0 units of battery.
+*   **Temporal Constraint:** The total mission duration $T_{total}$ must not exceed 10 minutes.
+*   **Energy Constraint:** The battery level $B$ must remain $\geq 0$ at all times.
+
+#### **4. Mission Requirements**
+*   **Mandatory Objectives:**
+    *   Execute the inspection protocol at **OutpostX** exactly once.
+    *   Execute the inspection protocol at **OutpostY** exactly once.
+*   **Optional Objective:**
+    *   Execute the inspection protocol at **RelayStation**.
+
+#### **5. Reward Logic: Bonus Diagnostic Data**
+The system shall grant a diagnostic reward if and only if the following conditions are met concurrently at the time of the RelayStation inspection:
+1.  **Inspection Completeness:** Both mandatory inspections (OutpostX and OutpostY) have been successfully concluded.
+2.  **Energy Reserve:** The current battery level $B$ is strictly greater than 2 units ($B > 2$).
+
+#### **6. Execution Constraints**
+*   **Strict Traversal:** Movement is only permitted between nodes sharing a defined edge in $E$.
+*   **Stationary Requirement:** The rover must remain at a node for the full duration of the inspection (1 minute).
+*   **Termination:** The mission is considered complete once all mandatory objectives are met, provided all constraints are satisfied. Evaluation of the optional objective is performed at the point of interaction with the RelayStation.

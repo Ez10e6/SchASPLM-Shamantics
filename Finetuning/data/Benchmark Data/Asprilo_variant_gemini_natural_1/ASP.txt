@@ -1,0 +1,60 @@
+% Define the time horizon.
+time(1..horizon).
+
+% Define cardinal directions and adjacency on the grid.
+direction((X,Y)) :- X=-1..1, Y=-1..1, |X+Y|=1.
+nextto((X,Y),(DX,DY),(X',Y')) :- direction((DX,DY)), position((X,Y)), position((X',Y')), (X,Y)=(X'-DX,Y'-DY), (X',Y')=(X+DX,Y+DY).
+
+% Generate exactly one action per robot per timestep: move, pickup, putdown, or wait.
+{ move(R,D,T) : direction(D) ; pickup(R,S,T) : isShelf(S) ; putdown(R,S,T) : isShelf(S) } 1 :- isRobot(R), time(T).
+
+% Effect: Moving updates the robot's position to an adjacent cell.
+position(R,C,T) :- move(R,D,T), position(R,C',T-1), nextto(C',D,C).
+
+% Constraint: Robots cannot move to a cell that is not adjacent.
+:- move(R,D,T), position(R,C,T-1), not nextto(C, D,_).
+
+% Effect: Picking up a shelf makes the robot carry it.
+carries(R,S,T) :- pickup(R,S,T).
+
+% Constraint: Pickup requires the robot and shelf to be at the same location.
+:- pickup(R,S,T), position(R,C,T-1), not position(S,C,T-1).
+
+% Constraint: A robot cannot pick up if it is already carrying something.
+:- pickup(R,S,T), carries(R,_,T-1).
+
+% Constraint: A shelf cannot be picked up if it is already carried.
+:- pickup(R,S,T), carries(_,S,T-1).
+
+% Effect: Putting down a shelf releases it from the robot.
+:- putdown(R,S,T), not carries(R,S,T-1).
+
+% Inertia: Robot position remains unchanged if not moving.
+position(R,C,T) :- position(R,C,T-1), not move(R,_,T), isRobot(R), time(T).
+
+% Inertia: Carrying status remains unchanged if not picking up or putting down.
+carries(R,S,T) :- carries(R,S,T-1), not putdown(R,S,T), time(T).
+
+% Effect: Shelf position follows the robot when carried.
+position(S,C,T) :- position(R,C,T), carries(R,S,T).
+
+% Effect: Shelf position remains unchanged when not carried.
+position(S,C,T) :- position(S,C,T-1), not carries(_,S,T), isShelf(S), time(T).
+
+% Constraint: Edge Collision - Two robots cannot swap positions in a single timestep.
+moveto(C',C,T) :- nextto(C',D,C), position(R,C',T-1), move(R,D,T).
+:- moveto(C',C,T), moveto(C,C',T), C < C'.
+
+% Constraint: Vertex Collision - No two robots can occupy the same node at the same time.
+:- { position(R,C,T) : isRobot(R) } > 1, position(C), time(T).
+
+% Constraint: No two shelves can occupy the same node at the same time.
+:- { position(S,C,T) : isShelf(S) } > 1, position(C), time(T).
+
+% Goal: All ordered products must be processed (delivered) at the correct station.
+processed(A,O,T) :- process(A,O,C,T).
+processed(A,O,T) :- processed(A,O,T-1), time(T).
+:- ordered(O,A), not processed(A,O,horizon).
+
+% Constraint: All shelves must be put down before the horizon ends.
+:- carries(_,_,horizon).

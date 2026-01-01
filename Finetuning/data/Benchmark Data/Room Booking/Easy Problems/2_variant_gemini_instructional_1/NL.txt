@@ -1,0 +1,28 @@
+### **System Specification: Lecture Scheduling and Resource Allocation**
+
+#### **1. System Entities and Domains**
+Define the following finite sets for the scheduling environment:
+*   **Lectures ($L$):** A set of five unique elements $\{l_1, l_2, l_3, l_4, l_5\}$.
+*   **Subjects ($S$):** $\{Artificial\ Intelligence\ (AI),\ Mathematics\ (Math),\ Physics\ (Physics)\}$.
+*   **Time Slots ($T$):** $\{Morning,\ Afternoon\}$.
+*   **Rooms ($R$):** $\{Room_1,\ Room_2,\ Room_3\}$.
+
+#### **2. Allocation Requirements**
+Each lecture $l \in L$ is associated with exactly one subject $s \in S$. The system must generate a total assignment mapping $A: L \rightarrow (R \times T)$ such that:
+*   Every lecture $l \in L$ is assigned exactly one Room-Time pair.
+*   No lecture remains unassigned.
+*   No lecture is assigned to multiple Room-Time pairs.
+
+#### **3. Operational Constraints**
+
+**3.1 Resource Capacity (Mutual Exclusion)**
+*   Prohibit the assignment of more than one lecture to the same Room-Time coordinate. 
+*   Formally: For any two distinct lectures $l_i, l_j \in L$, if $A(l_i) = (r_i, t_i)$ and $A(l_j) = (r_j, t_j)$, then $(r_i, t_i) \neq (r_j, t_j)$.
+
+**3.2 Subject-Room Compatibility**
+*   Restrict room usage based on subject classification.
+*   Prohibit any room $r \in R$ from hosting both a **Mathematics** lecture and a **Physics** lecture, regardless of the time slot.
+*   If a room $r$ is assigned to a lecture where $Subject = Math$, ensure that same room $r$ is never assigned to a lecture where $Subject = Physics$ within the same schedule, and vice versa.
+
+#### **4. Objective Summary**
+Ensure the final schedule populates 5 of the 6 available Room-Time slots while maintaining strict adherence to the subject-based room isolation policy between Mathematics and Physics.

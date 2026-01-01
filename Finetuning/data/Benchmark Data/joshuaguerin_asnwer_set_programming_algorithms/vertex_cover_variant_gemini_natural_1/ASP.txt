@@ -1,0 +1,11 @@
+% Edges are symmetric (undirected).
+edge(Y, X) :- edge(X, Y).
+
+% Generate a valid subset of nodes to form the cover.
+{ cover(X) } :- node(X).
+
+% Constraint: For every defined edge between two nodes, at least one of those nodes must be in the cover.
+:- edge(X, Y), not cover(X), not cover(Y).
+
+% Minimize the total count of nodes selected for the cover.
+#minimize { 1, X : cover(X) }.

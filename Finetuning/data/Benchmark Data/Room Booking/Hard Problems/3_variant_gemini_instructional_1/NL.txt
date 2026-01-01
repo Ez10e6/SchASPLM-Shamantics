@@ -1,0 +1,43 @@
+### **Formal Specification: Technical Symposium Scheduling System**
+
+#### **1. System Entities and Domains**
+*   **Presentations ($P$):** A set of 10 distinct presentations $\{p_1, p_2, ..., p_{10}\}$.
+*   **Domains ($D$):** A set of 4 specialized categories: $\{Artificial Intelligence (AI), Cloud Computing (Cloud), Internet of Things (IoT), Virtual Reality (VR)\}$.
+*   **Temporal Framework:**
+    *   **Days ($T$):** $\{Day_1, Day_2, Day_3, Day_4\}$.
+    *   **Sessions ($S$):** $\{Early Morning (S_1), Late Morning (S_2), Early Afternoon (S_3), Late Afternoon (S_4)\}$.
+*   **Spatial Resources:**
+    *   **Rooms ($R$):** $\{Room_1, Room_2, Room_3, Room_4, Room_5\}$.
+
+#### **2. Operational Constraints**
+
+**2.1 Assignment Integrity**
+*   **Exhaustion:** Assign all 10 presentations to the schedule; no presentation shall remain unassigned.
+*   **Exclusivity:** Assign no more than one presentation to any unique triplet of $(Day, Session, Room)$.
+
+**2.2 Room Utilization and Continuity**
+*   **Daily Capacity:** Limit each room to a maximum of three presentations per day.
+*   **Session Continuity:** Prohibit consecutive occupancy for any room. If a room is assigned to Session $S_n$, it must remain vacant during $S_{n-1}$ and $S_{n+1}$ within the same day.
+
+**2.3 Domain-Specific Spatial Restrictions**
+*   **Hardware Compatibility (Room 2):** Prohibit $AI$ and $Cloud$ presentations from $Room_2$ due to lack of projection hardware.
+*   **General Exclusion (Room 1):** Prohibit $VR$ presentations from $Room_1$ across all days and sessions.
+
+**2.4 Topical Distribution and Temporal Spacing**
+*   **IoT Temporal Dispersion:** Distribute $IoT$ presentations across a minimum of three distinct days.
+*   **AI/VR Spatial Separation:** Prohibit the scheduling of $AI$ and $VR$ presentations in the same room on the same day.
+*   **Domain Concurrency:** Limit the simultaneous scheduling of $Cloud$ and $IoT$ presentations to a maximum of two (combined total) per $(Day, Session)$ across all rooms.
+
+**2.5 Anchor Assignments**
+*   **Opening Session:** Assign an $AI$ presentation to $(Day_1, S_1)$. No other domain may occupy this slot.
+*   **VR Closing Requirement:** Assign a $VR$ presentation to $(Day_4, S_3)$. No other domain may occupy this slot.
+
+**2.6 Coverage and Diversity**
+*   **Daily Minimum:** Ensure every day in the sequence $\{Day_1, Day_2, Day_3, Day_4\}$ contains at least one scheduled presentation.
+*   **Session Diversity:** For any session $(Day_i, Session_j)$ containing presentations, ensure the presentations represent at least two different domains. No session may be occupied by a single domain exclusively.
+
+#### **3. Optimization Criteria**
+In the event of multiple valid schedule configurations, the system shall apply the following hierarchical preferences:
+
+1.  **Primary Objective:** Maximize the number of unique rooms utilized during each active session.
+2.  **Secondary Objective:** Minimize the total count of idle room-time slots across the entire four-day duration.

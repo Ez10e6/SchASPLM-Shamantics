@@ -1,0 +1,18 @@
+**Exercise 3.14: The Maximum Clique Optimization Problem**
+
+**Problem Statement:**
+Let $G = (V, E)$ be a simple undirected graph, where $V$ denotes a finite set of vertices (entities) and $E \subseteq \{\{u, v\} \mid u, v \in V, u \neq v\}$ represents a set of unordered pairs defining the adjacency relations between these entities. 
+
+**Definition:**
+A subset of vertices $C \subseteq V$ is defined as a **clique** if the subgraph induced by $C$ is complete. Formally, $C$ must satisfy the condition that for every pair of distinct vertices $u, v \in C$, the edge $\{u, v\}$ is an element of $E$.
+
+**Objective:**
+The objective of the Maximum Clique problem is to identify a clique $C^*$ that possesses the maximum possible cardinality. This optimization task can be formulated as follows:
+
+$$\text{Maximize } |C|$$
+$$\text{Subject to the constraint: } \forall u, v \in C, u \neq v \implies \{u, v\} \in E$$
+
+**Requirements:**
+1.  **Existence:** Determine if there exists a subset $C \subseteq V$ of size $k$ that satisfies the completeness condition.
+2.  **Optimization:** Define an algorithmic approach to calculate the **clique number** of the graph, denoted as $\omega(G)$, which represents the cardinality of the maximum clique.
+3.  **Complexity Analysis:** Discuss the computational implications of this problem, specifically addressing its classification within the NP-hard complexity class and the feasibility of exact versus heuristic solution methods.

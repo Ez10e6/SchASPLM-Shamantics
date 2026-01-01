@@ -1,0 +1,7 @@
+You are tasked with solving the Maximum Flow problem on a directed graph.
+The input consists of a set of nodes, edges with associated capacities, a specific start node, and a terminal node.
+
+The objective is to determine the amount of flow to assign to each edge to maximize the total flow reaching the terminal node.
+The solution must satisfy two main conditions:
+1. The flow on any specific edge cannot exceed that edge's capacity.
+2. For every node except the start and terminal nodes, the total incoming flow must equal the total outgoing flow (flow conservation).

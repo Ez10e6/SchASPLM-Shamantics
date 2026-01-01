@@ -1,0 +1,33 @@
+### System Specification: River Crossing Logistics Problem
+
+#### 1. System Entities
+Define the set of active entities $E = \{F, W, G, C\}$, where:
+*   **F**: Farmer (Operator)
+*   **W**: Wolf
+*   **G**: Goat
+*   **C**: Cabbage
+
+#### 2. State Space and Initial Conditions
+*   **Locations**: Let $L = \{Left\_Bank, Right\_Bank\}$.
+*   **State Definition**: The state of the system at time $t$ is defined by the position of all entities: $S_t = \{(e, l) \mid e \in E, l \in L\}$.
+*   **Initial State ($t=0$)**: $\forall e \in E, pos(e) = Left\_Bank$.
+*   **Goal State ($t=T$)**: $\forall e \in E, pos(e) = Right\_Bank$.
+
+#### 3. Operational Constraints (Transitions)
+For each time step $t \in \{0, \dots, T-1\}$, a transition to $S_{t+1}$ must adhere to the following:
+*   **Operator Requirement**: The Farmer ($F$) must change location in every transition.
+*   **Transport Capacity**: In each step, the Farmer may transport at most one item $i \in \{W, G, C\}$ or travel alone.
+*   **Co-location Requirement**: An item $i$ can only change location if its position at time $t$ is identical to the Farmer's position at time $t$.
+*   **Directionality**: The boat must move from the Farmer's current bank to the opposite bank.
+
+#### 4. Safety Invariants (Prohibited States)
+A state $S_t$ is invalid if any of the following conditions are met:
+*   **Predation (Wolf/Goat)**: $pos(W) = pos(G)$ AND $pos(F) \neq pos(W)$.
+*   **Herbivory (Goat/Cabbage)**: $pos(G) = pos(C)$ AND $pos(F) \neq pos(G)$.
+
+#### 5. Objective
+Determine a sequence of transitions (moves) $M = \{m_1, m_2, \dots, m_T\}$ such that:
+1.  The sequence begins at the **Initial State**.
+2.  The sequence terminates at the **Goal State**.
+3.  Every intermediate state $S_t$ satisfies all **Safety Invariants**.
+4.  The total number of steps $T$ is minimized or falls within the specified temporal bound.

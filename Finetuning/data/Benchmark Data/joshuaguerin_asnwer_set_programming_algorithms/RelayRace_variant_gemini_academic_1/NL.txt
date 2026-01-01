@@ -1,0 +1,35 @@
+**Exercise 4.12: Multiobjective Optimization of Relay Race Scheduling**
+
+**Problem Context:**
+Consider a relay race event modeled as a sequence of contiguous segments, hereafter referred to as **legs**, denoted by the set $L = \{l_1, l_2, \dots, l_n\}$. Each leg $l_i$ is defined by a start waypoint $v_{i-1}$ and an end waypoint $v_i$, a distance $d_i \in \mathbb{R}^+$, an elevation gain (ascent) $a_i \in \mathbb{R}_{\geq 0}$, and an elevation loss (descent) $s_i \in \mathbb{R}_{\geq 0}$. Let $P = \{p_1, p_2, \dots, p_m\}$ represent the set of available participants. Each participant $p_j$ is characterized by a preferred distance $\hat{d}_j$ and a preferred pace $\hat{r}_j$.
+
+**Assignment Model:**
+The assignment is defined by a surjective mapping $A: L \to P$, where $A(l_i) = p_j$ indicates that participant $p_j$ is assigned to leg $l_i$. A participant may be assigned to multiple, potentially non-contiguous, legs.
+
+**Task 1: Relational Predicates and Sequence Analysis**
+Define formal predicates to characterize the assignment $A$:
+1.  **Index Mapping:** Derive a set of indices $I_j = \{i \mid A(l_i) = p_j\}$ for each participant $p_j$.
+2.  **Exchange Identification:** Identify the set of exchange points $E \subseteq \{v_1, \dots, v_{n-1}\}$ where $A(l_i) \neq A(l_{i+1})$. For each participant $p_j$, determine the boundary waypoints $\{v_{start}, v_{end}\}$ for every contiguous subsequence of assigned legs.
+
+**Task 2: Metric Derivation**
+Given the assignment $A$ and the physical properties of each leg, compute the following metrics:
+1.  **Temporal Duration:** Calculate the duration $t_i$ for each leg $l_i$, where $t_i = d_i \times r_{i,j}$, and $r_{i,j}$ is the operational pace of participant $p_j$ on leg $l_i$.
+2.  **Participant Aggregates:** For each participant $p_j \in P$, compute the following scalar values:
+    *   Total Distance: $D_j = \sum_{i \in I_j} d_i$
+    *   Cumulative Ascent: $A_j = \sum_{i \in I_j} a_i$
+    *   Cumulative Descent: $S_j = \sum_{i \in I_j} s_i$
+
+**Task 3: Multiobjective Optimization Formulation**
+Formulate a mathematical model to optimize the assignment $A$ subject to the following objective functions:
+1.  **Distance Preference Deviation:** Minimize the total $L_1$ norm of the difference between actual and preferred distances: 
+    $$\min \sum_{p_j \in P} |D_j - \hat{d}_j|$$
+2.  **Total Race Latency:** Minimize the aggregate duration of all legs: 
+    $$\min \sum_{i=1}^n t_i$$
+3.  **Handoff Minimization:** Minimize the cardinality of the set of runner exchanges to ensure continuity:
+    $$\min |\{i \in \{1, \dots, n-1\} : A(l_i) \neq A(l_{i+1})\}|$$
+4.  **Pace Variance Optimization:** Minimize the deviation between the assigned participant's operational pace and their preferred pace $\hat{r}_j$.
+
+**Requirements:**
+*   Express the assignment constraints such that every leg is assigned to exactly one participant.
+*   Discuss the trade-offs between handoff minimization and distance preference fulfillment in a Pareto optimal context.
+*   Specify the conditions under which a feasible assignment $A$ exists given the constraints on $P$ and $L$.

@@ -129,24 +129,3 @@ def paraphrase_file(folder_path, style="natural"):
 
     except Exception as e:
         print(f" -> Failed: {e}")
-
-if __name__ == "__main__":
-    if not os.path.exists(DATA_ROOT):
-        print(f"Error: Data directory not found at {DATA_ROOT}")
-        exit(1)
-
-    print(f"Scanning data at: {DATA_ROOT}")
-
-    # Traverse Data Directory
-    for category in os.listdir(DATA_ROOT):
-        cat_path = os.path.join(DATA_ROOT, category)
-        if not os.path.isdir(cat_path): continue
-        for difficulty in os.listdir(cat_path):
-            diff_path = os.path.join(cat_path, difficulty)
-            if not os.path.isdir(diff_path): continue
-            for problem_folder in os.listdir(diff_path):
-                full_prob_path = os.path.join(diff_path, problem_folder)
-                if os.path.isdir(full_prob_path):
-                    if "_variant" not in problem_folder:
-                        # Default to natural if run as script
-                        paraphrase_file(full_prob_path, style="natural")

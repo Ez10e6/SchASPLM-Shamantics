@@ -1,0 +1,57 @@
+% Generate exactly one action per time step: push-to-nongoal, move, or push-to-goal.
+{ occurs(some_action,T) } :- step(T).
+1 <= { pushtonongoal( P,S,Ppos,From,To,Dir,T ) : movedir( Ppos,From,Dir ), movedir( From,To,Dir ), isnongoal( To ), player( P ), stone( S ), Ppos != To, Ppos != From, From != To; 
+       move( P,From,To,Dir,T ) : movedir( From,To,Dir ), player( P ), From != To;
+       pushtogoal( P,S,Ppos,From,To,Dir,T ) : movedir( Ppos,From,Dir ), movedir( From,To,Dir ), isgoal( To ), player( P ), stone( S ), Ppos != To, Ppos != From, From != To;
+       noop(T) } <= 1 :- step(T), occurs(some_action,T).
+
+% Initialize state at time 0.
+at(P,To,0) :- at(P,To).
+clear(P,0) :- clear(P).
+atgoal(S,0) :- isgoal(L), stone(S), at(S,L).
+
+% Effect: Push-to-nongoal updates player and stone positions.
+del( at( P,Ppos ),Ti ) :- pushtonongoal( P,S,Ppos,From,To,Dir,Ti ), step(Ti).
+del( at( S,From ),Ti ) :- pushtonongoal( P,S,Ppos,From,To,Dir,Ti ), step(Ti).
+del( clear( To ),Ti ) :- pushtonongoal( P,S,Ppos,From,To,Dir,Ti ), step(Ti).
+at( P,From,Ti ) :- pushtonongoal( P,S,Ppos,From,To,Dir,Ti ), step(Ti).
+at( S,To,Ti ) :- pushtonongoal( P,S,Ppos,From,To,Dir,Ti ), step(Ti).
+clear( Ppos,Ti ) :- pushtonongoal( P,S,Ppos,From,To,Dir,Ti ), step(Ti).
+del( atgoal( S ),Ti ) :- pushtonongoal( P,S,Ppos,From,To,Dir,Ti ), step(Ti).
+
+% Effect: Move updates player position.
+del( at( P,From ),Ti ) :- move( P,From,To,Dir,Ti ), step(Ti).
+del( clear( To ),Ti ) :- move( P,From,To,Dir,Ti ), step(Ti).
+at( P,To,Ti ) :- move( P,From,To,Dir,Ti ), step(Ti).
+clear( From,Ti ) :- move( P,From,To,Dir,Ti ), step(Ti).
+
+% Effect: Push-to-goal updates positions and goal status.
+del( at( P,Ppos ),Ti ) :- pushtogoal( P,S,Ppos,From,To,Dir,Ti ), step(Ti).
+del( at( S,From ),Ti ) :- pushtogoal( P,S,Ppos,From,To,Dir,Ti ), step(Ti).
+del( clear( To ),Ti ) :- pushtogoal( P,S,Ppos,From,To,Dir,Ti ), step(Ti).
+at( P,From,Ti ) :- pushtogoal( P,S,Ppos,From,To,Dir,Ti ), step(Ti).
+at( S,To,Ti ) :- pushtogoal( P,S,Ppos,From,To,Dir,Ti ), step(Ti).
+clear( Ppos,Ti ) :- pushtogoal( P,S,Ppos,From,To,Dir,Ti ), step(Ti).
+atgoal( S,Ti ) :- pushtogoal( P,S,Ppos,From,To,Dir,Ti ), step(Ti).
+
+% Inertia: State remains unless changed.
+clear( L,Ti ) :- clear( L,Ti-1 ), not del( clear( L ),Ti ), step(Ti).
+atgoal( S,Ti ) :- atgoal( S,Ti-1 ), not del( atgoal( S ),Ti ), stone( S ), step(Ti).
+at( T,L,Ti ) :- at( T,L,Ti-1 ), not del( at( T,L ) ,Ti ), step(Ti).
+
+% Precondition: Push-to-nongoal.
+:- pushtonongoal( P,S,Ppos,From,To,Dir,Ti ), not preconditions_png( P,S,Ppos,From,To,Dir,Ti ), step(Ti).
+preconditions_png( P,S,Ppos,From,To,Dir,Ti ) :- at( P,Ppos,Ti-1 ), at( S,From,Ti-1 ), clear( To,Ti-1 ), movedir( Ppos,From,Dir ), movedir( From,To,Dir ), isnongoal( To ), step(Ti).
+
+% Precondition: Move.
+:- move( P,From,To,Dir,Ti ), not preconditions_m( P,From,To,Dir,Ti ), step(Ti).
+preconditions_m( P,From,To,Dir,Ti ) :- at( P,From,Ti-1 ), clear( To,Ti-1 ), movedir( From,To,Dir ), step(Ti).
+
+% Precondition: Push-to-goal.
+:- pushtogoal( P,S,Ppos,From,To,Dir,Ti ), not preconditions_pg( P,S,Ppos,From,To,Dir,Ti ), step(Ti).
+preconditions_pg( P,S,Ppos,From,To,Dir,Ti ) :- at( P,Ppos,Ti-1 ), at( S,From,Ti-1 ), clear( To,Ti-1 ), movedir( Ppos,From,Dir ), movedir( From,To,Dir ), isgoal( To ), step(Ti).
+
+% Goal: All stones must be at goal locations at the final time step.
+goalreached(T) :- goalreached(T-1), step(T).
+goalreached(T) :- step(T), N = #count{ X : atgoal(X,T) , goal(X) }, N = #count{ X1 : goal(X1) }.
+:- not goalreached(T), step(T), not step(T+1).

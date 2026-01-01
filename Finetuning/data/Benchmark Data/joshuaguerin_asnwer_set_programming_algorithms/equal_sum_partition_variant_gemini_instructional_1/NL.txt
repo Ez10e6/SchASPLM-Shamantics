@@ -1,0 +1,22 @@
+### System Specification: Equal Sum Partitioning
+
+#### 1. Problem Definition
+The system shall solve the **Equal Sum Partition** problem by partitioning a given multiset of integers into two disjoint subsets such that the arithmetic sum of each subset is identical.
+
+#### 2. Input Specification
+*   **Input Set ($S$):** A finite multiset containing $n$ integer values.
+
+#### 3. Output Specification
+*   **Partition Labels:** A mapping of every element in $S$ to exactly one of two subsets, designated as subset **$a$** and subset **$b$**.
+
+#### 4. Operational Constraints
+The system must satisfy the following formal requirements:
+
+*   **Exhaustive Assignment:** Every element $x \in S$ must be assigned to either subset $a$ or subset $b$.
+*   **Mutual Exclusivity:** No element $x \in S$ may simultaneously belong to both subset $a$ and subset $b$. The intersection of the two subsets must be null ($a \cap b = \emptyset$).
+*   **Summation Equivalence:** The sum of all elements assigned to subset $a$ must strictly equal the sum of all elements assigned to subset $b$:
+    $$\sum_{x \in a} x = \sum_{y \in b} y$$
+
+#### 5. Functional Requirements
+*   **Validation:** Verify if a valid partition exists. If the sum of all elements in $S$ is odd, the system must recognize that no integer partition is possible.
+*   **Identification:** For every integer in the input set, the system shall output the specific subset identifier ($a$ or $b$) to which the integer is allocated.

@@ -1,0 +1,37 @@
+### **System Specification: Dynamic Toroidal Labyrinth Solver**
+
+#### **1. System Components**
+*   **Grid ($\mathcal{G}$):** A 2D matrix of dimensions $R \times C$, where $R$ is the number of rows and $C$ is the number of columns.
+*   **Field ($f_{r,c}$):** An element at coordinate $(r, c)$ containing a set of connectivity ports $P \subseteq \{N, S, E, W\}$.
+*   **Start Point ($S$):** The initial coordinate $(r_s, c_s)$ designated as reachable.
+*   **Goal Point ($G$):** The target coordinate $(r_g, c_g)$ that must attain reachable status.
+*   **State ($\Sigma$):** The current configuration of the grid and the set of reachable fields.
+
+#### **2. Connectivity and Reachability Logic**
+*   **Adjacency:** Two fields are adjacent if they share an edge, accounting for toroidal wrapping:
+    *   $f_{r,c}$ is North-adjacent to $f_{(r+1) \pmod R, c}$.
+    *   $f_{r,c}$ is South-adjacent to $f_{(r-1) \pmod R, c}$.
+    *   $f_{r,c}$ is East-adjacent to $f_{r, (c-1) \pmod C}$.
+    *   $f_{r,c}$ is West-adjacent to $f_{r, (c+1) \pmod C}$.
+*   **Bidirectional Connection:** A path exists between two adjacent fields $f_1$ and $f_2$ if and only if:
+    *   The exit port of $f_1$ aligns with the entry port of $f_2$ (e.g., $f_{r,c}$ has port $N$ and $f_{(r-1) \pmod R, c}$ has port $S$).
+*   **Reachability Propagation:** A field $f$ is reachable if there exists a sequence of bidirectional connections originating from any field currently marked as reachable. Reachability must be recalculated after every grid manipulation.
+
+#### **3. State Transition Rules (Push Operations)**
+A single action $A$ consists of shifting a linear segment of the grid.
+*   **Row Shift ($PushRow$):**
+    *   Input: Row index $i$, Direction $d \in \{East, West\}$.
+    *   Logic: All fields $f_{i, \cdot}$ shift one position in direction $d$. Fields exiting the grid boundary at $c=0$ or $c=C-1$ reappear at the opposite boundary (toroidal wrap).
+*   **Column Shift ($PushCol$):**
+    *   Input: Column index $j$, Direction $d \in \{North, South\}$.
+    *   Logic: All fields $f_{\cdot, j}$ shift one position in direction $d$. Fields exiting the grid boundary at $r=0$ or $r=R-1$ reappear at the opposite boundary (toroidal wrap).
+*   **Persistence:** The internal port configurations $P$ of a field remain invariant during shifts; only the field's grid coordinates $(r, c)$ change.
+
+#### **4. Operational Constraints**
+*   **Atomic Action:** Only one row or one column may be pushed per time step $t$.
+*   **Step Limit:** The total number of actions $\sum A$ must not exceed the predefined maximum steps $T_{max}$.
+*   **Fixed Points:** The coordinates of the Start Point $S$ and Goal Point $G$ are fixed relative to the grid frame; however, the fields (and their connections) occupying those coordinates change as the grid is manipulated.
+
+#### **5. Objective**
+*   **Terminal Condition:** Transform the grid state such that the field currently residing at coordinate $(r_g, c_g)$ is element-of the set of reachable fields.
+*   **Output Requirement:** Produce an ordered sequence of actions $\{A_1, A_2, \dots, A_n\}$ where $n \le T_{max}$, resulting in the satisfaction of the Terminal Condition.

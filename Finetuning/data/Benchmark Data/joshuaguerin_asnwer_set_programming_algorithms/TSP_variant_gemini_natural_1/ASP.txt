@@ -1,0 +1,30 @@
+% Edges are symmetric (undirected).
+edge(Y, X, C) :- edge(X, Y, C).
+
+% Generate a set of path edges from the available edges.
+{ path(X, Y, C) } :- edge(X, Y, C).
+
+% Each node must have at most one incoming edge in the path.
+{ path(X, Y, C) : edge(X, Y, C) } 1 :- node(Y).
+
+% Each node must have at most one outgoing edge in the path.
+{ path(X, Y, C) : edge(X, Y, C) } 1 :- node(X).
+
+% The start node must not have any incoming edges.
+:- start(S), path(X, S, C).
+
+% The end node must not have any outgoing edges.
+:- end(E), path(E, Y, C).
+
+% Define reachability: the start node is reachable, and any node connected to a reachable node via a path edge is reachable.
+reachable(S) :- start(S).
+reachable(Y) :- reachable(X), path(X, Y, C).
+
+% The end node must be reachable from the start.
+:- end(E), not reachable(E).
+
+% All nodes in the graph must be reachable (Hamiltonian property).
+:- node(X), not reachable(X).
+
+% Minimize the total cost of the selected path edges.
+#minimize{C, X, Y : path(X, Y, C)}.

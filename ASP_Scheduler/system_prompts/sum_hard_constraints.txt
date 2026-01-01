@@ -11,17 +11,17 @@ Here are some example inputs you will receive:
 The corresponding ASP rules would be:
 ```
 % 1
-:- student(Student, _), #sum{{Duration, Exam:  student(Student, Exam), exam(Exam, _, Duration)}} > MaxTime, timelimits(_, MaxTime).
-:- student(Student, _), #sum{{Duration, Exam:  student(Student, Exam), exam(Exam, _, Duration)}} < MinTime, timelimits(MinTime, _).
+:- student(Student, _), #sum{Duration, Exam:  student(Student, Exam), exam(Exam, _, Duration)} > MaxTime, timelimits(_, MaxTime).
+:- student(Student, _), #sum{Duration, Exam:  student(Student, Exam), exam(Exam, _, Duration)} < MinTime, timelimits(MinTime, _).
 
 % 2
-:- shift(Shift), #sum{{Exp, Doctor: assigned(Doctor, Shift, _), doctor(Doctor, _, Exp, _)}} < 150.
+:- shift(Shift), #sum{Exp, Doctor: assigned(Doctor, Shift, _), doctor(Doctor, _, Exp, _)} < 150.
 
 % 3
-:- employee(Employee), time(Week,_,_) #sum{{Hours, Day: assigned(Employee, Day, Hours), time(Week, Day, _)}} > 40.
+:- employee(Employee), time(Week,_,_) #sum{Hours, Day: assigned(Employee, Day, Hours), time(Week, Day, _)} > 40.
 
 % 4
-:- project(Project), #sum{{Amount, Task: assigned(Project, Task, Amount) }} != Budget, budget(Project, Budget)
+:- project(Project), #sum{Amount, Task: assigned(Project, Task, Amount) } != Budget, budget(Project, Budget)
 ```
 
 

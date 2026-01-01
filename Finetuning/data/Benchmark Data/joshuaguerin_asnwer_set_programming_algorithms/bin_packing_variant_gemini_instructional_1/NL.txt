@@ -1,0 +1,30 @@
+### Specification: Bin Packing Optimization Problem (BPP)
+
+**1. System Overview**
+Define an optimization system to partition a finite set of items into a minimum number of discrete containers (bins) of fixed capacity.
+
+**2. Input Parameters**
+*   **Item Set ($I$):** A finite set of $m$ items, $I = \{i_1, i_2, \dots, i_m\}$.
+*   **Weight Function ($w$):** A mapping $w: I \to \mathbb{R}^+$ where $w(i)$ represents the cost or weight of item $i$.
+*   **Bin Capacity ($n$):** A constant scalar $n \in \mathbb{R}^+$ representing the maximum permissible aggregate weight for any individual bin.
+    *   *Requirement:* $\forall i \in I, w(i) \leq n$.
+
+**3. Decision Variables**
+*   **$y_j$:** A binary indicator where $y_j = 1$ if bin $j$ is utilized, and $0$ otherwise.
+*   **$x_{ij}$:** A binary indicator where $x_{ij} = 1$ if item $i$ is assigned to bin $j$, and $0$ otherwise.
+
+**4. Constraints**
+*   **Total Assignment:** Ensure every item $i \in I$ is assigned to exactly one bin $j$.
+    $$\sum_{j} x_{ij} = 1, \quad \forall i \in I$$
+*   **Capacity Constraint:** Ensure the sum of the weights of all items assigned to bin $j$ does not exceed the capacity $n$.
+    $$\sum_{i \in I} w(i) \cdot x_{ij} \leq n \cdot y_j, \quad \forall j$$
+*   **Integrity Constraint:** Variables $x_{ij}$ and $y_j$ must strictly operate within the binary domain $\{0, 1\}$.
+
+**5. Objective Function**
+*   **Minimize Utilitzation:** Minimize the total cardinality of the set of utilized bins.
+    $$\text{Minimize } Z = \sum_{j} y_j$$
+
+**6. Operational Requirements**
+*   Assign all items provided in the input set.
+*   Maintain strict adherence to the capacity threshold $n$ for all bin allocations.
+*   Identify the global minimum for the number of bins required to satisfy all constraints.

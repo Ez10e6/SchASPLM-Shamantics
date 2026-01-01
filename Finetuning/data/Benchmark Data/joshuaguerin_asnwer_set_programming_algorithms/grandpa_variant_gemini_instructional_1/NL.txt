@@ -1,0 +1,42 @@
+### System Specification: Kinship Logic and Paradox Verification
+
+**1. Scope and Objective**
+This specification defines a formal logic system to evaluate kinship structures and identify the "Self-Grandparent" paradox. The system must process an input set of individuals and relationships to determine if any individual satisfies the recursive definition of being their own grandfather.
+
+**2. Domain Entities and Attributes**
+*   **Individual ($I$):** A discrete entity within the system.
+*   **Gender ($G$):** A property of an individual where $G(x) \in \{\text{Male, Female}\}$.
+*   **Biological Parentage ($P_{bio}$):** A directed relationship where $P_{bio}(x, y)$ denotes $x$ is the biological parent of $y$.
+
+**3. Relationship Definitions (Axioms)**
+The system shall derive extended relationships based on the following formal rules:
+
+*   **R1: Marriage Symmetry**
+    *   Define marriage ($M$) as a symmetric relation: $\forall x, y \in I: M(x, y) \iff M(y, x)$.
+*   **R2: Parentage (Inclusive of Stepparents)**
+    *   Define the general parentage relation ($P$) such that $P(x, y)$ is true if:
+        *   $x$ is the biological parent of $y$ ($P_{bio}(x, y)$).
+        *   $x$ is married to a parent of $y$: $\exists z \in I : M(x, z) \land P(z, y)$.
+*   **R3: Siblinghood**
+    *   Define individuals $x$ and $y$ as siblings ($S$) if:
+        *   $x \neq y$ (distinct individuals).
+        *   They share at least one parent: $\exists p \in I : P(p, x) \land P(p, y)$.
+*   **R4: Avuncular Relationship (Uncle)**
+    *   An individual $x$ is the uncle ($U$) of $y$ if:
+        *   $G(x) = \text{Male}$.
+        *   $x$ is a sibling of a parent of $y$: $\exists p \in I : S(x, p) \land P(p, y)$.
+*   **R5: Grandparentage**
+    *   An individual $x$ is the grandparent ($GP$) of $z$ if:
+        *   $x$ is the parent of a parent of $z$: $\exists y \in I : P(x, y) \land P(y, z)$.
+
+**4. Logical Paradox Identification**
+*   **Condition: "Grandpa" Paradox**
+    *   The system shall flag an individual $x$ as a "Grandpa" if and only if the following conditions are met:
+        1.  $G(x) = \text{Male}$.
+        2.  $GP(x, x)$ (The individual is their own grandparent).
+
+**5. Execution Requirements**
+*   **Input Handling:** Accept a set of facts defining $I$, $G$, $M$, and $P_{bio}$.
+*   **Inference Engine:** Recursively apply **R1** through **R5** to populate the relational graph.
+*   **Constraint Enforcement:** Ensure no rule violation (e.g., an individual cannot be their own biological parent) unless explicitly permitted by the stepparent logic to satisfy the paradox.
+*   **Output:** Return a Boolean value indicating the presence of the paradox, and identify the individual(s) $x$ for whom $GP(x, x)$ is true.

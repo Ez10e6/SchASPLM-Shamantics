@@ -1,0 +1,5 @@
+You are tasked with solving the Minimum Vertex Cover problem on a graph.
+The input consists of a set of nodes and edges connecting them.
+
+The objective is to select a subset of nodes (the "cover") such that every edge in the graph is connected to at least one selected node.
+To find the optimal solution, you must minimize the total number of nodes in this cover.

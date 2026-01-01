@@ -1,0 +1,5 @@
+Imagine you are managing a busy shipping warehouse where a large assortment of inventory is spread across the floor, waiting to be loaded for transport. Each of these items has its own specific weight or cost, and your task is to organize them into a set of standardized shipping bins. Every single item must be accounted for and assigned to a bin; leaving anything behind is not an option.
+
+The challenge lies in the physical limitations of your equipment, as every bin has a strict maximum capacity denoted as 'n'. As you distribute the items, you must ensure that the combined cost or weight of everything tucked into any individual bin never exceeds this limit. If the total weight in a bin goes even slightly over 'n', it is considered overloaded and unsafe.
+
+While there are many ways to divide the items among the bins, your ultimate goal is to achieve peak efficiency. To find the most optimal solution, you need to arrange the items in a way that allows you to use the smallest possible number of bins. By minimizing the total number of containers used while respecting the capacity of each, you ensure the most cost-effective and streamlined operation possible.

@@ -1,0 +1,9 @@
+You are tasked with solving the Numerical 3-Dimensional Matching problem.
+The input consists of three equal-sized sets of integers: X, Y, and Z, and a target sum 'n'.
+
+The objective is to form a set of triples (x, y, z) such that:
+1. 'x' comes from set X, 'y' from set Y, and 'z' from set Z.
+2. Every element in sets X, Y, and Z is used exactly once across all triples.
+3. The sum of the elements in each triple (x + y + z) must equal the target 'n'.
+
+The output should be the set of valid solution triples.

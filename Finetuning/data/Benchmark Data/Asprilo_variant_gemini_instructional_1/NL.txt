@@ -1,0 +1,49 @@
+# System Specification: Asprilo Warehouse Logistics
+
+## 1. Domain Definition
+The system operates within a discrete 2D spatial grid $\mathcal{G} \subseteq \mathbb{Z}^2$ over a finite temporal horizon $\mathcal{T} = \{0, 1, \dots, T\}$. 
+
+## 2. Entity Definitions
+*   **Robots ($R$):** Mobile agents capable of traversing the grid and transporting shelves.
+*   **Shelves ($S$):** Stationary storage units that hold product inventories.
+*   **Picking Stations ($P$):** Fixed locations where product extraction and order fulfillment occur.
+*   **Products ($I$):** Distinct item types stored within shelves.
+*   **Orders ($O$):** Requests consisting of a target picking station $p \in P$, a product type $i \in I$, and a required quantity $q \in \mathbb{N}^+$.
+
+## 3. State Schema
+The system state at time $t$ is defined by:
+*   $L(r, t) \in \mathcal{G}$: The coordinates of robot $r$.
+*   $L(s, t) \in \mathcal{G}$: The coordinates of shelf $s$.
+*   $C(r, s, t) \in \{0, 1\}$: A binary indicator where 1 signifies robot $r$ is carrying shelf $s$.
+*   $Inv(s, i, t) \in \mathbb{N}$: The quantity of product $i$ currently stored on shelf $s$.
+*   $Req(o, i, t) \in \mathbb{N}$: The remaining quantity of product $i$ required for order $o$.
+
+## 4. Action Schema
+For each time step $t \to t+1$, a robot $r$ must execute exactly one action from the following set:
+*   **Move($d$):** Transition to an adjacent cell in direction $d \in \{North, South, East, West\}$.
+*   **Pickup($s$):** Lift shelf $s$ located at $L(r, t)$.
+*   **Putdown($s$):** Release the currently held shelf $s$ at $L(r, t)$.
+*   **Deliver($o, s, i, q$):** Transfer quantity $q$ of product $i$ from shelf $s$ to fulfill order $o$.
+*   **Wait:** Maintain current position and state.
+
+## 5. Operational Constraints
+
+### 5.1 Kinematic and Collision Constraints
+*   **Grid Boundary:** All robot and shelf positions must remain within the bounds of $\mathcal{G}$.
+*   **Vertex Collision:** For any two distinct robots $r_1, r_2$, $L(r_1, t) \neq L(r_2, t)$ for all $t$.
+*   **Edge Collision:** Robots may not swap positions; for any $t$, $\neg (L(r_1, t) = L(r_2, t+1) \land L(r_1, t+1) = L(r_2, t))$.
+*   **Obstacle Avoidance:** Robots cannot occupy cells designated as permanent obstacles.
+
+### 5.2 Manipulation Constraints
+*   **Robot Capacity:** A robot $r$ can carry a maximum of one shelf $s$ at any time $t$ ($\sum_{s \in S} C(r, s, t) \leq 1$).
+*   **Shelf Capacity:** A shelf $s$ can be carried by a maximum of one robot $r$ at any time $t$ ($\sum_{r \in R} C(r, s, t) \leq 1$).
+*   **Pickup Precondition:** Robot $r$ can execute **Pickup($s$)** only if $L(r, t) = L(s, t)$ and $\sum_{r' \in R} C(r', s, t) = 0$.
+*   **Putdown Precondition:** Robot $r$ can execute **Putdown($s$)** only if $C(r, s, t) = 1$.
+*   **Shelf Displacement:** If $C(r, s, t) = 1$, then $L(s, t+1) = L(r, t+1)$. If $\sum_{r \in R} C(r, s, t) = 0$, then $L(s, t+1) = L(s, t)$.
+
+### 5.3 Delivery Constraints
+*   **Location Precondition:** A **Deliver** action is valid only if the robot $r$ carrying shelf $s$ is positioned at the picking station $p$ associated with order $o$.
+*   **Inventory Precondition:** The quantity $q$ delivered must satisfy $q \leq Inv(s, i, t)$ and $q \leq Req(o, i, t)$.
+
+## 6. Objective
+Generate a valid sequence of actions for all $r \in R$ such that for all orders $o \in O$, the remaining requirement $Req(o, i, T) = 0$ within the time horizon $T$.

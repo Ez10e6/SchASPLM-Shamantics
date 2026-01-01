@@ -1,0 +1,24 @@
+### **Specification: N-Queens Configuration Problem**
+
+#### **1. System Domain**
+*   **Board Definition:** Define a discrete square lattice $\mathcal{B}$ of dimension $n \times n$.
+*   **Coordinate System:** Represent the board using a Cartesian product of sets $L \times L$, where $L = \{1, 2, \dots, n\}$.
+*   **Element Mapping:** Each cell is identified by a unique coordinate $(r, c)$, where $r$ denotes the row index and $c$ denotes the column index.
+
+#### **2. Entities and State Space**
+*   **Agent:** Define a set of $n$ distinct entities $Q = \{q_1, q_2, \dots, q_n\}$ representing queens.
+*   **Placement Function:** Define a total function $f: Q \to L \times L$ that assigns each queen to a unique coordinate $(r, c)$ on the board.
+
+#### **3. Operational Constraints**
+The system must satisfy the following safety properties to ensure a valid configuration:
+
+*   **Cardinality Constraint:** Exactly $n$ queens must be instantiated on the board.
+*   **Uniqueness Constraint:** No two queens may occupy the same coordinate $(r, c)$.
+*   **Row Exclusion:** For any two distinct queens $q_i$ and $q_j$ located at $(r_i, c_i)$ and $(r_j, c_j)$, ensure $r_i \neq r_j$.
+*   **Column Exclusion:** For any two distinct queens $q_i$ and $q_j$ located at $(r_i, c_i)$ and $(r_j, c_j)$, ensure $c_i \neq c_j$.
+*   **Diagonal Exclusion:** For any two distinct queens $q_i$ and $q_j$ located at $(r_i, c_i)$ and $(r_j, c_j)$, the absolute difference between their row indices must not equal the absolute difference between their column indices:
+    *   $|r_i - r_j| \neq |c_i - c_j|$
+
+#### **4. Objective**
+*   **Goal State:** Identify a configuration of the set $Q$ such that all Operational Constraints are satisfied simultaneously.
+*   **Output:** Return the set of coordinates $\{(r_1, c_1), (r_2, c_2), \dots, (r_n, c_n)\}$ representing the valid placement.

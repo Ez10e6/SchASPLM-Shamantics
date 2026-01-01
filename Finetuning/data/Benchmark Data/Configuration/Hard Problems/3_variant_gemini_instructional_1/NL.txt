@@ -1,0 +1,42 @@
+### System Specification: Balanced Workstation Procurement
+
+**1. Objective**
+Select exactly one component from each of the three hardware categories (CPU, GPU, and Drive) to form a valid system configuration that satisfies all proportionality, cost, and performance constraints.
+
+**2. Component Universe**
+The system must be assembled using the following discrete options:
+
+| Category | Model | Cost ($) | Performance (pts) |
+| :--- | :--- | :--- | :--- |
+| **CPU** | FalconX | 600 | 125 |
+| | CoreZen | 500 | 115 |
+| | EcoMini | 300 | 90 |
+| **GPU** | TitanZ | 700 | 135 |
+| | MidlineGT | 500 | 100 |
+| | Pixie | 400 | 95 |
+| **Drive** | FlashNova | 250 | 110 |
+| | Terabox | 300 | 100 |
+| | BudgetDisk | 150 | 60 |
+
+**3. Selection Constraints**
+The configuration must adhere to the following logic:
+
+*   **Cardinality:** Select exactly one (1) CPU, one (1) GPU, and one (1) Drive.
+*   **Performance Ranking (Median Position):** The GPU’s performance score must be the median of the three selected components. It must be strictly greater than one component and strictly less than the other (i.e., $P_{Drive} < P_{GPU} < P_{CPU}$ OR $P_{CPU} < P_{GPU} < P_{Drive}$).
+*   **Cost Proportionality:** The component identified as the median performance value (the GPU, per the ranking constraint) must have the lowest cost of the three selected parts.
+*   **Pricing Distribution:** Exactly two (2) of the selected components must have a cost exceeding $300.00.
+*   **Performance Stability:** The total spread between the highest performance score and the lowest performance score in the set must not exceed 50 points ($\max(P) - \min(P) \leq 50$).
+
+**4. Conditional Dependencies**
+*   **CPU/GPU Exclusion:** If the selected CPU cost is greater than $500.00, the Pixie GPU is prohibited.
+*   **Storage/GPU Requirement:** If the FlashNova Drive is selected, the GPU performance score must be $\geq 100$.
+
+**5. Formal Logic Summary**
+Let $C = \{CPU, GPU, Drive\}$ be the set of selected components.
+1. $|C| = 3$.
+2. $\text{Median}(P_{CPU}, P_{GPU}, P_{Drive}) = P_{GPU}$.
+3. $Price_{GPU} < Price_{CPU}$ AND $Price_{GPU} < Price_{Drive}$.
+4. Count($Price_i > 300$) $= 2$.
+5. $\max(P_i) - \min(P_i) \leq 50$.
+6. If $Price_{CPU} > 500 \implies GPU \neq \text{Pixie}$.
+7. If $Drive = \text{FlashNova} \implies P_{GPU} \geq 100$.

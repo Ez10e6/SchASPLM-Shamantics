@@ -1,0 +1,41 @@
+### System Specification: Curriculum-Based Course Timetabling (CB-CTT)
+
+#### 1. System Objective
+The primary objective is to generate an optimal schedule that assigns every lecture of every course to a specific period (defined as a unique day and timeslot combination) and an authorized room, satisfying all fundamental integrity constraints while minimizing penalty costs associated with secondary preferences.
+
+#### 2. Domain Definitions
+*   **Course**: A set of lectures taught by a teacher to a specific group of students.
+*   **Curriculum**: A grouping of courses that share a common student cohort.
+*   **Period**: A discrete temporal unit defined by a Day and a Timeslot.
+*   **Room**: A physical location with a defined capacity and building attribute.
+*   **Teacher**: An entity assigned to deliver course lectures.
+
+#### 3. Hard Constraints (Mandatory Requirements)
+The system shall strictly enforce the following constraints. Any violation renders the schedule invalid.
+
+*   **Lecture Completeness**: Assign every lecture defined for each course to exactly one period and one room.
+*   **Course Conflict Avoidance**: Prohibit the scheduling of two or more lectures from the same course in the same period.
+*   **Curriculum & Teacher Cohesion**: Prohibit the scheduling of two or more lectures in the same period if they:
+    *   Belong to the same curriculum.
+    *   Are taught by the same teacher.
+*   **Room Uniqueness**: Ensure that no more than one lecture is assigned to the same room during the same period.
+*   **Teacher Availability**: Restrict lecture assignments to periods where the assigned teacher is explicitly marked as available.
+
+#### 4. Soft Constraints (Optimization Objectives)
+The system shall minimize the total penalty score derived from the following violations:
+
+*   **SC-1: Room Capacity**: Penalize assignments where the number of enrolled students in a course exceeds the seated capacity of the assigned room.
+*   **SC-2: Minimum Working Days**: Penalize courses whose total lectures are spread across fewer distinct days than the defined "Minimum Working Days" parameter for that course.
+*   **SC-3: Isolated Lectures**: Penalize occurrences where a lecture within a curriculum is not temporally adjacent (immediately before or after) to another lecture of the same curriculum on the same day.
+*   **SC-4: Curriculum Windows**: Penalize "gaps" (empty periods) between two scheduled lectures of the same curriculum occurring on the same day.
+*   **SC-5: Room Stability**: Penalize the assignment of a course’s lectures to multiple distinct rooms; ideally, all lectures for a single course should occur in the same room.
+*   **SC-6: Student Load**: Ensure the daily count of lectures for a specific curriculum remains within the defined [Minimum, Maximum] range; penalize any daily total falling outside these bounds.
+*   **SC-7: Travel Distance**: Penalize the scheduling of consecutive lectures within a curriculum if the rooms assigned to those lectures are located in different buildings.
+*   **SC-8: Room Suitability**: Penalize the assignment of courses to rooms that do not satisfy the specific equipment or environmental requirements of the course.
+*   **SC-9: Double Lectures**: If a course configuration requires grouped (back-to-back) lectures, penalize instances where these lectures are not scheduled consecutively in the same day.
+
+#### 5. Execution Logic
+1.  **Input Parsing**: Ingest sets for Courses, Teachers, Curricula, Rooms, and Availability Matrices.
+2.  **Feasibility Check**: Attempt to find an assignment $(Lecture \rightarrow Period, Room)$ that satisfies all Hard Constraints.
+3.  **Cost Evaluation**: Calculate the weighted sum of all Soft Constraint violations.
+4.  **Optimization**: Apply iterative heuristics or exact methods to minimize the objective function (Total Penalty) without violating Hard Constraints.

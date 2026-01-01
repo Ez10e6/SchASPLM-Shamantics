@@ -17,13 +17,13 @@ The corresponding ASP generator would be:
 
 ```
 % 1
-N_lectures {{ assigned(Course, Room, Day, Period) : room(Room,_), day(Day), period(Period) }} N_lectures :- course(Course,_,N_lectures,_,_).
+N_lectures { assigned(Course, Room, Day, Period) : room(Room,_), day(Day), period(Period) } N_lectures :- course(Course,_,N_lectures,_,_).
 
 % 2
-1 {{ assigned(Player, Team, Position) : team(Team), position(Position) }} 1 :- player(Player).
+1 { assigned(Player, Team, Position) : team(Team), position(Position) } 1 :- player(Player).
 
 % 3
-1 {{ assigned(Employee, Task, Day) : task(Task) }} 1 :- employee(Employee), day(Day).
+1 { assigned(Employee, Task, Day) : task(Task) } 1 :- employee(Employee), day(Day).
 ```
 
 Below is a template of an instace for your problem, you may use the predicates and variables to construct your generator:

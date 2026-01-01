@@ -1,0 +1,54 @@
+### **System Specification: Autonomous Subterranean Exploration Rover**
+
+#### **1. Operational Environment and Topology**
+The mission environment is a directed graph consisting of nodes (locations) and edges (tunnels). Movement between any two nodes consumes exactly **1 minute** of mission time.
+
+*   **Nodes:** {LaunchPad, Tunnel1, Tunnel2, Tunnel3, StationA, StationB, StationC, CalibEdge}.
+*   **Edge Connectivity and Resource Costs:**
+    *   **LaunchPad → Tunnel1:** 2 liters water.
+    *   **LaunchPad → Tunnel2:** 3 liters water.
+    *   **Tunnel1 → StationA:** 1 liter water.
+    *   **StationA → Tunnel3:** 1 liter water.
+    *   **Tunnel3 → Tunnel2:** 0 liters water.
+    *   **Tunnel2 → StationB:** 1 liter water.
+    *   **Tunnel2 → CalibEdge:** 2 liters water.
+    *   **CalibEdge → StationC:** 1 liter water.
+    *   **StationC → Tunnel1:** 2 liters water.
+
+#### **2. Initial State**
+*   **Deployment Location:** LaunchPad.
+*   **Initial Water Inventory ($W$):** 16 liters.
+*   **Elapsed Time ($T$):** 0 minutes.
+*   **Event Counter ($E$):** 0.
+*   **Sample Inventory ($S$):** $\emptyset$.
+
+#### **3. Transitional Constraints**
+*   **Temporal Limit:** Total mission time $T$ must not exceed **10 minutes**.
+*   **Resource Integrity:** Water inventory $W$ must remain $\ge 0$ at all times.
+*   **Event Limit:** Total discrete events $E$ (movements, sampling, and refills) must not exceed **18**.
+*   **Directionality:** Traversal is strictly limited to the specified directions between nodes.
+
+#### **4. Operational Actions**
+*   **Sampling Operations:**
+    *   **Duration:** 1 minute per operation.
+    *   **Resource Recovery:** +1 liter water (recovered from substrate).
+    *   **Protocol:** No two consecutive sampling operations may occur at the same station.
+*   **Water Replenishment (CalibEdge):**
+    *   **Duration:** 2 consecutive minutes.
+    *   **Resource Gain:** +3 liters water.
+    *   **Frequency:** Maximum of one replenishment operation per mission.
+
+#### **5. Mission Objectives and Sampling Logic**
+*   **Primary Samples (Mandatory):**
+    *   **StationA:** Must be sampled exactly once. Collection must be completed by $T \le 6$.
+    *   **StationB:** Must be sampled exactly once.
+*   **Secondary Samples (Conditional):**
+    *   **StationC:** Must be sampled if and only if both StationA and StationB have been sampled within the first **8 minutes** ($T \le 8$). If this condition is not met, StationC sampling is non-essential.
+*   **Optimization Hierarchy:**
+    1.  **Maximize $N$:** Total number of unique samples collected.
+    2.  **Minimize $T_{mandatory}$:** If $N$ is equal across plans, select the plan with the lowest time for completing both mandatory samples (StationA and StationB).
+
+#### **6. Execution Rules**
+*   The rover must navigate the network while adhering to the cooling/hydraulic costs associated with each tunnel and station entry.
+*   Every movement between nodes, every 1-minute sampling operation, and every 2-minute refill sequence counts as a discrete event toward the total event limit $E$.
+*   The mission terminates immediately upon $T = 10$, $E = 18$, or the completion of the optimization goals.

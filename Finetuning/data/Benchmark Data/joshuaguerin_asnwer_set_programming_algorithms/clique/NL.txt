@@ -1,0 +1,5 @@
+You are tasked with solving the Maximum Clique problem on an undirected graph.
+The input consists of a set of nodes and edges connecting them.
+
+The objective is to select a subgraph that is "complete," meaning every pair of distinct vertices in the subset is connected by an edge.
+To find the optimal solution, you must maximize the total number of nodes in this complete subgraph.

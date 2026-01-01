@@ -1,0 +1,14 @@
+You are tasked with solving the Ricochet Robots puzzle.
+The board is a grid with specified dimensions (rows and columns).
+The input defines the initial positions of several robots and the locations of barriers (walls).
+The goal is to move specific robots to specific target locations.
+
+The movement rules are unique:
+1. At each step, you select exactly one robot to move.
+2. You select exactly one direction (North, South, East, West).
+3. Once a robot starts moving, it slides continuously in the chosen direction until it is blocked.
+4. A robot is blocked if it hits a barrier or another robot.
+5. The robot stops at the last valid square before the obstacle.
+6. A robot cannot stop mid-path; it must slide fully.
+
+The solution must output the sequence of moves (robot, direction, time) to achieve the target configuration within a maximum number of steps.

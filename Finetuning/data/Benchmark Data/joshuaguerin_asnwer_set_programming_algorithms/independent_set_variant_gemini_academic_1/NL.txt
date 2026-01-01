@@ -1,0 +1,15 @@
+**Exercise: The Maximum Independent Set Problem**
+
+**Problem Statement**
+Let $G = (V, E)$ be an undirected, simple graph, where $V$ denotes a finite set of vertices (entities) and $E \subseteq \{\{u, v\} \mid u, v \in V, u \neq v\}$ represents the set of edges (binary relations) between them.
+
+A subset of vertices $S \subseteq V$ is defined as an **independent set** if it satisfies the following condition:
+$$\forall u, v \in S, \{u, v\} \notin E$$
+That is, no two distinct vertices within the subset $S$ are adjacent in $G$.
+
+**Objective**
+The goal of the **Maximum Independent Set (MIS)** problem is to identify an independent set $S^*$ that maximizes the cardinality of the subset. Formally, solve the following optimization problem:
+$$\text{Maximize } |S|$$
+$$\text{subject to } S \subseteq V \text{ and } (S \times S) \cap E = \emptyset$$
+
+The cardinality of such a set, denoted by $\alpha(G)$, is referred to as the **independence number** of the graph. Provide a formal characterization of the subset $S^*$ for a given graph $G$ and discuss the computational complexity of determining $\alpha(G)$ in the general case.

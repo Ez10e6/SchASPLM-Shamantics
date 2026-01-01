@@ -1,0 +1,7 @@
+You are tasked with implementing a Prime Sieve algorithm.
+Given an input integer 'n', the goal is to identify all prime numbers within the range from 2 to 'n'.
+
+A number is considered composite if it has an integer divisor other than 1 and itself.
+A number is considered prime if it is not composite.
+
+The output should be the set of all prime numbers in the given range.

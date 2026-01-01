@@ -1,0 +1,33 @@
+**Project Specification: Multi-Day Seminar Scheduling System**
+
+### 1. System Entities and Domains
+*   **Seminars ($I$):** A set of 10 unique seminars $\{i_1, i_2, \dots, i_{10}\}$.
+*   **Topics ($T$):** Each seminar $i$ is mapped to exactly one topic from the set $\{\text{AI, Biology, Mathematics}\}$.
+*   **Days ($D$):** $\{1, 2\}$.
+*   **Time Slots ($S$):** $\{\text{Morning, Midday, Afternoon}\}$.
+*   **Rooms ($R$):** $\{1, 2, 3, 4\}$.
+
+### 2. Operational Objective
+Assign each seminar $i \in I$ to a unique schedule coordinate $(d, s, r)$, where $d \in D, s \in S, r \in R$, such that all global and specific constraints are satisfied.
+
+### 3. Global Scheduling Constraints
+*   **Completeness:** Every seminar $i \in I$ must be assigned to exactly one $(d, s, r)$ coordinate.
+*   **Resource Exclusivity:** No more than one seminar may occupy the same $(d, s, r)$ coordinate.
+*   **Venue Availability:** Room 4 is restricted. The coordinate $(d, \text{Midday}, 4)$ is unavailable for all $d \in D$.
+
+### 4. Topic-Specific Constraints
+*   **AI Seminars:**
+    *   Restrict scheduling to $s \in \{\text{Morning, Midday}\}$.
+    *   Prohibit scheduling in $s = \text{Afternoon}$.
+*   **Biology Seminars:**
+    *   Ensure spatial diversity. The set of all Biology seminars must be distributed across a minimum of two distinct rooms ($|R_{Biology}| \ge 2$).
+*   **Mathematics Seminars:**
+    *   Enforce temporal isolation. No two Mathematics seminars may share the same day $d$ and time slot $s$, regardless of room assignment.
+
+### 5. Seminar-Specific Assignments
+*   **Seminar 5:**
+    *   Must be assigned to Day 2 ($d = 2$).
+    *   Must not be assigned to the Morning slot ($s \neq \text{Morning}$).
+*   **Seminar 6 & Seminar 7:**
+    *   **Room Co-location:** Both seminars must be assigned to the same room $r$.
+    *   **Temporal Separation:** Seminars must be assigned to different days $d$. (If Seminar 6 is on Day 1, Seminar 7 must be on Day 2, and vice versa).

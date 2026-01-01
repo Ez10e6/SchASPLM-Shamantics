@@ -1,0 +1,23 @@
+**Exercise: The Numerical 3-Dimensional Matching (N3DM) Problem**
+
+**Problem Statement:**
+Given an instance defined by three disjoint sets of integers $X, Y, \text{ and } Z$, each of cardinality $k$, and a target sum $n \in \mathbb{Z}^+$, determine the existence of a set of $k$ triples $S \subseteq X \times Y \times Z$ that constitutes a valid numerical matching.
+
+**Formal Specification:**
+An instance of the problem is a tuple $(X, Y, Z, n)$ where:
+*   $X = \{x_1, x_2, \dots, x_k\}$
+*   $Y = \{y_1, y_2, \dots, y_k\}$
+*   $Z = \{z_1, z_2, \dots, z_k\}$
+*   $n$ is a constant positive integer.
+
+**Objective:**
+Construct a set $S$ of $k$ ordered triples of the form $(x, y, z)$ such that the following constraints are satisfied:
+
+1.  **Bijective Partitioning (Perfect Matching):** The set $S$ must partition the union $X \cup Y \cup Z$ into $k$ disjoint subsets. Formally, every element of the constituent sets must appear in exactly one triple. This implies the existence of two permutations, $\sigma$ and $\pi$, of the index set $\{1, \dots, k\}$ such that:
+    $$S = \{ (x_i, y_{\sigma(i)}, z_{\pi(i)}) \mid 1 \le i \le k \}$$
+
+2.  **Arithmetic Invariance:** Every triple $(x, y, z) \in S$ must satisfy the summation constraint:
+    $$x + y + z = n$$
+
+**Required Output:**
+The output must be the collection of triples $S$ that satisfies the aforementioned conditions, or a proof of non-existence if no such partition of elements into sum-invariant triples is feasible for the given instance.

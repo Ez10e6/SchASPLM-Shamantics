@@ -1,0 +1,45 @@
+### **Symposium Architectural Specification**
+
+#### **1. System Entities and Domains**
+*   **Temporal Units:**
+    *   **Days ($D$):** $\{d_1, d_2, d_3\}$
+    *   **Sessions ($S$):** $\{s_{morning}, s_{midday}, s_{evening}\}$
+*   **Spatial Units:**
+    *   **Rooms ($R$):** $\{r_1, r_2, r_3, r_4\}$
+*   **Academic Disciplines ($Di$):** $\{AI, Physics, Mathematics, Linguistics\}$
+*   **Workshops ($W$):** A set of 12 unique workshops $\{w_1, w_2, \dots, w_{12}\}$, each assigned to one discipline $di \in Di$.
+
+#### **2. Operational Constraints**
+
+**2.1 Slot Allocation and Capacity**
+*   **Workshop Minimum:** Each workshop $w \in W$ must be assigned to at least one room-time slot $(d, s, r)$.
+*   **Mutual Exclusivity:** No more than one workshop may occupy a specific room-time slot $(d, s, r)$.
+*   **Daily Room Capacity:** A room $r$ may host a maximum of two workshops per day $d$.
+*   **Temporal Buffer:** A room $r$ cannot host workshops in back-to-back sessions. If a session is held in $s_{midday}$, the room must remain vacant during $s_{morning}$ and $s_{evening}$ of the same day.
+
+**2.2 Spatial Restrictions**
+*   **Room 2 Availability:** Room $r_2$ is prohibited from hosting sessions during $s_{evening}$.
+*   **Room 4 Discipline Exclusion:** Room $r_4$ is prohibited from hosting workshops categorized as $AI$ or $Physics$.
+*   **Mathematics Localization:** All $Mathematics$ workshops must be scheduled exclusively in $r_1$ or $r_3$.
+
+**2.3 Temporal and Discipline Constraints**
+*   **AI Scheduling:** All $AI$ workshops must be scheduled during $s_{morning}$.
+*   **Physics Scheduling:** All $Physics$ workshops must be scheduled on $d_1$ or $d_2$; they are prohibited on $d_3$.
+*   **Linguistics Concurrency:** No two $Linguistics$ workshops may occur during the same session $s$ on the same day $d$.
+*   **Daily Discipline Diversity:** Every day $d \in D$ must include at least one workshop from each discipline $di \in Di$.
+*   **Intra-Room Discipline Homogeneity:** A room $r$ may host only one type of discipline $di$ per day $d$. Mixing different disciplines within the same room on the same day is prohibited.
+
+**2.4 Schedule Anchor Points**
+*   **Symposium Opening:** The session at $(d_1, s_{morning})$ must be an $AI$ workshop.
+*   **Symposium Closing:** The session at $(d_3, s_{evening})$ must be a $Linguistics$ workshop.
+
+#### **3. Optimization Objective**
+*   **Utilization Maximization:** Populate the maximum number of available room-time slots $(d, s, r)$ subject to the 12-workshop minimum and all operational constraints.
+*   **Waste Minimization:** Minimize the count of unused slots while strictly adhering to the "Temporal Buffer" and "Daily Room Capacity" logic. No additional workshops beyond those required to satisfy the constraints and the 12-unit minimum should be added if they violate the established scheduling logic.
+
+#### **4. Execution Protocol**
+1.  Initialize a 3x3x4 grid representing the symposium schedule.
+2.  Apply Anchor Points to $(d_1, s_{morning})$ and $(d_3, s_{evening})$.
+3.  Distribute the 12 workshops to satisfy the Daily Discipline Diversity and Discipline Scheduling constraints.
+4.  Validate all Spatial and Temporal Buffer restrictions.
+5.  Iterate to ensure the configuration maximizes the total occupancy of the 36 available slots without violating the constraints defined in Section 2.

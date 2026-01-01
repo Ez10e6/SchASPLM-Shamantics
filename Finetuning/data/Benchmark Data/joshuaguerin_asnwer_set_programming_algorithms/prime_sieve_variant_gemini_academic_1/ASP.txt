@@ -1,0 +1,8 @@
+% Define the domain of numbers from 2 to n.
+num(2..n).
+
+% Define composite numbers: X is composite if it is divisible by another number Y in the domain.
+composite(X) :- num(X), num(Y), X\Y==0, X!=Y.
+
+% Define prime numbers: N is prime if it is a number and not composite.
+prime(N) :- num(N), not composite(N).

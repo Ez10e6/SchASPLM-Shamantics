@@ -1,0 +1,14 @@
+**Exercise 4.12: Formal Specification of the Subset Sum Problem**
+
+**Problem Statement:**
+Let $\mathcal{S} = \{s_1, s_2, \dots, s_m\}$ be a finite multiset of $m$ integers, and let $T \in \mathbb{Z}$ represent a predetermined target value. Formulate a computational procedure to determine the existence of, or explicitly construct, a sub-collection of entities $\mathcal{S}' \subseteq \mathcal{S}$ that satisfies the following summation criterion:
+
+$$\sum_{x \in \mathcal{S}'} x = T$$
+
+**Constraints and Conditions:**
+1.  **Selection Constraint:** The subset $\mathcal{S}'$ must be composed exclusively of elements residing within the original multiset $\mathcal{S}$, observing the multiplicity of each element.
+2.  **Objective Function:** The aggregate sum of the elements in $\mathcal{S}'$ must be identically equal to the target value $T$.
+3.  **Domain:** While the elements of $\mathcal{S}$ and the target $T$ are typically restricted to the set of non-negative integers $\mathbb{Z}_{\geq 0}$ in standard decision versions, assume for this exercise that $s_i, T \in \mathbb{Z}$ unless otherwise specified.
+
+**Required:**
+Identify whether there exists any mapping of the elements of $\mathcal{S}$ to a binary state $x_i \in \{0, 1\}$ such that the linear combination $\sum_{i=1}^{m} x_i s_i = T$ holds true. Discuss the computational complexity of this problem relative to the size of the input and the magnitude of $T$.

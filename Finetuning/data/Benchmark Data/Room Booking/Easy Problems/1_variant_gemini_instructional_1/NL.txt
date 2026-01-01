@@ -1,0 +1,29 @@
+### System Specification: Seminar Scheduling Problem
+
+**1. System Entities**
+Define the following finite sets representing the system components:
+*   **Seminars ($\mathcal{S}$):** $\{S_1, S_2, S_3, S_4, S_5, S_6\}$
+*   **Time Slots ($\mathcal{T}$):** $\{T_{Morning}, T_{Midday}, T_{Afternoon}\}$
+*   **Rooms ($\mathcal{R}$):** $\{R_1, R_2, R_3\}$
+
+**2. Functional Requirement**
+*   **Assignment:** Map every seminar $s \in \mathcal{S}$ to a unique tuple $(t, r)$, where $t \in \mathcal{T}$ and $r \in \mathcal{R}$.
+*   **Completeness:** Ensure all six seminars are assigned a schedule.
+
+**3. Constraints**
+
+*   **C1: Resource Exclusivity**
+    *   Prohibit the assignment of two distinct seminars to the same $(t, r)$ coordinate.
+    *   $\forall s_i, s_j \in \mathcal{S}, s_i \neq s_j \implies (t_i, r_i) \neq (t_j, r_j)$.
+
+*   **C2: Room 3 Temporal Restriction**
+    *   Restrict the use of $R_3$ such that it is unavailable during $T_{Afternoon}$.
+    *   If $r = R_3$, then $t \neq T_{Afternoon}$.
+
+*   **C3: Seminar 1 Spatial Fixity**
+    *   Mandate that $S_1$ is assigned to $R_1$.
+    *   $S_1 \to (t, R_1)$, where $t \in \mathcal{T}$.
+
+*   **C4: Seminar 2 and 3 Temporal Disjointness**
+    *   Prohibit $S_2$ and $S_3$ from sharing the same time slot, regardless of room assignment.
+    *   $t(S_2) \neq t(S_3)$.

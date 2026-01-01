@@ -1,3 +1,0 @@
-An autonomous scout initiates a mission from Node 1 within a four-site network. The available flight paths are restricted to the following connections: Site 1 is linked to Sites 2 and 3, while Site 2 is connected to Site 4. Every transition between linked sites consumes one unit of operational time. 
-
-The scout is mandated to execute a flight path lasting exactly 5 time units. For the mission to be classified as successful, the scout must register a presence at both Node 3 and Node 4 at some point during its journey, irrespective of the order in which they are reached.

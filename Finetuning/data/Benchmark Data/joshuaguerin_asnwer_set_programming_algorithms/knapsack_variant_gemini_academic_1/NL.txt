@@ -1,0 +1,19 @@
+**Exercise: The 0-1 Knapsack Optimization Problem**
+
+**Problem Statement:**
+Consider a finite set of $m$ discrete entities, denoted by $S = \{e_1, e_2, \dots, e_m\}$. Each entity $e_i$ is characterized by a tuple $(v_i, w_i)$, where $v_i \in \mathbb{R}^+$ represents the intrinsic value of the entity and $w_i \in \mathbb{R}^+$ represents its weight. Given a scalar $n \in \mathbb{R}^+$, which defines the maximum weight capacity of a container, formulate and solve the following combinatorial optimization problem.
+
+**Objective:**
+Identify a subset of entities $S' \subseteq S$ that maximizes the objective function:
+$$\max \sum_{e_i \in S'} v_i$$
+
+**Constraints:**
+The selection of the subset $S'$ is subject to the following capacity constraint:
+$$\sum_{e_i \in S'} w_i \leq n$$
+
+**Formal Requirements:**
+1.  **Decision Variables:** Define a set of binary indicator variables $x_i \in \{0, 1\}$ for $i = 1, \dots, m$, where $x_i = 1$ if entity $e_i$ is included in the subset $S'$, and $x_i = 0$ otherwise.
+2.  **Feasibility:** A solution is deemed feasible if and only if it satisfies the linear inequality $\sum_{i=1}^m w_i x_i \leq n$.
+3.  **Optimality:** A feasible solution is optimal if no other feasible subset yields a strictly greater aggregate value.
+
+Provide a formal description of an algorithm (e.g., via dynamic programming or a branch-and-bound approach) to determine the optimal vector $\mathbf{x} = (x_1, x_2, \dots, x_m)$ and the corresponding maximum value. Discuss the computational complexity of your proposed solution in terms of $m$ and $n$.

@@ -13,3 +13,7 @@ accelerate
 
 # macOS Specific
 mlx-lm == 0.30.0; sys_platform == 'darwin'
+
+# data augentation using google gemini
+google
+google-genai

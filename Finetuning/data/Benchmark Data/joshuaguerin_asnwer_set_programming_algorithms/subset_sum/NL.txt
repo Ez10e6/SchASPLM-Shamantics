@@ -1,0 +1,4 @@
+You are tasked with solving the Subset Sum problem.
+The input consists of a set of integer values and a specific target number 'n'.
+
+The objective is to select a subset of these values such that the sum of the selected numbers adds up to exactly the target 'n'.

@@ -1,0 +1,17 @@
+% Define the board dimensions from 1 to n.
+values(1..n).
+
+% Generate exactly n queen positions on the board.
+n { queens(R, C) : values(R), values(C) } n.
+
+% Constraint: No two queens can occupy the same row.
+:- queens(R, C), queens(R, D), C!=D.
+
+% Constraint: No two queens can occupy the same column.
+:- queens(R, C), queens(S, C), R!=S.
+
+% Constraint: No two queens can occupy the same positive diagonal (sum of coordinates).
+:- queens(R, C), queens(S, D), R!=S, C!=D, R+C==S+D.
+
+% Constraint: No two queens can occupy the same negative diagonal (difference of coordinates).
+:- queens(R, C), queens(S, D), R!=S, C!=D, R-C==S-D.

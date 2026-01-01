@@ -1,0 +1,57 @@
+### **System Configuration Specification: 3D Rendering Suite**
+
+#### **1. Objective**
+Select exactly one component from each of the three defined categories—Central Processing Units (CPUs), Graphics Processing Units (GPUs), and Power Supply Units (PSUs)—to form a valid system configuration that satisfies all operational, compatibility, and fiscal constraints.
+
+#### **2. Component Definitions**
+
+**Table 1: CPUs ($C$)**
+| ID | Name | Wattage ($W$) | Cost ($P$) |
+| :--- | :--- | :--- | :--- |
+| $C_1$ | BoltX | 85W | $400 |
+| $C_2$ | HydraPro | 125W | $550 |
+| $C_3$ | LiteCore | 60W | $350 |
+
+**Table 2: GPUs ($G$)**
+| ID | Name | Wattage ($W$) | Cost ($P$) |
+| :--- | :--- | :--- | :--- |
+| $G_1$ | StormZ | 180W | $800 |
+| $G_2$ | Nebula9 | 150W | $650 |
+| $G_3$ | VegaLite | 95W | $500 |
+
+**Table 3: PSUs ($S$)**
+| ID | Name | Capacity ($W_{cap}$) | Cost ($P$) |
+| :--- | :--- | :--- | :--- |
+| $S_1$ | PowerMax750 | 750W | $200 |
+| $S_2$ | Eco600 | 600W | $150 |
+| $S_3$ | Titan900 | 900W | $250 |
+
+---
+
+#### **3. System Constraints**
+
+**3.1 Power Capacity Constraint**
+*   The aggregate wattage of the selected CPU ($W_C$) and GPU ($W_G$) must be at least 100W less than the maximum capacity of the selected PSU ($W_{cap}$).
+*   **Equation:** $W_C + W_G \leq W_{cap} - 100$.
+
+**3.2 Cost-Wattage Alignment (Cost Justification)**
+*   The component possessing the highest wattage within the configuration must also be the component with the highest unit cost.
+*   **Logic:** If $Comp_i = \text{argmax}(W_C, W_G, W_S)$, then $Comp_i$ must also equal $\text{argmax}(P_C, P_G, P_S)$.
+
+**3.3 Thermal and Electrical Compatibility**
+*   **Exclusion A:** The CPU "HydraPro" ($C_2$) cannot be paired with the GPU "VegaLite" ($G_3$).
+*   **Exclusion B:** The PSU "Eco600" ($S_2$) cannot be paired with the GPU "StormZ" ($G_1$).
+
+**3.4 Minimum Specification Threshold**
+*   The final configuration is prohibited from consisting of the least expensive component from every category simultaneously.
+*   **Prohibited Set:** {$C_3$ (LiteCore), $G_3$ (VegaLite), $S_2$ (Eco600)}.
+
+**3.5 Price Variance Constraint**
+*   The price differential between any two selected components must not exceed $400.
+*   **Equation:** $\max(P_C, P_G, P_S) - \min(P_C, P_G, P_S) \leq 400$.
+
+---
+
+#### **4. Selection Requirements**
+*   Identify a triplet $\{C_n, G_n, S_n\}$ where $n$ represents the selection from each category.
+*   Verify all five constraints (3.1 through 3.5) are satisfied before finalizing the architecture.

@@ -1,0 +1,53 @@
+### System Specification: Graduate Workshop Scheduling
+
+**Document Purpose:** Formal architectural requirements for the allocation of eight (8) graduate workshops across a two-day schedule.
+
+---
+
+#### 1. Domain Definitions
+*   **Workshops ($W$):** A set of 8 distinct sessions $\{w_1, w_2, \dots, w_8\}$.
+*   **Topics ($S$):** Each workshop is categorized as exactly one of: {Artificial Intelligence (AI), Mathematics (Math), Biology (Bio)}.
+*   **Time Slots ($T$):** {Morning, Midday, Afternoon}.
+*   **Days ($D$):** {Day 1, Day 2}.
+*   **Rooms ($R$):** {Room 1, Room 2, Room 3}.
+*   **Schedule Slot:** A unique combination of $(d \in D, t \in T, r \in R)$. Total available slots: 18.
+
+---
+
+#### 2. Functional Requirements
+*   **R2.1 (Allocation):** Every workshop $w \in W$ must be assigned to exactly one Schedule Slot.
+*   **R2.2 (Uniqueness):** No more than one workshop may be assigned to any specific Schedule Slot $(d, t, r)$.
+
+---
+
+#### 3. Operational Constraints
+
+**3.1 Room & Temporal Constraints**
+*   **C3.1.1 (Room Capacity):** For any day $d$ and room $r$, the total number of assigned workshops must not exceed two (2).
+*   **C3.1.2 (Mandatory Vacancy):** Every room must contain at least one (1) unused time slot per day.
+*   **C3.1.3 (Room 2 Restriction):** No workshop shall be scheduled in Room 2 during the Afternoon slot on Day 1 or Day 2.
+
+**3.2 Topic-Specific Constraints**
+*   **C3.2.1 (AI Timing):** Workshops categorized as AI must be scheduled exclusively in the Morning slot.
+*   **C3.2.2 (Math Concurrency):** No two Math workshops may occur during the same time slot $t$ on the same day $d$, regardless of room assignment.
+*   **C3.2.3 (AI/Bio Spatial Exclusion):** If an AI workshop is assigned to room $r$ on day $d$, no Biology workshop may be assigned to that same room $r$ on that same day $d$.
+
+**3.3 Daily Subject Coverage**
+*   **C3.3.1 (Diversity Requirement):** Each day $d \in \{1, 2\}$ must include at least one (1) AI workshop, at least one (1) Math workshop, and at least one (1) Biology workshop.
+
+---
+
+#### 4. Optimization Objective
+*   **O4.1 (Space Efficiency):** Maximize the utilization of available room-time slots.
+*   **O4.2 (Idle Minimization):** Minimize the number of unused valid Schedule Slots while strictly adhering to all constraints in Section 3. (Note: Given the fixed count of 8 workshops and the constraint of max 2 per room/day, efficiency is defined by validly placing all 8 workshops within the restricted 12-slot capacity).
+
+---
+
+#### 5. Constraint Summary Table
+
+| Topic | Time Constraint | Room/Conflict Constraint |
+| :--- | :--- | :--- |
+| **AI** | Morning Only | No Biology workshops in the same room/day. |
+| **Math** | No simultaneous sessions | None. |
+| **Bio** | No Morning/Midday/Afternoon restriction | No AI workshops in the same room/day. |
+| **General** | Room 2 Afternoon = Closed | Max 2 workshops per room per day. |

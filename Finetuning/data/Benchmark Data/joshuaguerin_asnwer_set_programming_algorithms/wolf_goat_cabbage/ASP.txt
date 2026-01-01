@@ -1,0 +1,38 @@
+% Define time steps from 1 to n.
+time(1..n).
+
+% Define a placeholder 'x' (representing an empty seat) that exists on both sides at all times.
+at(x, l, T) :- time(T).
+at(x, r, T) :- time(T).
+
+% Constraint: Each passenger (excluding the placeholder) must be on exactly one side at any time.
+1 { at(P, l, T) ; at(P, r, T) } 1 :- passenger(P), time(T), P!=x.
+
+% Constraint: The farmer must be on exactly one side at any time.
+1 { at(f, l, T) ; at(f, r, T) } 1 :- time(T).
+
+% Generate a boat move: Select a passenger (or placeholder) to enter the boat if they are on the same side as the farmer.
+{ boat(P, T) } :- at(f, S, T), at(P, S, T), passenger(P).
+
+% Effect: If a passenger is in the boat, they move to the opposite bank at the next time step.
+at(P, r, T+1) :- boat(P, T), at(P, l, T), P!=x, T<n.
+at(P, l, T+1) :- boat(P, T), at(P, r, T), P!=x, T<n.
+
+% Effect: The farmer always moves to the opposite bank at the next time step.
+at(f, r, T+1) :- boat(_, T), at(f, l, T), T<n.
+at(f, l, T+1) :- boat(_, T), at(f, r, T), T<n.
+
+% Inertia: Passengers not in the boat remain on their current side.
+at(P, S, T+1) :- passenger(P), not boat(P, T), at(P, S, T), P!=x, T<n.
+
+% Constraint: The wolf and goat cannot be on the same side without the farmer.
+:- at(w, S, T), at(g, S, T), not at(f, S, T).
+
+% Constraint: The goat and cabbage cannot be on the same side without the farmer.
+:- at(g, S, T), at(c, S, T), not at(f, S, T).
+
+% Constraint: The boat cannot carry more than one passenger (ensure unique selection).
+:- boat(P, T), boat(Q, T), P!=Q.
+
+% Goal: The farmer, wolf, goat, and cabbage must all be on the right bank at the final time step.
+at((f ; w ; g ; c), r, n).

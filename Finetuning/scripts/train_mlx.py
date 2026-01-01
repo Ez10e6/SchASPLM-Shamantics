@@ -2,108 +2,132 @@ import sys
 import os
 import subprocess
 import yaml
-from utils_ft import to_relative
+import shutil
+import tempfile
+from utils_ft import to_relative, get_root_path
 
-def run_mlx_training(model_path, data_folder, adapter_path, iters=300):
+def run_mlx_training(model_path, data_folder, adapter_path, iters=12000, num_layers=16):
     """
-    Runs MLX LoRA training by generating a YAML config and calling the CLI.
-    Since mlx_lm.lora uses trust_remote_code=true when loading the tokenizer
-    it is important to only run this with trusted models.
+    Runs MLX LoRA training via CLI.
     """
+    cwd = os.getcwd()
+
+    # Maak paden relatief t.o.v. waar je het script draait.
+    # Dit zorgt ervoor dat de interne logs van MLX er schoon uitzien.
+    rel_model_path = os.path.relpath(model_path, cwd)
+    rel_data_folder = os.path.relpath(data_folder, cwd)
+    rel_adapter_path = os.path.relpath(adapter_path, cwd)
+
     print("--- Initializing MLX Fine-tuning (CLI Mode) ---")
-    print(f"--- Model: ./{to_relative(model_path)} ---")
-    print(f"--- Data Folder: ./{to_relative(data_folder)} ---")
+    print(f"--- Model: ./{rel_model_path} ---")
+    print(f"--- Data Folder: ./{rel_data_folder} ---")
 
-    # Ensure adapter directory exists
-    os.makedirs(adapter_path, exist_ok=True)
+    os.makedirs(rel_adapter_path, exist_ok=True)
+
+    # This ratio needs to be correct
+    grad_accumulation_steps=16
+    decay_steps=iters//grad_accumulation_steps
     
-    # 1. Construct the Configuration Dictionary
+    # Configuration
     config_data = {
-        "model": model_path,
+        "model": rel_model_path,
         "train": True,
-        "data": data_folder,
+        "data": rel_data_folder,
         "fine_tune_type": "lora",
-        "adapter_path": adapter_path,
+        "adapter_path": rel_adapter_path,
         
-        # Training Hyperparameters
+        # Hyperparameters
         "iters": iters,
         "batch_size": 1,
-        "grad_accumulation_steps": 4,  
+        "grad_accumulation_steps": grad_accumulation_steps,  
         "grad_checkpoint": True,       
-        "max_seq_length": 4096,
+        "max_seq_length": 4096,        
         
-        # Optimization
+        # Optimizer
         "optimizer": "adamw",
         "lr_schedule": {
             "name": "cosine_decay",  
-            "arguments": [5e-5, iters]
+            "arguments": [1e-4, decay_steps],
         },
         
         # Logging & Saving
-        "steps_per_report": 10,
-        "steps_per_eval": 50,
-        "val_batches": 5,
-        "save_every": 100,
+        "steps_per_report": 100,
+        "steps_per_eval": 600,
+        "val_batches": 128,
+        "save_every": 600,
         "seed": 42,
         
-        # LoRA Architecture
-        # num_layers: 16 fine-tunes the top 16 layers (memory efficient).
-        "num_layers": 16, 
-        
+        # LoRA Config
+        "num_layers": num_layers, 
         "lora_parameters": {
             "rank": 16,
             "dropout": 0.05,
-            "scale": 10.0
-        }
+            "scale": 32.0
+        },
+
+        # This ensures Loss is only calculated on the ASP Code (Assistant response),
+        # not the User Prompt or System Message.
+        "mask_prompt": True
     }
 
-    # 2. Save Config to YAML
-    config_path = os.path.join(adapter_path, "train_config.yaml")
-    print(f"Generating configuration file at: ./{to_relative(config_path)}")
-    with open(config_path, "w") as f:
+    rel_config_path = os.path.join(rel_adapter_path, "train_config.yaml")
+    print(f"Generating configuration file at: ./{rel_config_path}")
+    with open(rel_config_path, "w") as f:
         yaml.dump(config_data, f, default_flow_style=False)
 
-    # 3. Build and Execute Command
-    cmd = [
-        sys.executable, "-m", "mlx_lm", "lora",
-        "--config", config_path
-    ]
+    cmd = [sys.executable, "-m", "mlx_lm", "lora", "--config", rel_config_path]
 
     print("Executing MLX CLI training...")
     try:
-        # Check=True will raise CalledProcessError if it fails
         subprocess.run(cmd, check=True)
-        
-        if os.path.exists(os.path.join(adapter_path, "adapters.safetensors")):
-            print("✓ Training completed successfully. Adapters saved.")
-        else:
-            print("! Warning: Training finished but adapters.safetensors not found.")
-            
+        print("✓ Training completed.")
     except subprocess.CalledProcessError as e:
         print(f"Training Failed with exit code {e.returncode}")
         raise
 
-def fuse_model(base_model, adapter_path, save_path):
+def fuse_model(base_model, adapter_path, save_path, checkpoint_step=None):
     """
-    Fuses the LoRA adapter weights back into the base model using the official CLI.
+    Fuses adapters into the base model.
     """
-    print("Fusing LoRA adapters into base model (CLI Mode)...")
-    print(f"--- Base Model: ./{to_relative(base_model)} ---")
-    print(f"--- Adapter Path: ./{to_relative(adapter_path)} ---")
-    print(f"--- Save Path: ./{to_relative(save_path)} ---")
+    print(f"Fusing LoRA adapters (Step: {checkpoint_step if checkpoint_step else 'Final'})...")
     
-    cmd = [
-        sys.executable, "-m", "mlx_lm", "fuse",
-        "--model", base_model,
-        "--adapter-path", adapter_path,
-        "--save-path", save_path,
-    ]
-    
-    try:
-        subprocess.run(cmd, check=True)
-        print(f"Success! Fused model saved to: ./{to_relative(save_path)}")
-    except subprocess.CalledProcessError as e:
-        print(f"Fusing Failed with exit code {e.returncode}")
-        if e.returncode == 1:
-            print("Tip: If fusing failed due to memory, close other apps or try reducing the base model precision.")
-        raise
+    # Paths for display
+    rel_save_path = to_relative(save_path)
+
+    with tempfile.TemporaryDirectory() as temp_dir:
+        
+        if checkpoint_step:
+            src_weights = os.path.join(adapter_path, f"{int(checkpoint_step):07d}_adapters.safetensors")
+            if not os.path.exists(src_weights):
+                raise FileNotFoundError(f"Checkpoint not found: {src_weights}")
+        else:
+            src_weights = os.path.join(adapter_path, "adapters.safetensors")
+
+        # Destination must be 'adapters.safetensors' for MLX fuse command
+        dest_weights = os.path.join(temp_dir, "adapters.safetensors")
+        
+        print(f"--- Staging checkpoint from: {os.path.basename(src_weights)} ---")
+        shutil.copy2(src_weights, dest_weights)
+        
+        # Copy config files
+        for file in ["adapter_config.json", "train_config.yaml"]:
+            src = os.path.join(adapter_path, file)
+            if os.path.exists(src):
+                shutil.copy2(src, os.path.join(temp_dir, file))
+
+        # Use relative paths for the fuse command as well
+        # Note: temp_dir is absolute, which is fine
+        cmd = [
+            sys.executable, "-m", "mlx_lm", "fuse",
+            "--model", base_model,
+            "--adapter-path", temp_dir,
+            "--save-path", rel_save_path,
+        ]
+        
+        try:
+            # Run from Root so relative model/save paths work
+            subprocess.run(cmd, check=True, cwd=get_root_path())
+            print(f"Success! Fused model saved to: ./{rel_save_path}")
+        except subprocess.CalledProcessError as e:
+            print(f"Fusing Failed with exit code {e.returncode}")
+            raise

@@ -1,0 +1,23 @@
+### Exercise: Optimization of Flow in Directed Networks
+
+**Problem Statement:**
+Let $G = (V, E)$ be a directed graph representing a flow network, where $V$ is the set of vertices (entities) and $E \subseteq V \times V$ is the set of directed edges. We define a capacity function $c: E \to \mathbb{R}_{\geq 0}$ that maps each edge $(u, v) \in E$ to a non-negative real-valued capacity $c(u, v)$. Within this network, let there be two distinguished nodes: a source $s \in V$ and a sink $t \in V$.
+
+The objective is to define a flow function $f: E \to \mathbb{R}$ that maximizes the aggregate value $|f|$, representing the net flow out of the source $s$ (or equivalently, the net flow into the sink $t$).
+
+**Formal Constraints:**
+The assigned flow $f$ must be determined subject to the following rigorous conditions:
+
+1.  **Capacity Constraint:** 
+    For every edge $(u, v) \in E$, the flow assigned to the edge must be non-negative and must not exceed the edge's prescribed capacity:
+    $$0 \leq f(u, v) \leq c(u, v) \quad \forall (u, v) \in E$$
+
+2.  **Flow Conservation:** 
+    For every vertex $u \in V \setminus \{s, t\}$ (all nodes excluding the source and the sink), the total incoming flow must be precisely equal to the total outgoing flow. Formally, the divergence of the flow at any intermediate node must be zero:
+    $$\sum_{\{v \mid (v, u) \in E\}} f(v, u) = \sum_{\{v \mid (u, v) \in E\}} f(u, v) \quad \forall u \in V \setminus \{s, t\}$$
+
+**Objective Function:**
+Maximize the total flow value $|f|$, defined as:
+$$|f| = \sum_{\{v \mid (s, v) \in E\}} f(s, v) - \sum_{\{v \mid (v, s) \in E\}} f(v, s)$$
+
+Provide a formal derivation or an algorithmic approach (e.g., augmenting paths or preflow-push) to identify the optimal flow distribution that satisfies the aforementioned constraints.

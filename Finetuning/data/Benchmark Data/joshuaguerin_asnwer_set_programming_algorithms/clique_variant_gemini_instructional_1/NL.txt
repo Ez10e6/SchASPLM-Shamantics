@@ -1,0 +1,27 @@
+### Problem Specification: Maximum Clique (MC) Optimization
+
+#### 1. System Definition
+Define an undirected graph $G = (V, E)$ as the primary data structure, where:
+*   $V$ is a finite set of vertices (nodes).
+*   $E \subseteq \{\{u, v\} \mid u, v \in V, u \neq v\}$ is a set of unordered pairs representing undirected edges.
+
+#### 2. Objective
+Identify a subset of vertices $S \subseteq V$ that constitutes a **Maximum Clique**. The system must satisfy the dual requirements of structural completeness and cardinality maximization.
+
+#### 3. Functional Constraints
+To qualify as a valid solution, the subset $S$ must adhere to the following logic:
+*   **Completeness (Clique Property):** For every pair of distinct vertices $u, v \in S$, there must exist an edge $\{u, v\} \in E$.
+*   **Induced Subgraph Integrity:** The subgraph $G[S]$ induced by the subset $S$ must be a complete graph (each vertex is adjacent to all other vertices in the subset).
+*   **Vertex Uniqueness:** The selection process must treat all vertices in $S$ as distinct entities.
+
+#### 4. Operational Requirements
+The implementation must execute the following operations:
+*   **Search:** Traverse the vertex space $V$ to evaluate potential candidate subsets.
+*   **Verification:** Validate that every selected node pair within a candidate subset $S$ is represented in the edge set $E$.
+*   **Optimization:** Apply an objective function to maximize the cardinality of the subset:
+    $$\text{Maximize } z = |S|$$
+    $$\text{Subject to: } \forall u, v \in S, u \neq v \implies \{u, v\} \in E$$
+
+#### 5. Output Specification
+*   **Primary Output:** The subset $S^* \subseteq V$ that yields the highest possible integer value for $|S^*|$.
+*   **Optimality Proof:** Ensure that no subset $S' \subseteq V$ exists such that $S'$ is a clique and $|S'| > |S^*|$.

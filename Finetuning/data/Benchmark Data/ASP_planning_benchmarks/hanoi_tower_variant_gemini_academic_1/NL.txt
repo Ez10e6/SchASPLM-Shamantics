@@ -1,0 +1,30 @@
+**Exercise: Constrained Temporal State-Space Search in a Generalized Towers of Hanoi Environment**
+
+**1. System Formalization**
+Let $D = \{d_1, d_2, \dots, d_k\}$ be a set of $k$ discrete entities (disks). We partition $D$ into two disjoint subsets:
+*   $P = \{d_1, d_2, d_3, d_4\}$, representing a set of stationary foundations (pegs).
+*   $M = \{d_5, d_6, \dots, d_k\}$, representing a set of $k-4$ movable elements.
+
+We define a strict total ordering on $D$ based on physical magnitude, denoted by the relation $\prec$. The magnitude of an entity is inversely proportional to its index:
+$$\forall i, j \in \{1, \dots, k\}: i > j \iff d_i \prec d_j$$
+Thus, $d_k$ is the smallest entity and the elements of $P$ are the largest.
+
+**2. State Space and Configurations**
+A configuration $\sigma$ is defined as a collection of stacks where each $d \in M$ is assigned a position within a sequence rooted at some $p \in P$. A state at time $t$ is valid if and only if it satisfies the **monotonicity constraint**:
+For any two entities $d_i, d_j$ where $d_i$ is immediately superior to $d_j$ in a stack, the condition $d_i \prec d_j$ (or $i > j$) must hold.
+
+**3. Transition Dynamics**
+A transition between state $\sigma_{t}$ and $\sigma_{t+1}$ is defined by the relocation of a single entity $d \in M$. Let $move(d, t)$ denote the action of moving disk $d$ at time step $t$. The system is subject to the following operational constraints:
+
+*   **C1 (Singleton Move):** Exactly one disk $d \in M$ must be moved per time step $t \in \{1, \dots, T\}$.
+*   **C2 (Stack Top Condition):** An entity $d$ may be moved at time $t$ if and only if $d$ is the maximal element (topmost) of its current stack in configuration $\sigma_{t-1}$.
+*   **C3 (Placement Constraint):** An entity $d$ may be placed upon $d'$ at time $t$ if and only if $d \prec d'$ and $d'$ is the current maximal element of its stack.
+*   **C4 (Temporal Non-Recurrence):** To prevent immediate oscillation, no entity $d$ may be moved in consecutive time steps. Formally:
+    $$\forall t \in \{2, \dots, T\}, move(d, t) \implies \neg move(d, t-1)$$
+*   **C5 (Foundation Invariance):** Elements of $P$ are non-relocatable and must serve as the terminal base of every non-empty stack.
+
+**4. Problem Statement**
+Given an initial configuration $\sigma_{0}$ and a target goal configuration $\sigma_{G}$, determine a sequence of $T$ transitions $\{move(d, t)\}_{t=1}^T$ that transforms the system from $\sigma_{0}$ to $\sigma_{G}$ while adhering to constraints **C1–C5**.
+
+**Deliverable:**
+Provide the ordered sequence of operations $S = \langle m_1, m_2, \dots, m_T \rangle$, where each $m_t$ specifies the entity moved and its destination.

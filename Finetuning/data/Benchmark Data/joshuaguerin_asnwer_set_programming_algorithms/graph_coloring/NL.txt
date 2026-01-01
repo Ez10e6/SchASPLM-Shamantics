@@ -1,0 +1,5 @@
+You are tasked with solving the Graph Coloring problem to find the chromatic number.
+The input consists of a set of nodes and edges connecting them.
+
+The objective is to assign a color to each node such that no two connected nodes share the same color.
+To find the optimal solution, you must minimize the total number of distinct colors used.

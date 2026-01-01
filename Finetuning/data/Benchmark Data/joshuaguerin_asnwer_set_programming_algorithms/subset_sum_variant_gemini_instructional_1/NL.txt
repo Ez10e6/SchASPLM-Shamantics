@@ -1,0 +1,24 @@
+### Formal Specification: Subset Sum Solver
+
+**1. System Overview**
+The system is required to execute a formal decision procedure for the **Subset Sum Problem**. Given a finite collection of integers and a specific target value, the system must determine the existence of and identify a subset that satisfies the summation criteria.
+
+**2. Input Definitions**
+*   **Set ($S$):** A finite set of $k$ integers, defined as $S = \{s_1, s_2, \dots, s_k\}$, where $s_i \in \mathbb{Z}$.
+*   **Target ($n$):** A target integer value $n \in \mathbb{Z}$.
+
+**3. Functional Requirements**
+*   **Subset Selection:** Identify a subset $S' \subseteq S$.
+*   **Summation Verification:** Calculate the arithmetic sum of all elements within the selected subset $S'$.
+*   **Objective:** Ensure the summation satisfies the equality:
+    $$\sum_{x \in S'} x = n$$
+
+**4. Operational Constraints**
+*   **Exclusivity:** Every element in $S'$ must be a member of the input set $S$.
+*   **Cardinality Constraint:** Each instance of an element in $S$ may be utilized at most once in the construction of $S'$.
+*   **Precision:** The sum of the chosen integers must equate to exactly $n$; no deviations or approximations are permitted.
+*   **Null Case:** If $n = 0$, the empty set $S' = \emptyset$ shall be considered a valid solution, unless otherwise constrained by domain-specific non-empty requirements.
+
+**5. Output Specification**
+*   The system shall return the subset $S'$ if the condition is satisfied.
+*   The system shall return a null or failure signal if no subset $S' \subseteq S$ exists such that the sum of its elements equals $n$.

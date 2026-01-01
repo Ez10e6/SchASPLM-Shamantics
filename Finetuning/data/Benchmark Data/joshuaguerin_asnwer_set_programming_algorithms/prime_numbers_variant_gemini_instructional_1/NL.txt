@@ -1,0 +1,32 @@
+### System Specification: Perfect Number Identification
+
+**Objective:**
+Design and execute a computational procedure to identify all integers within a defined closed interval that satisfy the mathematical criteria for perfection.
+
+**1. Input Specification**
+*   **Variable:** $n$
+*   **Type:** Positive Integer ($\mathbb{Z}^+$)
+*   **Description:** Represents the inclusive upper bound of the search interval.
+
+**2. Mathematical Definitions**
+*   **Proper Divisors:** For any integer $x$, the set of proper divisors $D(x)$ is defined as $\{d \in \mathbb{Z}^+ : d < x \land x \equiv 0 \pmod d\}$.
+*   **Perfect Number:** An integer $x$ is classified as "perfect" if and only if the sum of its proper divisors equals the integer itself:
+    $$\sum_{d \in D(x)} d = x$$
+
+**3. Functional Requirements**
+*   **Interval Initialization:** Define the search space as the discrete range $[1, n]$.
+*   **Iterative Evaluation:** Systematically evaluate each integer $i$ where $1 \le i \le n$.
+*   **Divisor Extraction:** For each candidate $i$, identify all positive integers $d$ such that $d$ divides $i$ without remainder and $d < i$.
+*   **Summation Logic:** Calculate the arithmetic sum of the identified proper divisors.
+*   **Predicate Verification:** Apply a boolean check to determine if the sum of divisors is exactly equal to $i$.
+*   **Collection:** Aggregate all integers that satisfy the perfection predicate into a resultant set $P$.
+
+**4. Constraints and Logic**
+*   **Exclusion:** The value $i$ itself must be excluded from its own sum of divisors.
+*   **Lower Bound:** The search must commence at 1.
+*   **Upper Bound:** The search must terminate exactly at $n$.
+*   **Integrity:** The system must strictly preserve the numerical equality requirement ($\text{Sum} = \text{Value}$) without approximation.
+
+**5. Output Specification**
+*   **Format:** A set or ordered list of all identified perfect numbers.
+*   **Null Case:** If no integers satisfy the criteria within the range $[1, n]$, return an empty set.

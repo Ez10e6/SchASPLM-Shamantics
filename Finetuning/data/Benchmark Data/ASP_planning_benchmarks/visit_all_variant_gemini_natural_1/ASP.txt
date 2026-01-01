@@ -1,0 +1,20 @@
+% Define time steps from 1 to the horizon.
+step(1..horizon).
+
+% Initialize the robot's position at time 0.
+atrobot(X, 0) :- at(X).
+
+% Generate exactly one move per time step: from the current position to a connected position.
+1 { move(X, Y, T) : connected(X, Y) } 1 :- atrobot(X, T-1), step(T).
+
+% Effect: The robot's position updates to the destination of the move.
+atrobot(Y, T) :- move(_, Y, T), step(T).
+
+% Track visited locations: A location is visited if the robot is at that location at any time step.
+visited(X) :- atrobot(X, _).
+
+% Constraint: All target locations must be included in the set of visited locations.
+:- visit(X), not visited(X).
+
+% Output the move sequence.
+#show move/3.
