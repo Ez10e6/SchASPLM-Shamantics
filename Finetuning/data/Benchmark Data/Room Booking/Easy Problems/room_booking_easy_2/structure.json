@@ -1,0 +1,19 @@
+{
+  "instance_template": "lecture(1..5). topic(\"AI\"; \"Math\"; \"Physics\"). room(1..3). slot(\"morning\"; \"afternoon\").",
+  "generator": "1 { topicOf(L, T) : topic(T) } 1 :- lecture(L). 1 { scheduled(L, R, S) : room(R), slot(S) } 1 :- lecture(L).",
+  "hard_constraints": [
+    {
+      "description": "Listen closely, class: we must ensure that no room is ever double-booked. This means that if two different lectures are assigned to the same room and the same time slot, we must reject that solution.",
+      "asp_rule": ":- scheduled(L1, R, S), scheduled(L2, R, S), L1 != L2."
+    },
+    {
+      "description": "Now, pay attention to the specific timing for our Artificial Intelligence subject. Every AI lecture is strictly required to take place during the morning slot; any schedule placing AI in the afternoon is considered an error.",
+      "asp_rule": ":- scheduled(L, _, S), topicOf(L, \"AI\"), S != \"morning\"."
+    },
+    {
+      "description": "To maintain proper department boundaries, we have a spatial restriction: Math and Physics lectures are never allowed to occupy the same room. Even if they occur at different times, if one room is used for Math, it cannot be used for Physics.",
+      "asp_rule": ":- scheduled(L1, R, _), scheduled(L2, R, _), topicOf(L1, \"Math\"), topicOf(L2, \"Physics\")."
+    }
+  ],
+  "soft_constraints": []
+}

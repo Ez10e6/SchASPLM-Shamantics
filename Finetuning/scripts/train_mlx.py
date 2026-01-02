@@ -4,9 +4,9 @@ import subprocess
 import yaml
 import shutil
 import tempfile
-from utils_ft import to_relative, get_root_path
+from utils_ft import to_relative, get_project_root
 
-def run_mlx_training(model_path, data_folder, adapter_path, iters=12000, num_layers=16):
+def run_mlx_training(model_path, data_folder, adapter_path, iters=2000, num_layers=16):
     """
     Runs MLX LoRA training via CLI.
     """
@@ -25,7 +25,7 @@ def run_mlx_training(model_path, data_folder, adapter_path, iters=12000, num_lay
     os.makedirs(rel_adapter_path, exist_ok=True)
 
     # This ratio needs to be correct
-    grad_accumulation_steps=16
+    grad_accumulation_steps=4
     decay_steps=iters//grad_accumulation_steps
     
     # Configuration
@@ -47,22 +47,22 @@ def run_mlx_training(model_path, data_folder, adapter_path, iters=12000, num_lay
         "optimizer": "adamw",
         "lr_schedule": {
             "name": "cosine_decay",  
-            "arguments": [5e-5, decay_steps],
+            "arguments": [1e-5, decay_steps],
         },
         
         # Logging & Saving
-        "steps_per_report": 100,
-        "steps_per_eval": 600,
-        "val_batches": 128,
-        "save_every": 600,
+        "steps_per_report": 20,
+        "steps_per_eval": 100,
+        "val_batches": -1,
+        "save_every": 100,
         "seed": 42,
         
         # LoRA Config
         "num_layers": num_layers, 
         "lora_parameters": {
             "rank": 16,
-            "dropout": 0.05,
-            "scale": 32.0
+            "dropout": 0.1,
+            "scale": 2.0
         },
 
         # This ensures Loss is only calculated on the ASP Code (Assistant response),
@@ -126,7 +126,7 @@ def fuse_model(base_model, adapter_path, save_path, checkpoint_step=None):
         
         try:
             # Run from Root so relative model/save paths work
-            subprocess.run(cmd, check=True, cwd=get_root_path())
+            subprocess.run(cmd, check=True, cwd=get_project_root())
             print(f"Success! Fused model saved to: ./{rel_save_path}")
         except subprocess.CalledProcessError as e:
             print(f"Fusing Failed with exit code {e.returncode}")

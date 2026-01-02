@@ -1,0 +1,43 @@
+{
+  "instance_template": "step(t). movedir(pos1, pos2, dir). isnongoal(pos). isgoal(pos). player(p). stone(s). at(entity, pos). clear(pos). goal(s).",
+  "generator": "{ occurs(some_action,T) } :- step(T). 1 <= { pushtonongoal( P,S,Ppos,From,To,Dir,T ) : movedir( Ppos,From,Dir ), movedir( From,To,Dir ), isnongoal( To ), player( P ), stone( S ), Ppos != To, Ppos != From, From != To; move( P,From,To,Dir,T ) : movedir( From,To,Dir ), player( P ), From != To; pushtogoal( P,S,Ppos,From,To,Dir,T ) : movedir( Ppos,From,Dir ), movedir( From,To,Dir ), isgoal( To ), player( P ), stone( S ), Ppos != To, Ppos != From, From != To; noop(T) } <= 1 :- step(T), occurs(some_action,T).",
+  "hard_constraints": [
+    {
+      "description": "The initial state of the environment is defined at temporal index T=0 by mapping the input spatial and relational predicates to the fluents.",
+      "asp_rule": "at(P,To,0) :- at(P,To). clear(P,0) :- clear(P). atgoal(S,0) :- isgoal(L), stone(S), at(S,L)."
+    },
+    {
+      "description": "The execution of a push action towards a non-goal cell necessitates the removal of existing spatial fluents and the assertion of new fluents representing the updated coordinates of the agent and the stone, while simultaneously nullifying the stone's goal attainment status.",
+      "asp_rule": "del( at( P,Ppos ),Ti ) :- pushtonongoal( P,S,Ppos,From,To,Dir,Ti ), step(Ti). del( at( S,From ),Ti ) :- pushtonongoal( P,S,Ppos,From,To,Dir,Ti ), step(Ti). del( clear( To ),Ti ) :- pushtonongoal( P,S,Ppos,From,To,Dir,Ti ), step(Ti). at( P,From,Ti ) :- pushtonongoal( P,S,Ppos,From,To,Dir,Ti ), step(Ti). at( S,To,Ti ) :- pushtonongoal( P,S,Ppos,From,To,Dir,Ti ), step(Ti). clear( Ppos,Ti ) :- pushtonongoal( P,S,Ppos,From,To,Dir,Ti ), step(Ti). del( atgoal( S ),Ti ) :- pushtonongoal( P,S,Ppos,From,To,Dir,Ti ), step(Ti)."
+    },
+    {
+      "description": "The player movement action is defined by the deletion of the agent's occupancy at the source cell and the clear status of the target cell, complemented by the assertion of the agent's occupancy at the target cell and the clear status of the source cell.",
+      "asp_rule": "del( at( P,From ),Ti ) :- move( P,From,To,Dir,Ti ), step(Ti). del( clear( To ),Ti ) :- move( P,From,To,Dir,Ti ), step(Ti). at( P,To,Ti ) :- move( P,From,To,Dir,Ti ), step(Ti). clear( From,Ti ) :- move( P,From,To,Dir,Ti ), step(Ti)."
+    },
+    {
+      "description": "The push action toward a goal location is characterized by the spatial transition of the agent and the stone, the modification of cell occupancy statuses, and the formal assertion of the stone's goal status fluent.",
+      "asp_rule": "del( at( P,Ppos ),Ti ) :- pushtogoal( P,S,Ppos,From,To,Dir,Ti ), step(Ti). del( at( S,From ),Ti ) :- pushtogoal( P,S,Ppos,From,To,Dir,Ti ), step(Ti). del( clear( To ),Ti ) :- pushtogoal( P,S,Ppos,From,To,Dir,Ti ), step(Ti). at( P,From,Ti ) :- pushtogoal( P,S,Ppos,From,To,Dir,Ti ), step(Ti). at( S,To,Ti ) :- pushtogoal( P,S,Ppos,From,To,Dir,Ti ), step(Ti). clear( Ppos,Ti ) :- pushtogoal( P,S,Ppos,From,To,Dir,Ti ), step(Ti). atgoal( S,Ti ) :- pushtogoal( P,S,Ppos,From,To,Dir,Ti ), step(Ti)."
+    },
+    {
+      "description": "The frame axioms (inertia) dictate that any fluent characterizing the environment persists from temporal step T-1 to T unless an explicit deletion operation is performed by a valid action.",
+      "asp_rule": "clear( L,Ti ) :- clear( L,Ti-1 ), not del( clear( L ),Ti ), step(Ti). atgoal( S,Ti ) :- atgoal( S,Ti-1 ), not del( atgoal( S ),Ti ), stone( S ), step(Ti). at( T,L,Ti ) :- at( T,L,Ti-1 ), not del( at( T,L ) ,Ti ), step(Ti)."
+    },
+    {
+      "description": "A push-to-nongoal action is logically restricted by the requirement that the agent and stone must occupy adjacent cells and the target non-goal cell must be clear at the preceding temporal increment.",
+      "asp_rule": ":- pushtonongoal( P,S,Ppos,From,To,Dir,Ti ), not preconditions_png( P,S,Ppos,From,To,Dir,Ti ), step(Ti). preconditions_png( P,S,Ppos,From,To,Dir,Ti ) :- at( P,Ppos,Ti-1 ), at( S,From,Ti-1 ), clear( To,Ti-1 ), movedir( Ppos,From,Dir ), movedir( From,To,Dir ), isnongoal( To ), step(Ti)."
+    },
+    {
+      "description": "A movement action is constrained such that the agent must be situated at the source node and the destination node must be devoid of obstructions at the previous time step.",
+      "asp_rule": ":- move( P,From,To,Dir,Ti ), not preconditions_m( P,From,To,Dir,Ti ), step(Ti). preconditions_m( P,From,To,Dir,Ti ) :- at( P,From,Ti-1 ), clear( To,Ti-1 ), movedir( From,To,Dir ), step(Ti)."
+    },
+    {
+      "description": "The push-to-goal action requires that the agent and stone are in the correct relative spatial configuration and that the destination cell is an empty goal location at temporal index T-1.",
+      "asp_rule": ":- pushtogoal( P,S,Ppos,From,To,Dir,Ti ), not preconditions_pg( P,S,Ppos,From,To,Dir,Ti ), step(Ti). preconditions_pg( P,S,Ppos,From,To,Dir,Ti ) :- at( P,Ppos,Ti-1 ), at( S,From,Ti-1 ), clear( To,Ti-1 ), movedir( Ppos,From,Dir ), movedir( From,To,Dir ), isgoal( To ), step(Ti)."
+    },
+    {
+      "description": "The termination of the search process is conditioned upon a terminal state where the cardinality of stones achieving goal status is equivalent to the total count of required goal instances.",
+      "asp_rule": "goalreached(T) :- goalreached(T-1), step(T). goalreached(T) :- step(T), N = #count{ X : atgoal(X,T) , goal(X) }, N = #count{ X1 : goal(X1) }. :- not goalreached(T), step(T), not step(T+1)."
+    }
+  ],
+  "soft_constraints": []
+}

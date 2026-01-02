@@ -1,0 +1,31 @@
+{
+  "instance_template": "cpu(\"X9\"; \"ZetaCore\"; \"Alpha8\").\ngpu(\"QuasarRTX\"; \"NovaX\"; \"GammaGTX\").\nstorage(\"UltraSSD\"; \"MegaHDD\"; \"FusionDrive\").\ncost(\"X9\", 300; \"ZetaCore\", 500; \"Alpha8\", 450).\ncost(\"QuasarRTX\", 700; \"NovaX\", 600; \"GammaGTX\", 450).\ncost(\"UltraSSD\", 250; \"MegaHDD\", 200; \"FusionDrive\", 300).\nperf(\"X9\", 95; \"ZetaCore\", 120; \"Alpha8\", 110).\nperf(\"QuasarRTX\", 130; \"NovaX\", 125; \"GammaGTX\", 90).\nperf(\"UltraSSD\", 100; \"MegaHDD\", 60; \"FusionDrive\", 95).",
+  "generator": "1 { selected_cpu(C) : cpu(C) } 1.\n1 { selected_gpu(G) : gpu(G) } 1.\n1 { selected_storage(S) : storage(S) } 1.",
+  "hard_constraints": [
+    {
+      "description": "If we're dropping the most cash on a specific part, it better be the MVP of the build. Sanity check for budget justification.",
+      "asp_rule": "selected(X) :- selected_cpu(X). selected(X) :- selected_gpu(X). selected(X) :- selected_storage(X). max_cost(C) :- cost(C, V), V = #max {V1 : cost(C1, V1), selected(C1)}. max_perf(C) :- perf(C, V), V = #max {V1 : perf(C1, V1), selected(C1)}. :- selected(C), max_cost(C), not max_perf(C)."
+    },
+    {
+      "description": "Avoid maxing out every single slot. The bean counters don't want us picking the top-rated part for every category.",
+      "asp_rule": "top_cpu(C) :- cpu(C), perf(C, V), V = #max {V1 : perf(C1, V1), cpu(C1)}. top_gpu(C) :- gpu(C), perf(C, V), V = #max {V1 : perf(C1, V1), gpu(C1)}. top_storage(C) :- storage(C), perf(C, V), V = #max {V1 : perf(C1, V1), storage(C1)}. :- selected_cpu(C), top_cpu(C), selected_gpu(G), top_gpu(G), selected_storage(S), top_storage(S)."
+    },
+    {
+      "description": "Keep the component prices in the same ballpark. If the cost delta between any two parts is over $250, the build is a no-go.",
+      "asp_rule": ":- selected(C1), selected(C2), cost(C1, V1), cost(C2, V2), V1 - 250 >= V2."
+    },
+    {
+      "description": "No bottlenecking allowed. The GPU shouldn't be outrunning the CPU or it's just wasted cycles.",
+      "asp_rule": ":- selected_cpu(C), selected_gpu(G), perf(C, PC), perf(G, PG), PG > PC."
+    },
+    {
+      "description": "Hard skip on the Alpha8 and NovaX combo. They've got some nasty BIOS bugs when paired together.",
+      "asp_rule": ":- selected_cpu(\"Alpha8\"), selected_gpu(\"NovaX\")."
+    },
+    {
+      "description": "FusionDrive is a diva and only works if it's paired with the ZetaCore chip.",
+      "asp_rule": ":- selected_storage(\"FusionDrive\"), not selected_cpu(\"ZetaCore\")."
+    }
+  ],
+  "soft_constraints": []
+}

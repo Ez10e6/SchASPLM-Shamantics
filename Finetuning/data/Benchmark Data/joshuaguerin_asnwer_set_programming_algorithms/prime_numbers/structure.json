@@ -1,0 +1,15 @@
+{
+  "instance_template": "num(1..n).",
+  "generator": "{ p(X) : d(X) }.",
+  "hard_constraints": [
+    {
+      "description": "The relation of proper divisibility is formally established such that for any integer N within the specified domain, an integer M is identified as a proper divisor if N is non-identical to M and the remainder of the division of N by M is equal to zero.",
+      "asp_rule": "divisor(M, N) :- num(N), num(M), N!=M, N\\M==0."
+    },
+    {
+      "description": "The property of being a perfect number is predicated upon the condition that for any integer N, the arithmetic summation of the set of its proper divisors M is quantitatively equivalent to N.",
+      "asp_rule": "perfect(N) :- num(N), #sum {M : divisor(M, N)} == N."
+    }
+  ],
+  "soft_constraints": []
+}

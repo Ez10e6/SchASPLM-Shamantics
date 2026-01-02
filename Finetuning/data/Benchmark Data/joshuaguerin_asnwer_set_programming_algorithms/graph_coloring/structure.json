@@ -1,0 +1,16 @@
+{
+  "instance_template": "max_colors(N) :- N = #count{ X : node(X) }. color(1..N) :- max_colors(N). edge(Y, X) :- edge(X, Y).",
+  "generator": "1 { assign(N, C) : color(C) } 1 :- node(N).",
+  "hard_constraints": [
+    {
+      "description": "Adjacent nodes. No shared color.",
+      "asp_rule": ":- edge(X, Y), assign(X, C), assign(Y, C)."
+    }
+  ],
+  "soft_constraints": [
+    {
+      "description": "Minimize unique colors used.",
+      "asp_rule": "chromatic_number(N) :- N = #count{ C : assign(X, C) }. #minimize { N : chromatic_number(N) }."
+    }
+  ]
+}

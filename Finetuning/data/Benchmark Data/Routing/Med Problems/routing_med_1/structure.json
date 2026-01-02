@@ -1,0 +1,28 @@
+{
+  "instance_template": "loc(\"Station1\"; \"Junction1\"; \"Junction2\"; \"SubstationA\"; \"SubstationB\"). edge(\"Station1\", \"Junction1\"). edge(\"Station1\", \"Junction2\"). edge(\"Junction1\", \"SubstationA\"). edge(\"Junction2\", \"SubstationB\"). edge(\"Junction1\", \"Junction2\"). power(0..8). inspect(\"SubstationA\"; \"SubstationB\").",
+  "generator": "1 { at(L, P) : loc(L) } 1 :- power(P). 1 { inspect_at(L, P) : power(P) } 1 :- inspect(L).",
+  "hard_constraints": [
+    {
+      "description": "Compliance requires that the drone's initial deployment must always be locked to Station1 at the start of the mission sequence.",
+      "asp_rule": "at(\"Station1\", 0)."
+    },
+    {
+      "description": "Operational rules mandate that movement between intervals must follow the site's physical adjacency map; non-consecutive or unconnected jumps are a violation of safety protocols.",
+      "asp_rule": ":- at(L1, P), at(L2, P+1), not edge(L1, L2), not edge(L2, L1), L1 != L2."
+    },
+    {
+      "description": "Company policy requires drone occupancy at a facility during an inspection window, specifically consuming a subsequent energy unit to fulfill technical capture requirements.",
+      "asp_rule": "at(L, P) :- inspect_at(L, P). at(L, P+1) :- inspect_at(L, P), P < 8."
+    },
+    {
+      "description": "To prevent signal interference and ensure mission integrity, our compliance standards prohibit backtracking through Junction1 if Junction2 was navigated prior to the SubstationA inspection.",
+      "asp_rule": ":- at(\"Junction2\", P1), at(\"SubstationA\", P2), at(\"Junction1\", P3), P1 < P2 < P3."
+    }
+  ],
+  "soft_constraints": [
+    {
+      "description": "Energy efficiency is a key performance indicator; the project manager requires the minimization of total power usage calculated at the point of final inspection completion.",
+      "asp_rule": "latest_inspect(P) :- P = #max{P1: inspect_at(_, P1)}. #minimize { P : latest_inspect(P) }."
+    }
+  ]
+}

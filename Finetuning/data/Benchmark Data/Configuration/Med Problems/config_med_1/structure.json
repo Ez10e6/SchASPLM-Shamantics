@@ -1,0 +1,36 @@
+{
+  "instance_template": "cpu(\"Ryzen7\", 300; \"i9\", 400; \"Xeon\", 500).\ngpu(\"RTX4060\", 350; \"RTX3090\", 700; \"Quadro\", 800).\nmobo(\"X670\", 180; \"Z690\", 200; \"C621\", 250).\npsu(\"Bronze\", 80; \"Gold\", 120; \"Platinum\", 160).\nhigh_power(\"RTX3090\"; \"Quadro\").",
+  "generator": "1 { selected_cpu(C) : cpu(C, _) } 1.\n1 { selected_gpu(G) : gpu(G, _) } 1.\n1 { selected_mobo(M) : mobo(M, _) } 1.\n1 { selected_psu(P) : psu(P, _) } 1.",
+  "hard_constraints": [
+    {
+      "description": "Notice how high-performance graphics cards have heavy energy requirements. We must ensure that if a high-power GPU is chosen, it is never paired with a low-efficiency Bronze PSU.",
+      "asp_rule": ":- selected_gpu(G), high_power(G), selected_psu(\"Bronze\")."
+    },
+    {
+      "description": "Class, it is important to remember that the Xeon is a specialized processor. It strictly requires the workstation-grade C621 motherboard to function.",
+      "asp_rule": ":- selected_cpu(\"Xeon\"), selected_mobo(M), M != \"C621\"."
+    },
+    {
+      "description": "To maintain system stability, we must ensure the Ryzen7 processor is only ever used with the X670 motherboard; no other board is acceptable for this CPU.",
+      "asp_rule": ":- selected_cpu(\"Ryzen7\"), selected_mobo(M), M != \"X670\"."
+    },
+    {
+      "description": "Pay close attention to hardware incompatibilities: the i9 processor simply cannot be installed on an X670 motherboard, so we must forbid that combination.",
+      "asp_rule": ":- selected_cpu(\"i9\"), selected_mobo(\"X670\")."
+    },
+    {
+      "description": "For high-end workstation tasks, the Quadro card is only supported when paired with a Xeon CPU. Any other processor choice is invalid for this GPU.",
+      "asp_rule": ":- selected_gpu(\"Quadro\"), selected_cpu(C), C != \"Xeon\"."
+    },
+    {
+      "description": "The Quadro card also has motherboard limitations; specifically, it is not compatible with the Z690 board, so we must filter out that configuration.",
+      "asp_rule": ":- selected_gpu(\"Quadro\"), selected_mobo(\"Z690\")."
+    }
+  ],
+  "soft_constraints": [
+    {
+      "description": "Finally, students, we want to find the most cost-effective build. We calculate the sum of the costs of our selected components and instruct the solver to minimize that total value.",
+      "asp_rule": "total_cost(Cost) :- selected_cpu(C), cpu(C, CCost), selected_gpu(G), gpu(G, GCost), selected_mobo(M), mobo(M, MCost), selected_psu(P), psu(P, PCost), Cost = CCost + GCost + MCost + PCost. #minimize { C : total_cost(C) }."
+    }
+  ]
+}

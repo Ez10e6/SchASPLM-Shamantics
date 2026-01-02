@@ -1,0 +1,20 @@
+{
+  "instance_template": "node(X). edge(X, Y).",
+  "generator": "edge(Y, X) :- edge(X, Y). { clique(X, Y) } :- edge(X, Y). clique(X) :- clique(X, Y). clique(Y) :- clique(X, Y).",
+  "hard_constraints": [
+    {
+      "description": "Distinct clique nodes require connecting clique edge.",
+      "asp_rule": "1 { clique(X, Y) ; clique(Y, X) } 1 :- clique(X), clique(Y), X != Y."
+    },
+    {
+      "description": "Selected edges must exist in original graph.",
+      "asp_rule": ":- clique(X, Y), not edge(X, Y)."
+    }
+  ],
+  "soft_constraints": [
+    {
+      "description": "Maximize clique node count.",
+      "asp_rule": "#maximize { 1, X : clique(X) }."
+    }
+  ]
+}

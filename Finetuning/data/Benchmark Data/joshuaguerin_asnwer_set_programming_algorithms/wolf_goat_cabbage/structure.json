@@ -1,0 +1,35 @@
+{
+  "instance_template": "time(1..n). at(x, l, T) :- time(T). at(x, r, T) :- time(T).",
+  "generator": "{ boat(P, T) } :- at(f, S, T), at(P, S, T), passenger(P).",
+  "hard_constraints": [
+    {
+      "description": "Passenger one location per time.",
+      "asp_rule": "1 { at(P, l, T) ; at(P, r, T) } 1 :- passenger(P), time(T), P!=x. 1 { at(f, l, T) ; at(f, r, T) } 1 :- time(T)."
+    },
+    {
+      "description": "Wolf-goat alone forbidden.",
+      "asp_rule": ":- at(w, S, T), at(g, S, T), not at(f, S, T)."
+    },
+    {
+      "description": "Goat-cabbage alone forbidden.",
+      "asp_rule": ":- at(g, S, T), at(c, S, T), not at(f, S, T)."
+    },
+    {
+      "description": "Max one passenger per boat.",
+      "asp_rule": ":- boat(P, T), boat(Q, T), P!=Q."
+    },
+    {
+      "description": "Boat items switch sides.",
+      "asp_rule": "at(P, r, T+1) :- boat(P, T), at(P, l, T), P!=x, T<n. at(P, l, T+1) :- boat(P, T), at(P, r, T), P!=x, T<n. at(f, r, T+1) :- boat(_, T), at(f, l, T), T<n. at(f, l, T+1) :- boat(_, T), at(f, r, T), T<n."
+    },
+    {
+      "description": "Non-boat items stay.",
+      "asp_rule": "at(P, S, T+1) :- passenger(P), not boat(P, T), at(P, S, T), P!=x, T<n."
+    },
+    {
+      "description": "Everyone right bank at end.",
+      "asp_rule": "at((f ; w ; g ; c), r, n)."
+    }
+  ],
+  "soft_constraints": []
+}

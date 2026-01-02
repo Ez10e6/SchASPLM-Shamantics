@@ -1,0 +1,16 @@
+{
+  "instance_template": "item(Value, Weight).",
+  "generator": "{ knapsack(V, W) } :- item(V, W).",
+  "hard_constraints": [
+    {
+      "description": "Do a sanity check on the bag's weight. If the total heft of our picked items blows past the capacity limit 'n', the whole thing is a bust.",
+      "asp_rule": ":- #sum { W, V : knapsack(V, W) } > n."
+    }
+  ],
+  "soft_constraints": [
+    {
+      "description": "We're trying to get rich here, so maximize the total value. Crank that sum as high as the constraints allow so we get the best loot.",
+      "asp_rule": "#maximize { V, W : knapsack(V, W) }."
+    }
+  ]
+}

@@ -1,0 +1,31 @@
+{
+  "instance_template": "dir(D, DX, DY). dl(D, V). robot(R). barrier(I, J, D). dim(V). pos(R, I, J). target(R, I, J). length(L). step(T).",
+  "generator": "{ occurs(some_action, T) } :- step(T). 1 { selectRobot(R, T) : robot(R) } 1 :- step(T), occurs(some_action, T). 1 { selectDir(D, O, T) : dir(D, O) } 1 :- step(T), occurs(some_action, T).",
+  "hard_constraints": [
+    {
+      "description": "Sanity check: we need to figure out which tiles are actually reachable by sliding until the bot hits a wall or another robot.",
+      "asp_rule": "reachable(R,D,O,I,T) :- go(R,D,O,T), pos(R,O,I,T-1), step(T). reachable(R,D,O,I+DI,T) :- reachable(R,D,O,I,T), not blocked(R,D,O,I+DI,T), dl(D,DI), dim(I+DI), step(T)."
+    },
+    {
+      "description": "Mark a spot as blocked if there is a wall in the way or if another robot is sitting there camping the spot.",
+      "asp_rule": "blocked(R,D,O,I+DI,T) :- go(R,D,O,T), pos(R,-O,L,T-1), not conn(D,L,I), dl(D,DI), dim(I), dim(I+DI), step(T). blocked(R,D,O,L,T) :- sameLine(R,D,O,RR,T), pos(RR,O,L,T-1), step(T)."
+    },
+    {
+      "description": "If a robot isn't the one we picked to move, it shouldn't budge. Standard inertia logic.",
+      "asp_rule": "pos(R,O,I,T) :- pos(R,O,I,T-1), not go_(R,O,T), step(T)."
+    },
+    {
+      "description": "A robot stops sliding at the very last reachable tile before hitting an obstacle.",
+      "asp_rule": "pos(R,O,I,T) :- reachable(R,D,O,I,T), not reachable(R,D,O,I+DI,T), dl(D,DI), step(T)."
+    },
+    {
+      "description": "Don't let the solver think it's okay to make an impossible move where it's blocked from the start.",
+      "asp_rule": ":- go(R,D,O,T), pos(R,O,I,T-1), blocked(R,D,O,I+DI,T), dl(D,DI), step(T)."
+    },
+    {
+      "description": "The big one: if the robot isn't at the target coordinates by the end of the timeline, trash that candidate.",
+      "asp_rule": ":- target(R,I,_), not pos(R,1,I,X), step(X), not step(X+1). :- target(R,_,J), not pos(R,-1,J,X), step(X), not step(X+1)."
+    }
+  ],
+  "soft_constraints": []
+}

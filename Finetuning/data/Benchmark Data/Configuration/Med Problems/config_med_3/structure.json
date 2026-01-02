@@ -1,0 +1,32 @@
+{
+  "instance_template": "frame(\"Lightweight\", 50; \"Standard\", 40; \"Reinforced\", 30). motor(\"Eco\", 60; \"Standard\", 70; \"HighTorque\", 90). battery(\"SmallCell\", 30; \"MediumCell\", 50; \"LongLife\", 80).",
+  "generator": "1 { selected_frame(F) : frame(F, _) } 1. 1 { selected_motor(M) : motor(M, _) } 1. 1 { selected_battery(B) : battery(B, _) } 1.",
+  "hard_constraints": [
+    {
+      "description": "Sanity check: if you're running HighTorque, you better have a LongLife battery or it's game over.",
+      "asp_rule": ":- selected_motor(\"HighTorque\"), selected_battery(B), B != \"LongLife\"."
+    },
+    {
+      "description": "Don't try to slap a HighTorque motor on a Lightweight frame; that's just asking for a hardware crash.",
+      "asp_rule": ":- selected_frame(\"Lightweight\"), selected_motor(\"HighTorque\")."
+    },
+    {
+      "description": "LongLife batteries are basically bricks; you need a Reinforced frame to carry the load.",
+      "asp_rule": ":- selected_battery(\"LongLife\"), selected_frame(F), F != \"Reinforced\"."
+    },
+    {
+      "description": "SmallCell is strictly for the Eco motor; anything else will just pop the circuit.",
+      "asp_rule": ":- selected_battery(\"SmallCell\"), selected_motor(M), M != \"Eco\"."
+    },
+    {
+      "description": "MediumCell doesn't have the juice for HighTorque, so keep them apart.",
+      "asp_rule": ":- selected_battery(\"MediumCell\"), selected_motor(\"HighTorque\")."
+    }
+  ],
+  "soft_constraints": [
+    {
+      "description": "Need to crunch the numbers and maximize that total endurance score so this drone stays airborne.",
+      "asp_rule": "total_endurance(E) :- selected_frame(F), frame(F, EF), selected_motor(M), motor(M, EM), selected_battery(B), battery(B, EB), E = EF + EM + EB. #maximize { E : total_endurance(E) }."
+    }
+  ]
+}

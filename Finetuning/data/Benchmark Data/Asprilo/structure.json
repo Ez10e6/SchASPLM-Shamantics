@@ -1,0 +1,67 @@
+{
+  "instance_template": "time(1..horizon). direction((X,Y)) :- X=-1..1, Y=-1..1, |X+Y|=1. nextto((X,Y),(DX,DY),(X',Y')) :- direction((DX,DY)), position((X,Y)), position((X',Y')), (X,Y)=(X'-DX,Y'-DY), (X',Y')=(X+DX,Y+DY).",
+  "generator": "{ move(R,D,T) : direction(D) ; pickup(R,S,T) : isShelf(S) ; putdown(R,S,T) : isShelf(S) } 1 :- isRobot(R), time(T).",
+  "hard_constraints": [
+    {
+      "description": "Robot position updates via movement.",
+      "asp_rule": "position(R,C,T) :- move(R,D,T), position(R,C',T-1), nextto(C',D,C)."
+    },
+    {
+      "description": "Disallow movement to non-adjacent nodes.",
+      "asp_rule": ":- move(R,D,T), position(R,C,T-1), not nextto(C, D,_)."
+    },
+    {
+      "description": "Robot position remains stationary if no movement.",
+      "asp_rule": "position(R,C,T) :- position(R,C,T-1), not move(R,_,T), isRobot(R), time(T)."
+    },
+    {
+      "description": "Track shelf carriage state.",
+      "asp_rule": "carries(R,S,T) :- pickup(R,S,T). carries(R,S,T) :- carries(R,S,T-1), not putdown(R,S,T), time(T)."
+    },
+    {
+      "description": "Shelf coordinates match carrying robot.",
+      "asp_rule": "position(S,C,T) :- position(R,C,T), carries(R,S,T)."
+    },
+    {
+      "description": "Uncarried shelf remains stationary.",
+      "asp_rule": "position(S,C,T) :- position(S,C,T-1), not carries(_,S,T), isShelf(S), time(T)."
+    },
+    {
+      "description": "Robot and shelf co-location required for pickup.",
+      "asp_rule": ":- pickup(R,S,T), position(R,C,T-1), not position(S,C,T-1)."
+    },
+    {
+      "description": "Robot capacity limit one shelf.",
+      "asp_rule": ":- pickup(R,S,T), carries(R,_,T-1)."
+    },
+    {
+      "description": "Shelf capacity limit one robot.",
+      "asp_rule": ":- pickup(R,S,T), carries(_,S,T-1)."
+    },
+    {
+      "description": "Carrying state required for putdown.",
+      "asp_rule": ":- putdown(R,S,T), not carries(R,S,T-1)."
+    },
+    {
+      "description": "Prohibit robots from swapping adjacent positions.",
+      "asp_rule": "moveto(C',C,T) :- nextto(C',D,C), position(R,C',T-1), move(R,D,T). :- moveto(C',C,T), moveto(C,C',T), C < C'."
+    },
+    {
+      "description": "Prohibit multiple robots per node.",
+      "asp_rule": ":- { position(R,C,T) : isRobot(R) } > 1, position(C), time(T)."
+    },
+    {
+      "description": "Prohibit multiple shelves per node.",
+      "asp_rule": ":- { position(S,C,T) : isShelf(S) } > 1, position(C), time(T)."
+    },
+    {
+      "description": "Fulfil all customer orders within horizon.",
+      "asp_rule": "processed(A,O,T) :- process(A,O,C,T). processed(A,O,T) :- processed(A,O,T-1), time(T). :- ordered(O,A), not processed(A,O,horizon)."
+    },
+    {
+      "description": "Ensure no shelves held at end of horizon.",
+      "asp_rule": ":- carries(_,_,horizon)."
+    }
+  ],
+  "soft_constraints": []
+}

@@ -1,0 +1,20 @@
+{
+  "instance_template": "node(X). edge(X, Y).",
+  "generator": "{ cover(X) } :- node(X).",
+  "hard_constraints": [
+    {
+      "description": "Edges symmetric.",
+      "asp_rule": "edge(Y, X) :- edge(X, Y)."
+    },
+    {
+      "description": "Cover all edges.",
+      "asp_rule": ":- edge(X, Y), not cover(X), not cover(Y)."
+    }
+  ],
+  "soft_constraints": [
+    {
+      "description": "Minimize cover cardinality.",
+      "asp_rule": "#minimize { 1, X : cover(X) }."
+    }
+  ]
+}

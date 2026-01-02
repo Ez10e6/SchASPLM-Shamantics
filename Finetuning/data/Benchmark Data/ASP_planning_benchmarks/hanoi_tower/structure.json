@@ -1,0 +1,31 @@
+{
+  "instance_template": "disk(N). time(0..T). steps(T). ongoal(Target, Disk). on(0, Target, Disk).",
+  "generator": "{ occurs(some_action,T) } :- time(T), T>0.\n1 { move(T,N) : disk(N) } 1 :- occurs(some_action,T).\n1 { where(T,N) : disk(N) } 1 :- occurs(some_action,T).\non(T,N1,N) :- move(T,N), where(T,N1).\non(T,N,N1) :- time(T), T>0, on(T-1,N,N1), not move(T,N1).",
+  "hard_constraints": [
+    {
+      "description": "Sanity check to make sure we don't accidentally stack a big disk on a tiny one. Physics is a thing.",
+      "asp_rule": ":- time(T), on(T,N1,N), N1>=N."
+    },
+    {
+      "description": "Don't try moving the pegs, dude. They are literally part of the board.",
+      "asp_rule": ":- move(T,N), N<5."
+    },
+    {
+      "description": "You can't move a disk if something is sitting on top of it. Clear the stack first.",
+      "asp_rule": ":- on(T-1,N,N1), move(T,N)."
+    },
+    {
+      "description": "The destination disk better be at the top of its own stack too, otherwise we're just making a mess.",
+      "asp_rule": ":- on(T-1,N,N1), where(T,N)."
+    },
+    {
+      "description": "No double-dipping. A single disk can't be moved two steps in a row. Give it a rest.",
+      "asp_rule": ":- move(T,N), move(TM1,N), TM1=T-1."
+    },
+    {
+      "description": "Check if we actually hit the goal state. If the final config doesn't match the target, it's a bust.",
+      "asp_rule": ":- not on(T,N,N1), ongoal(N1,N), steps(T).\n:- on(T,N,N1), not ongoal(N1,N), steps(T)."
+    }
+  ],
+  "soft_constraints": []
+}

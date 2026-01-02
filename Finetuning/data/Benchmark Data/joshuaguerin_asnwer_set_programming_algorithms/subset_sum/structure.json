@@ -1,0 +1,11 @@
+{
+  "instance_template": "value(X).",
+  "generator": "{ sum(X) : value(X) }.",
+  "hard_constraints": [
+    {
+      "description": "Now, pay attention class: our most important rule is that the total sum of all the numbers we have chosen for our subset must be exactly equal to our target number. If the sum of those numbers is anything other than the target, we must reject that combination as an incorrect solution.",
+      "asp_rule": ":- #sum { X : sum(X) } != n."
+    }
+  ],
+  "soft_constraints": []
+}

@@ -1,0 +1,64 @@
+{
+  "instance_template": "presentation(1..10).\ntopic(\"AI\"; \"Cloud\"; \"IoT\"; \"VR\").\nday(1..4).\nslot(1..4).\nroom(1..5).\n-projector(2).",
+  "generator": "1 { topicOf(P, T) : topic(T) } 1 :- presentation(P).\n1 { scheduled(P, R, Sl, D) : room(R), slot(Sl), day(D) } :- presentation(P).",
+  "hard_constraints": [
+    {
+      "description": "All event staff must comply with the policy that no more than one presentation occupies a specific room-time coordinate.",
+      "asp_rule": ":- scheduled(P1, R, Sl, D), scheduled(P2, R, Sl, D), P1 != P2."
+    },
+    {
+      "description": "Each room is subject to a daily capacity limit; total scheduled sessions must not exceed three per day.",
+      "asp_rule": "{ scheduled(P, R, Sl, D) : presentation(P), slot(Sl) } 3 :- room(R), day(D)."
+    },
+    {
+      "description": "Operations policy forbids back-to-back room usage; rooms must remain vacant between consecutive sessions.",
+      "asp_rule": ":- scheduled(_, R, Sl1, D), scheduled(_, R, Sl2, D), Sl1 = Sl2 - 1."
+    },
+    {
+      "description": "Equipment compliance rule: AI and Cloud topics require hardware not available in Room 2; scheduling in this room is prohibited.",
+      "asp_rule": ":- scheduled(P, R, _, _), topicOf(P, T), T = \"AI\", -projector(R).\n:- scheduled(P, R, _, _), topicOf(P, T), T = \"Cloud\", -projector(R)."
+    },
+    {
+      "description": "The facility manager has issued a restriction forbidding VR sessions from being held in Room 1.",
+      "asp_rule": ":- scheduled(P, 1, _, _), topicOf(P, \"VR\")."
+    },
+    {
+      "description": "Corporate distribution rules require IoT content to be spread across a minimum of three days.",
+      "asp_rule": "hasIoT(D) :- scheduled(P, _, _, D), topicOf(P, \"IoT\").\n:- #count { D : hasIoT(D) } < 3."
+    },
+    {
+      "description": "Spatial separation policy: AI and VR sessions are forbidden from sharing a physical room within the same calendar day.",
+      "asp_rule": ":- scheduled(P1, R, _, D), scheduled(P2, R, _, D), topicOf(P1, \"VR\"), topicOf(P2, \"AI\")."
+    },
+    {
+      "description": "Overlap limit policy: To ensure balanced attendance, no more than two presentations involving Cloud or IoT topics may occur simultaneously.",
+      "asp_rule": "cloudOrIoT(P, Sl, D) :- scheduled(P, _, Sl, D), topicOf(P, \"Cloud\").\ncloudOrIoT(P, Sl, D) :- scheduled(P, _, Sl, D), topicOf(P, \"IoT\").\n:- day(D), slot(Sl), #count { P : cloudOrIoT(P, Sl, D) } > 2."
+    },
+    {
+      "description": "The early morning slot on Day 1 is strictly reserved for AI content in accordance with the opening ceremony guidelines.",
+      "asp_rule": ":- scheduled(P, _, 1, 1), not topicOf(P, \"AI\")."
+    },
+    {
+      "description": "Compliance mandate: The early afternoon session of Day 4 must be dedicated exclusively to VR presentations.",
+      "asp_rule": ":- scheduled(P, _, 3, 4), not topicOf(P, \"VR\")."
+    },
+    {
+      "description": "Standard engagement rules require that every scheduled day must feature at least one presentation.",
+      "asp_rule": ":- day(D), not scheduled(_, _, _, D)."
+    },
+    {
+      "description": "To maintain topical diversity, every time slot must host a minimum of two distinct subject areas across the facility.",
+      "asp_rule": "hasTopic(T, Sl, D) :- scheduled(P, _, Sl, D), topicOf(P, T).\n:- slot(Sl), day(D), #count { T : hasTopic(T, Sl, D) } < 2."
+    }
+  ],
+  "soft_constraints": [
+    {
+      "description": "Top-tier priority: Maximize the number of rooms utilized during each session to demonstrate high operational activity.",
+      "asp_rule": "used(R, Sl, D) :- scheduled(_, R, Sl, D).\nroomsUsed(N, Sl, D) :- N = #count { R : used(R, Sl, D) }, slot(Sl), day(D).\n#maximize { N@2 : roomsUsed(N, Sl, D) }."
+    },
+    {
+      "description": "Secondary priority: Minimize global idle room-time slots to optimize facility overhead and resource efficiency.",
+      "asp_rule": "idle(R, Sl, D) :- room(R), slot(Sl), day(D), not used(R, Sl, D).\nnum_idle(N) :- N = #count{R, Sl, D: idle(R, Sl, D) }.\n#minimize { N@1: num_idle(N) }."
+    }
+  ]
+}

@@ -1,0 +1,64 @@
+{
+  "instance_template": "seminar(1..10). topic(\"AI\"; \"Bio\"; \"Math\"; \"Chem\"). day(1; 2). timeslot(\"morning\"; \"late morning\"; \"early afternoon\"; \"late afternoon\"). room(1..5). follows(\"morning\",\"late morning\";\"late morning\", \"early afternoon\";\"early afternoon\", \"late afternoon\"). -projector(R) :- room(R), R = 5. firstSession(\"morning\", 1). lastSession(\"late afternoon\", 2).",
+  "generator": "1{topicOf(S, T): topic(T)}1 :- seminar(S). 1{delivered(S, R, T, D) : room(R), timeslot(T), day(D)} :- seminar(S).",
+  "hard_constraints": [
+    {
+      "description": "Sanity check: we can't have two seminars fighting for the same room at the same time.",
+      "asp_rule": ":- delivered(S1, R, T, D), delivered(S2, R, T, D), S1 != S2."
+    },
+    {
+      "description": "Each room is capped at two sessions per day so we don't burn out the facilities.",
+      "asp_rule": "{delivered(S, R, T, D) : seminar(S), timeslot(T)}2 :- room(R), day(D)."
+    },
+    {
+      "description": "No back-to-back bookings. Each room needs a breather between sessions.",
+      "asp_rule": ":- delivered(_, R, T1, _), delivered(_, R, T2, _), follows(T1, T2)."
+    },
+    {
+      "description": "Room 3 goes dark once the afternoon hits, so nothing can be scheduled there then.",
+      "asp_rule": ":- delivered(_, R, T, _), R = 3, T = \"early afternoon\"; T = \"late afternoon\"."
+    },
+    {
+      "description": "AI and Math need a projector, and Room 5 is a dead zone for tech. Keep them out of there.",
+      "asp_rule": ":- delivered(S, R, _, _), topicOf(S, \"AI\"), -projector(R). :- delivered(S, R, _, _), topicOf(S, \"Math\"), -projector(R)."
+    },
+    {
+      "description": "The AI crowd only works mornings. No AI seminars allowed in the afternoon slots.",
+      "asp_rule": ":- delivered(S, _, T, _), topicOf(S, \"AI\"), T != \"morning\", T != \"late morning\"."
+    },
+    {
+      "description": "Bio needs to be spread out. It's gotta show up on both days of the symposium.",
+      "asp_rule": "hasBio(D) :- delivered(S, _, _, D), topicOf(S, \"Bio\"). :- day(D), not hasBio(D)."
+    },
+    {
+      "description": "We can't handle multiple Bio talks at once. Keep them on separate time slots.",
+      "asp_rule": ":- delivered(S1, _, T, D), delivered(S2, _, T, D), S1 != S2, topicOf(S1, \"Bio\"), topicOf(S2, \"Bio\")."
+    },
+    {
+      "description": "Chemistry talks are solitary. No room can host more than one Chem session for the whole event.",
+      "asp_rule": ":- delivered(S1, R, _, _), delivered(S2, R, _, _), S1 != S2, topicOf(S1, \"Chem\"), topicOf(S2, \"Chem\")."
+    },
+    {
+      "description": "Gotta bookend the show with Math. The very first and very last sessions must be Math talks.",
+      "asp_rule": "1{delivered(S, R, T, D): room(R), firstSession(T, D), topicOf(S, \"Math\")}. 1{delivered(S, R, T, D): room(R), lastSession(T, D), topicOf(S, \"Math\")}."
+    },
+    {
+      "description": "Keep the total number of slots where Bio and Chem overlap to a maximum of two.",
+      "asp_rule": "overlap(T, D) :- delivered(S1, _, T, D), delivered(S2, _, T, D), topicOf(S1, \"Bio\"), topicOf(S2, \"Chem\"). { overlap(T, D) : timeslot(T), day(D) }2."
+    },
+    {
+      "description": "Bio and Chem don't mix in the same room on the same day. Keep them separated.",
+      "asp_rule": ":- delivered(S1, R, _, D), delivered(S2, R, _, D), topicOf(S1, \"Chem\"), topicOf(S2, \"Bio\")."
+    }
+  ],
+  "soft_constraints": [
+    {
+      "description": "Don't leave rooms sitting empty. We want to minimize wasted slots across the schedule.",
+      "asp_rule": "wastedSlot(R, T, D) :- not delivered(_, R, T, D), room(R), timeslot(T), day(D). wastedSlots(N) :- #count{R, T, D: wastedSlot(R, T, D)} = N. #minimize{N: wastedSlots(N)}."
+    },
+    {
+      "description": "Variety is key. Try to pack as many unique topics into every time slot as possible.",
+      "asp_rule": "hasTopic(To, T, D) :- delivered(S, _, T, D), topicOf(S, To). topicsPerSlot(N, T, D) :- #count{To: hasTopic(To, T, D)} = N, timeslot(T), day(D). #maximize{N: topicsPerSlot(N, T, D)}."
+    }
+  ]
+}

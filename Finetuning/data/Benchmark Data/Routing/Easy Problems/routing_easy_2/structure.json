@@ -1,0 +1,19 @@
+{
+  "instance_template": "loc(1..4). edge(1, 2). edge(1, 3). edge(2, 4). time(0..5).",
+  "generator": "1 { at(L, T) : loc(L) } 1 :- time(T).",
+  "hard_constraints": [
+    {
+      "description": "Now class, pay attention: a drone cannot simply teleport across the map. We must ensure that if it moves from one location to another between consecutive time steps, those two points must have a valid connection defined in our edges.",
+      "asp_rule": ":- at(L1, T), at(L2, T+1), not edge(L1, L2), not edge(L2, L1), time(T)."
+    },
+    {
+      "description": "Students, it is vital that we fulfill our mission objectives! This rule ensures that the drone must be present at locations 3 and 4 at some point during the flight, regardless of the order.",
+      "asp_rule": "at(3, _). at(4, _)."
+    },
+    {
+      "description": "Every journey has a specific starting point, class. We need to explicitly state that at the very beginning of our timeline\u2014time step zero\u2014the drone is located at the headquarters, which is point 1.",
+      "asp_rule": "at(1, 0)."
+    }
+  ],
+  "soft_constraints": []
+}

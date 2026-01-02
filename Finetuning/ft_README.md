@@ -1,3 +1,7 @@
+Here is the updated `Finetuning/ft_README.md`. I have revised the **Training Architecture** section to reflect the "Balanced" configuration we settled on (Top 16 layers, Rank 16, Completion-Only Training) which balances learning new logic while preserving the base model's ability to speak English.
+
+--- START OF FILE Finetuning/ft_README.md ---
+
 # Fine-tuning LLMs for Answer Set Programming
 
 This directory contains the pipeline for Supervised Fine-Tuning (SFT) of Large Language Models (LLMs) to generate Answer Set Programming (ASP) code. The methodology is designed to overcome the "Knowledge Acquisition Bottleneck" by training models not just to translate, but to reason iteratively and repair their own syntax errors.
@@ -46,14 +50,15 @@ Implemented in `scripts/data_augmentor.py` using **Google Gemini 3 Flash**.
 
 ## 3. Training Architecture (PEFT)
 
-We use **Low-Rank Adaptation (LoRA)** to adapt the base model (`Meta-Llama-3-8B` or `Qwen2.5-7B`).
+We use **Low-Rank Adaptation (LoRA)** to adapt the base model (`Meta-Llama-3-8B` or `Qwen2.5-7B`). The configuration is tuned to balance **Logical Acquisition** (learning ASP) with **Language Preservation** (preventing catastrophic forgetting/gibberish output).
 
-### Hyperparameters & Configuration
-*   **Rank ($r=16$) and Alpha ($\alpha=160$):** High scaling factor (10x) to prioritize learned ASP syntax.
-*   **Target Layers (Top 16):** We apply adapters only to the top 16 transformer layers, specializing high-level reasoning while preserving pre-trained linguistic knowledge in lower layers.
-*   **Iterations:** ~550 (approx 2 epochs for ~1,000 examples) to prevent overfitting.
+### Hyperparameters & Configuration (MLX)
+*   **Target Layers (Top 16):** We apply adapters only to the top 16 transformer layers. This allows the model to learn abstract reasoning and logic mapping in the upper layers while preserving the fundamental "grammar" and world knowledge frozen in the lower layers.
+*   **Rank ($r=16$) and Scale ($=32.0$):** High rank provides the necessary capacity to learn a low-resource language like ASP. The scaling factor ($\approx 2.0$) ensures strong gradient updates.
+*   **Completion-Only Training (Masking):** We mask the User Prompt and System Message in the loss calculation. The model is trained *only* to predict the ASP code, preventing it from overfitting to the prompt style or inflating metrics with easy English predictions.
+*   **Learning Rate:** `5e-5` (Cosine Decay). A stable rate that prevents divergence.
+*   **Iterations:** `12,000`. Given a batch size of 1 and ~4,000 examples, this equates to roughly **3 Epochs**, the standard "sweet spot" for fine-tuning.
 *   **Context Length:** 4096 tokens to accommodate full ASP programs.
-*   **Precision:** bfloat16.
 
 ---
 
@@ -89,7 +94,7 @@ Use `notebooks/ft_mlx_lora.ipynb`.
 *   **Process:**
     1.  Set `MODEL_TYPE` (e.g., `"qwen"`).
     2.  Execute training cell.
-    3.  Run the **Fuse** cell at the end. *Note: You can select a specific checkpoint (e.g., step 700) if the final model overfits.*
+    3.  Run the **Fuse** cell at the end. *Note: You can select a specific checkpoint (e.g., step 5400) if the final model overfits.*
     4.  Final model is saved to `local_models/ft_qwen_mlx`.
 
 

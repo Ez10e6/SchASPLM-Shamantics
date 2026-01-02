@@ -1,0 +1,28 @@
+{
+  "instance_template": "cpu(\"Ryzen9\", 95; \"i7\", 85; \"M1\", 70).\ngpu(\"RTX3070\", 90; \"RX6700XT\", 88; \"IrisXe\", 65).\ncooler(\"AirCool\", 20; \"LiquidCool\", 40; \"PassiveCool\", 5).\nhigh_perf(\"Ryzen9\").\nhigh_perf(\"RTX3070\").\ndiscrete_gpu(\"RTX3070\"; \"RX6700XT\").",
+  "generator": "1 { selected_cpu(C) : cpu(C, _) } 1.\n1 { selected_gpu(G) : gpu(G, _) } 1.\n1 { selected_cooler(C) : cooler(C, _) } 1.",
+  "hard_constraints": [
+    {
+      "description": "Sanity check: if we're running a beast CPU, we gotta use liquid cooling or the whole thing's gonna melt.",
+      "asp_rule": ":- selected_cpu(C), high_perf(C), selected_cooler(K), K != \"LiquidCool\"."
+    },
+    {
+      "description": "Same deal for the GPU; don't try to skimp on cooling if you've got a high-end card in the slot.",
+      "asp_rule": ":- selected_gpu(G), high_perf(G), selected_cooler(K), K != \"LiquidCool\"."
+    },
+    {
+      "description": "Passive cooling is a total joke for discrete GPUs. Don't even try it.",
+      "asp_rule": ":- selected_gpu(G), discrete_gpu(G), selected_cooler(\"PassiveCool\")."
+    },
+    {
+      "description": "Hardware mismatch alert! The M1 and that RX6700XT just don't play nice together.",
+      "asp_rule": ":- selected_gpu(\"RX6700XT\"), selected_cpu(\"M1\")."
+    }
+  ],
+  "soft_constraints": [
+    {
+      "description": "We want the beefiest specs possible, so let's max out that total performance score across the board.",
+      "asp_rule": "total_perf(P) :- selected_cpu(C), cpu(C, P1), selected_gpu(G), gpu(G, P2), selected_cooler(K), cooler(K, P3), P = P1 + P2 + P3.\n#maximize { P : total_perf(P) }."
+    }
+  ]
+}

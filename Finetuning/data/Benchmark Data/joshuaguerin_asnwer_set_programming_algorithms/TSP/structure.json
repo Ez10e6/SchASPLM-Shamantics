@@ -1,0 +1,32 @@
+{
+  "instance_template": "node(X). edge(X, Y, C). start(S). end(E). edge(Y, X, C) :- edge(X, Y, C).",
+  "generator": "{ path(X, Y, C) } :- edge(X, Y, C).",
+  "hard_constraints": [
+    {
+      "description": "Compliance rule: Every node in the network must have at most one incoming edge to maintain a singular trajectory.",
+      "asp_rule": "{ path(X, Y, C) : edge(X, Y, C) } 1 :- node(Y)."
+    },
+    {
+      "description": "Policy requirement: To ensure path continuity, every node must have at most one outgoing edge.",
+      "asp_rule": "{ path(X, Y, C) : edge(X, Y, C) } 1 :- node(X)."
+    },
+    {
+      "description": "Operational rule: The designated start node is prohibited from having any incoming connections to ensure it is the absolute origin.",
+      "asp_rule": ":- start(S), path(X, S, C)."
+    },
+    {
+      "description": "Security policy: The designated end node must terminate the path and is strictly forbidden from having outgoing connections.",
+      "asp_rule": ":- end(E), path(E, Y, C)."
+    },
+    {
+      "description": "Infrastructure compliance: All nodes must be reachable from the start node, and the end node must be reachable to ensure a valid Hamiltonian path.",
+      "asp_rule": "reachable(S) :- start(S). reachable(Y) :- reachable(X), path(X, Y, C). :- end(E), not reachable(E). :- node(X), not reachable(X)."
+    }
+  ],
+  "soft_constraints": [
+    {
+      "description": "Financial efficiency policy: The total cost of the path must be minimized to meet corporate expenditure targets.",
+      "asp_rule": "#minimize{C, X, Y : path(X, Y, C)}."
+    }
+  ]
+}

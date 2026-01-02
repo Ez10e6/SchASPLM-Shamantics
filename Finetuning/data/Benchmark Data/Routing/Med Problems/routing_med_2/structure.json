@@ -1,0 +1,32 @@
+{
+  "instance_template": "loc(\"HubWest\"; \"NodeA\"; \"NodeB\"; \"Sensor1\"; \"Sensor2\").\nedge(\"HubWest\", \"NodeA\").\nedge(\"HubWest\", \"NodeB\").\nedge(\"NodeA\", \"Sensor1\").\nedge(\"NodeB\", \"Sensor2\").\nedge(\"NodeA\", \"NodeB\").\ntime(0..9).\nat(\"HubWest\", 0).\ninspect(\"Sensor1\"; \"Sensor2\").",
+  "generator": "1 { at(L, T) : loc(L) } 1 :- time(T).\n1 { inspect_at(L, T) : time(T) } 1 :- inspect(L).",
+  "hard_constraints": [
+    {
+      "description": "Listen carefully, class: the drone cannot teleport! For the drone to move between two different locations in consecutive minutes, there must be a defined edge connecting them in our map.",
+      "asp_rule": ":- at(L1, T), at(L2, T+1), not edge(L1, L2), not edge(L2, L1), L1 != L2."
+    },
+    {
+      "description": "It is important to remember that you cannot inspect a sensor if you aren't actually there. We must ensure the drone's location matches the sensor's location at the time of inspection.",
+      "asp_rule": "at(L, T) :- inspect_at(L, T)."
+    },
+    {
+      "description": "Now, keep in mind that sampling takes time. If the drone starts an inspection at a specific minute, it must remain at that same location for the following minute to finish the task.",
+      "asp_rule": "at(L, T+1) :- inspect_at(L, T), T < 9."
+    },
+    {
+      "description": "To prevent sensor interference, we must leave a gap. Make sure that any two inspection events are separated by at least three minutes.",
+      "asp_rule": ":- inspect_at(_, T1), inspect_at(_, T2), 0 < T1 - T2 < 3."
+    },
+    {
+      "description": "Here is a specific logical pathing rule: if the drone visits NodeB and then moves to Sensor1, it is strictly forbidden from visiting NodeA at any point after that.",
+      "asp_rule": ":- at(\"NodeB\", T1), at(\"Sensor1\", T2), at(\"NodeA\", T3), T1 < T2 < T3."
+    }
+  ],
+  "soft_constraints": [
+    {
+      "description": "Our ultimate goal is speed! We want to find the specific schedule where the very last inspection is completed as early as possible in our timeline.",
+      "asp_rule": "latest_inspect(T) :- T = #max { T1 : inspect_at(_, T1) }.\n#minimize { T : latest_inspect(T) }."
+    }
+  ]
+}

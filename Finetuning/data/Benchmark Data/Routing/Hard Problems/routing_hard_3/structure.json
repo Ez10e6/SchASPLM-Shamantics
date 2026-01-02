@@ -1,0 +1,44 @@
+{
+  "instance_template": "loc(\"SubDock\"; \"CoralPass\"; \"VentStream\"; \"BeaconAlpha\"; \"DeepLoop\"; \"BeaconBeta\"; \"NodeX\"; \"BeaconGamma\").\nedge(\"SubDock\",\"CoralPass\",2). edge(\"SubDock\",\"VentStream\",4).\nedge(\"CoralPass\",\"BeaconAlpha\",1). edge(\"CoralPass\",\"DeepLoop\",1).\nedge(\"DeepLoop\",\"VentStream\",1). edge(\"VentStream\",\"BeaconBeta\",2).\nedge(\"VentStream\",\"NodeX\",1). edge(\"NodeX\",\"BeaconGamma\",3).\nedge(\"BeaconGamma\",\"BeaconAlpha\",4).",
+  "generator": "time(0..15).\n1{ at(L, T): loc(L) }1 :- time(T).\n1 { pulse_at(\"BeaconAlpha\",T) : time(T) }.\n1 { pulse_at(\"BeaconBeta\", T) : time(T) }.\n{ pulse_at(\"BeaconGamma\", T) : time(T) }.",
+  "hard_constraints": [
+    {
+      "description": "Sanity check: if we're moving, there better be a physical edge there. No teleporting.",
+      "asp_rule": ":- at(L1, T), at(L2, T+1), not edge(L1, L2, _), not edge(L2, L1, _), L1 != L2."
+    },
+    {
+      "description": "Keep an eye on the thermals. If the drone hits 11 units of heat, it's toast.",
+      "asp_rule": "heat(0,0). :- heat(_, H), H > 10. heat(T+1,H2) :- at(L1,T), at(L2,T+1), edge(L1,L2,Cost), heat(T,H1), H2=H1+Cost."
+    },
+    {
+      "description": "Scanning takes time and adds heat. If we pulse, we stay put for 2 ticks and add 1 heat unit.",
+      "asp_rule": "at(L,T) :- pulse_at(L,T). at(L,T+1) :- pulse_at(L,T), T < 15. heat(T+2,H+1) :- pulse_at(_,T), heat(T,H), T < 14."
+    },
+    {
+      "description": "Deadline for Alpha. Boss wants that pulse done before T=5.",
+      "asp_rule": ":- not pulse_at(\"BeaconAlpha\",T): time(T), T<5."
+    },
+    {
+      "description": "The logic for Gamma is a bit picky. Only hit it if Alpha and Beta are wrapped up by T=8.",
+      "asp_rule": "mand_done :- pulse_at(\"BeaconAlpha\",TA), pulse_at(\"BeaconBeta\",TB), TA <= 8, TB <= 8. :- pulse_at(\"BeaconGamma\",_), not mand_done. :- mand_done, not pulse_at(\"BeaconGamma\",_)."
+    },
+    {
+      "description": "NodeX is the chill zone. Spend 2 mins there to reset heat, otherwise you gotta pulse immediately.",
+      "asp_rule": "cooldown(T) :- at(\"NodeX\",T), at(\"NodeX\",T+1), T < 15. heat(T+2,0) :- cooldown(T), T < 14. :- at(\"NodeX\",T), T < 15, not cooldown(T), not pulse_at(_,T+1)."
+    },
+    {
+      "description": "Don't spam pulses. We need to swing back through VentStream to re-sync between every pulse.",
+      "asp_rule": "vent_between(L, H) :- at(\"VentStream\",T), L < T < H, time(L), time(H). :- pulse_at(_,T1), pulse_at(_,T2), not vent_between(T1, T2), T1 < T2."
+    },
+    {
+      "description": "Watch the action budget. If moves + pulses + cooldowns > 16, we're out of juice.",
+      "asp_rule": "action(T) :- at(L1, T), at(L2, T+1), L1 != L2. action(T) :- pulse_at(_,T). action(T) :- cooldown(T). :- #count {A : action(A)} > 16."
+    }
+  ],
+  "soft_constraints": [
+    {
+      "description": "Lazy drone protocol: minimize any time step where we aren't actually pulsing.",
+      "asp_rule": "non_pulse(T) :- time(T), not pulse_at(_,T). non_pulses(N) :- N = #count{ T: non_pulse(T) }. #minimize { N: non_pulses(N) }."
+    }
+  ]
+}

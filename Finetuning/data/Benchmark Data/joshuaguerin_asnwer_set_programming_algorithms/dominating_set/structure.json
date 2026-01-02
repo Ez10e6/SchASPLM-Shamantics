@@ -1,0 +1,11 @@
+{
+  "instance_template": "value(V).",
+  "generator": "1 { a(V) ; b(V) } 1 :- value(V).",
+  "hard_constraints": [
+    {
+      "description": "For any valid partition, the arithmetic summation of the elements contained within subset 'a' must be precisely equivalent to the arithmetic summation of the elements contained within subset 'b'.",
+      "asp_rule": "total(a, S) :- S = #sum{ A : a(A) }. total(b, S) :- S = #sum{ B : b(B) }. :- total(a, S1), total(b, S2), S1 != S2."
+    }
+  ],
+  "soft_constraints": []
+}

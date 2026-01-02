@@ -1,0 +1,35 @@
+{
+  "instance_template": "seminar(1..10).\ntopic(\"AI\"; \"Bio\"; \"Math\").\nday(1; 2).\ntimeslot(\"morning\"; \"midday\"; \"afternoon\").\nroom(1..4).",
+  "generator": "1{topicOf(S, T): topic(T)}1 :- seminar(S).\n1{scheduled(S, R, T, D): room(R), timeslot(T), day(D)}1 :- seminar(S).",
+  "hard_constraints": [
+    {
+      "description": "Now, pay attention: we cannot have two different seminars occurring in the exact same room at the same time. This rule ensures that if two seminars share a day, a time slot, and a room, they must be the same seminar.",
+      "asp_rule": ":- scheduled(S1, R, T, D), scheduled(S2, R, T, D), S1 != S2."
+    },
+    {
+      "description": "Notice that our Artificial Intelligence sessions have a specific timing requirement. You must ensure that no AI seminar is scheduled during the afternoon slot; they are strictly for the morning and midday.",
+      "asp_rule": ":- scheduled(S, _, \"afternoon\", _), topicOf(S, \"AI\")."
+    },
+    {
+      "description": "To provide some variety for our Biology students, we need to ensure that their seminars are not restricted to just one room. We must use at least two different rooms across all Biology sessions.",
+      "asp_rule": "bioRoom(R) :- scheduled(S, R, T, D), topicOf(S, \"Bio\").\n:- #count { R : bioRoom(R) } < 2."
+    },
+    {
+      "description": "Please remember that Room 4 has a blackout period. Regardless of which day it is, no seminar can be scheduled in Room 4 during the midday slot.",
+      "asp_rule": ":- scheduled(_, 4, \"midday\", _)."
+    },
+    {
+      "description": "For the Mathematics department, we have a strict policy: no two Math seminars can ever happen at the same time, even if there are multiple rooms available. They must be spaced out temporally.",
+      "asp_rule": ":- scheduled(S1, _, T, D), scheduled(S2, _, T, D), S1 != S2, topicOf(S1, \"Math\"), topicOf(S2, \"Math\")."
+    },
+    {
+      "description": "Let's look at the specific requirements for Seminar 5. This session must be held on the second day, but it is not allowed to take place during the morning slot.",
+      "asp_rule": "1{scheduled(5, R, T, 2): T != \"morning\", timeslot(T), room(R)}1."
+    },
+    {
+      "description": "Finally, we have a logistical requirement for Seminars 6 and 7. They both need to be assigned to the same room, but they must be scheduled on different days.",
+      "asp_rule": ":- scheduled(6, R1, T1, D1), scheduled(7, R2, T2, D2), R1 != R2.\n:- scheduled(6, R, T1, D), scheduled(7, R, T2, D)."
+    }
+  ],
+  "soft_constraints": []
+}

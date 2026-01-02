@@ -1,0 +1,23 @@
+{
+  "instance_template": "values(1..n).",
+  "generator": "n { queens(R, C) : values(R), values(C) } n.",
+  "hard_constraints": [
+    {
+      "description": "It is formally required that for any given row index R, there exists at most one queen assigned to a column index C such that the predicate queens(R, C) is satisfied.",
+      "asp_rule": ":- queens(R, C), queens(R, D), C!=D."
+    },
+    {
+      "description": "The condition is imposed that for every column index C, no two distinct row indices R and S may be associated with the predicate queens(R, C) simultaneously.",
+      "asp_rule": ":- queens(R, C), queens(S, C), R!=S."
+    },
+    {
+      "description": "To maintain diagonal independence, it is necessitated that for any two distinct queens, the sum of their respective row and column coordinates must not be equivalent, thereby preventing occupancy of the same positive diagonal.",
+      "asp_rule": ":- queens(R, C), queens(S, D), R!=S, C!=D, R+C==S+D."
+    },
+    {
+      "description": "For every pair of distinct queens, the difference between the row index and column index must be unique, ensuring that no two queens are situated on the same negative diagonal.",
+      "asp_rule": ":- queens(R, C), queens(S, D), R!=S, C!=D, R-C==S-D."
+    }
+  ],
+  "soft_constraints": []
+}

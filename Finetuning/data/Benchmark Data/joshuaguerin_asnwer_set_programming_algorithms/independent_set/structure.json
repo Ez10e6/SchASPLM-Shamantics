@@ -1,0 +1,16 @@
+{
+  "instance_template": "node(X). edge(X, Y). edge(Y, X) :- edge(X, Y).",
+  "generator": "{ set(X) } :- node(X).",
+  "hard_constraints": [
+    {
+      "description": "Adjacent nodes prohibited in set.",
+      "asp_rule": ":- edge(X, Y), set(X), set(Y)."
+    }
+  ],
+  "soft_constraints": [
+    {
+      "description": "Maximize set cardinality.",
+      "asp_rule": "#maximize { 1, X : set(X) }."
+    }
+  ]
+}

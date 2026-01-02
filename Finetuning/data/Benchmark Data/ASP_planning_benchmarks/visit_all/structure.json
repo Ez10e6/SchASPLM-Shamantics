@@ -1,0 +1,23 @@
+{
+  "instance_template": "step(1..horizon). at(X). connected(X, Y). visit(X).",
+  "generator": "1 { move(X, Y, T) : connected(X, Y) } 1 :- atrobot(X, T-1), step(T).",
+  "hard_constraints": [
+    {
+      "description": "Initial state setup: gotta make sure the robot starts exactly where the input says it does at time zero.",
+      "asp_rule": "atrobot(X, 0) :- at(X)."
+    },
+    {
+      "description": "State transition logic: if we move the bot to a new spot, we gotta update its current position for that time step.",
+      "asp_rule": "atrobot(Y, T) :- move(_, Y, T), step(T)."
+    },
+    {
+      "description": "Keep track of everywhere we've been: if the bot was at a location at any point, mark it as visited.",
+      "asp_rule": "visited(X) :- atrobot(X, _)."
+    },
+    {
+      "description": "Final sanity check: throw an error if there is a target location that we didn't actually visit.",
+      "asp_rule": ":- visit(X), not visited(X)."
+    }
+  ],
+  "soft_constraints": []
+}

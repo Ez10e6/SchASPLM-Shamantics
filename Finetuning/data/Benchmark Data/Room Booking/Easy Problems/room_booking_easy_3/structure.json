@@ -1,0 +1,19 @@
+{
+  "instance_template": "session(1..4).\ntopic(\"Networking\"; \"Security\").\nroom(1..2).\nslot(\"morning\"; \"afternoon\").",
+  "generator": "1 { topicOf(S, T) : topic(T) } 1 :- session(S).\n1 { scheduled(S, R, Sl) : room(R), slot(Sl) } 1 :- session(S).",
+  "hard_constraints": [
+    {
+      "description": "Quick sanity check to make sure we don't double-book. No two sessions can camp out in the same room at the same time.",
+      "asp_rule": ":- scheduled(S1, R, Sl), scheduled(S2, R, Sl), S1 != S2."
+    },
+    {
+      "description": "Security stuff has to happen in the afternoon, no exceptions. If it's Security and not in the afternoon slot, it's a bug.",
+      "asp_rule": ":- scheduled(S, _, Sl), topicOf(S, \"Security\"), Sl != \"afternoon\"."
+    },
+    {
+      "description": "Networking is banned from Room 1. It's a no-go zone for that topic.",
+      "asp_rule": ":- scheduled(S, 1, _), topicOf(S, \"Networking\")."
+    }
+  ],
+  "soft_constraints": []
+}

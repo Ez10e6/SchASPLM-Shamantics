@@ -1,0 +1,64 @@
+{
+  "instance_template": "workshop(1..12). topic(\"AI\"; \"Physics\"; \"Math\"; \"Linguistics\"). day(1..3). slot(\"morning\"; \"midday\"; \"evening\"). room(1..4). adjacent(\"morning\", \"midday\"). adjacent(\"midday\", \"evening\"). slotOrder(\"morning\", 1). slotOrder(\"midday\", 2). slotOrder(\"evening\", 3).",
+  "generator": "1 { topicOf(W, T) : topic(T) } 1 :- workshop(W). 1 { scheduled(W, R, S, D) : room(R), slot(S), day(D) } :- workshop(W).",
+  "hard_constraints": [
+    {
+      "description": "Sanity check: make sure we don't try to cram two workshops into the same room at the same time.",
+      "asp_rule": ":- scheduled(W1, R, S, D), scheduled(W2, R, S, D), W1 != W2."
+    },
+    {
+      "description": "Cap the sessions at two per room each day so things don't get too hectic.",
+      "asp_rule": "{ scheduled(W, R, S, D) : workshop(W), slot(S) } 2 :- room(R), day(D)."
+    },
+    {
+      "description": "Give the rooms a breather. No back-to-back sessions; we need a gap between usages.",
+      "asp_rule": ":- scheduled(_, R, S1, D), scheduled(_, R, S2, D), adjacent(S1, S2)."
+    },
+    {
+      "description": "Room 2 is a no-go for the evening. It basically goes dark.",
+      "asp_rule": ":- scheduled(_, 2, \"evening\", _)."
+    },
+    {
+      "description": "Room 4 is too tiny for the AI or Physics crowds, so keep them out.",
+      "asp_rule": ":- scheduled(W, 4, _, _), topicOf(W, \"AI\"). :- scheduled(W, 4, _, _), topicOf(W, \"Physics\")."
+    },
+    {
+      "description": "AI folks are early birds. They only get the morning slots.",
+      "asp_rule": ":- scheduled(W, _, S, _), topicOf(W, \"AI\"), S != \"morning\"."
+    },
+    {
+      "description": "Physics has to wrap up by Day 2. No spilling over into the final day.",
+      "asp_rule": ":- scheduled(W, _, _, D), topicOf(W, \"Physics\"), D = 3."
+    },
+    {
+      "description": "Math workshops are picky. They only want Room 1 or Room 3.",
+      "asp_rule": ":- scheduled(W, R, _, _), topicOf(W, \"Math\"), R != 1, R != 3."
+    },
+    {
+      "description": "Linguistics sessions are total prima donnas and can't run at the same time as each other.",
+      "asp_rule": ":- scheduled(W1, _, S, D), scheduled(W2, _, S, D), topicOf(W1, \"Linguistics\"), topicOf(W2, \"Linguistics\"), W1 != W2."
+    },
+    {
+      "description": "Keep it clean: only one discipline per room per day. No mixing topics under one roof.",
+      "asp_rule": ":- scheduled(W1, R, _, D), scheduled(W2, R, _, D), topicOf(W1, T1), topicOf(W2, T2), T1 != T2."
+    },
+    {
+      "description": "Every day needs a bit of everything. At least one workshop per topic per day is a must.",
+      "asp_rule": ":- day(D), topic(T), not scheduled(_, _, _, D) : topicOf(_, T)."
+    },
+    {
+      "description": "Bookend logic: Start the whole event with AI and end it with a Linguistics talk.",
+      "asp_rule": "timeIndex(D, S, I) :- day(D), slot(S), slotOrder(S, O), I = (D-1)*3 + O. wTime(W, I) :- scheduled(W, _, S, D), timeIndex(D, S, I). minTime(I) :- I = #min { J : wTime(_, J) }. maxTime(I) :- I = #max { J : wTime(_, J) }. :- wTime(W, I), minTime(I), not topicOf(W, \"AI\"). :- wTime(W, I), maxTime(I), not topicOf(W, \"Linguistics\")."
+    }
+  ],
+  "soft_constraints": [
+    {
+      "description": "Maximize room utilization so we don't have empty spaces during our slots.",
+      "asp_rule": "used(R, S, D) :- scheduled(_, R, S, D). roomsUsed(N, S, D) :- N = #count{ R : used(R, S, D) }, slot(S), day(D). #maximize { N : roomsUsed(N, S, D) }."
+    },
+    {
+      "description": "Minimize the idle time for rooms. We want this venue working for us.",
+      "asp_rule": "idle(R, S, D) :- room(R), slot(S), day(D), not used(R, S, D). num_idle(N) :- N = #count{ R, S, D : idle(R, S, D) }. #minimize { N : num_idle(N) }."
+    }
+  ]
+}

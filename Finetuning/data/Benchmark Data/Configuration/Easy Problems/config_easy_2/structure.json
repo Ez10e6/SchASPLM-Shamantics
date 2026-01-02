@@ -1,0 +1,19 @@
+{
+  "instance_template": "speaker(\"Alpha\"; \"Beta\").\namplifier(\"AmpX\"; \"AmpY\").\nplayer(\"Streamer1\"; \"Streamer2\").",
+  "generator": "1 { selected_speaker(S) : speaker(S) } 1.\n1 { selected_amplifier(A) : amplifier(A) } 1.\n1 { selected_player(P) : player(P) } 1.",
+  "hard_constraints": [
+    {
+      "description": "Speaker Alpha requires AmpX.",
+      "asp_rule": ":- selected_speaker(\"Alpha\"), selected_amplifier(A), A != \"AmpX\"."
+    },
+    {
+      "description": "AmpY incompatible with Streamer1.",
+      "asp_rule": ":- selected_amplifier(\"AmpY\"), selected_player(\"Streamer1\")."
+    },
+    {
+      "description": "Streamer2 requires Beta.",
+      "asp_rule": ":- selected_player(\"Streamer2\"), selected_speaker(S), S != \"Beta\"."
+    }
+  ],
+  "soft_constraints": []
+}

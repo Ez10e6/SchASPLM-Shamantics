@@ -1,0 +1,48 @@
+{
+  "instance_template": "loc(\"CommandCenter\"; \"PathA\"; \"PathB\"; \"TowerX\"; \"TowerY\"; \"MidRelay\"; \"TowerZ\"). edge(\"CommandCenter\",\"PathA\",2). edge(\"CommandCenter\",\"PathB\",3). edge(\"PathA\",\"TowerX\",2). edge(\"PathB\",\"TowerY\",2). edge(\"PathB\",\"PathA\",1). edge(\"TowerX\",\"PathB\",2). edge(\"TowerY\",\"MidRelay\",3). edge(\"MidRelay\",\"TowerZ\",2). edge(\"TowerZ\",\"TowerX\",4). at(\"CommandCenter\",0). time(0..10).",
+  "generator": "1{ at(L, T): loc(L) }1 :- time(T). 1{ scan_at(\"TowerX\", T): time(T) }. 1{ scan_at(\"TowerY\", T): time(T) }. { scan_at(\"TowerZ\", T): time(T) }.",
+  "hard_constraints": [
+    {
+      "description": "Now class, remember that a drone cannot simply teleport. It must follow the established flight corridors. We use this constraint to ensure that if a drone moves from one location to another, there must be a valid edge connecting them.",
+      "asp_rule": ":- at(L1, T), at(L2, T+1), not edge(L1, L2, _), L1 != L2."
+    },
+    {
+      "description": "Observe that scanning is not an instantaneous action. To ensure signal stability, the drone must remain at the same location for a total of three consecutive minutes starting from the time the scan begins.",
+      "asp_rule": "at(L,T) :- scan_at(L,T). at(L,T+1) :- scan_at(L,T), T < 10. at(L,T+2) :- scan_at(L,T), T < 9."
+    },
+    {
+      "description": "Students, timing is everything in this mission. You must ensure that the scan at TowerX is initiated early enough so that it is completed no later than the 5-minute mark.",
+      "asp_rule": ":- not scan_at(\"TowerX\",T): time(T), T < 5."
+    },
+    {
+      "description": "To maintain structural integrity and efficiency, the drone is limited in its total activity. We must ensure the total count of location-time assignments does not exceed our limit of 20 stops.",
+      "asp_rule": ":- N = #count {L,T: at(L,T)}, N > 20."
+    },
+    {
+      "description": "Let's look at our power management. We must track the cumulative energy used during flight and idling, while ensuring the total battery consumption never exceeds the drone's 14-unit capacity.",
+      "asp_rule": "used_batt(T+1 ,B2) :- at(L1,T), at(L2,T+1), edge(L1,L2,Cost), used_batt(T,B1), B2 = B1 + Cost. used_batt(T+1, B) :- at(L,T), at(L,T+1), used_batt(T, B). used_batt(0, 0). :- used_batt(_, B), B > 14."
+    },
+    {
+      "description": "Pay close attention to the MidRelay corridor. Due to routing constraints, if the drone visits the MidRelay node, it is strictly required to move to TowerZ in the very next minute.",
+      "asp_rule": ":- at(\"MidRelay\",T), not at(\"TowerZ\",T+1), T < 10."
+    },
+    {
+      "description": "We must protect our equipment from overheating. This rule prevents the drone from initiating a second scan at the same tower immediately after finishing a previous one.",
+      "asp_rule": ":- scan_at(L,T1), scan_at(L,T2), T2 = T1 + 3."
+    },
+    {
+      "description": "If the drone's battery is low, it can recover 4 units of power by idling at the MidRelay node for two consecutive minutes. Note how the battery state is adjusted downward to reflect this recharge.",
+      "asp_rule": "recharge(T) :- at(\"MidRelay\",T), at(\"MidRelay\",T+1), at(\"MidRelay\",T+2), T < 9. used_batt(T+1,Bnew) :- recharge(T), used_batt(T,B), Bnew = B-4."
+    }
+  ],
+  "soft_constraints": [
+    {
+      "description": "Our primary objective is to maximize the value of the mission. Therefore, we should aim to perform as many tower scans as possible, including the optional ones.",
+      "asp_rule": "#maximize { 1@2 : scan_at(L,T) }."
+    },
+    {
+      "description": "Secondary to the number of scans, we want to be efficient. Among plans with the same number of scans, we prefer the one that finishes all mandatory requirements in the shortest amount of time.",
+      "asp_rule": "scanned_time(T) :- T = #min{T1: scan_at(\"TowerX\", T2), scan_at(\"TowerY\", T3), T1>=T2, T1>=T3, time(T1) }. #minimize { T@1 : scanned_time(T) }."
+    }
+  ]
+}

@@ -1,0 +1,23 @@
+{
+  "instance_template": "x(X). y(Y). z(Z). #const n=V.",
+  "generator": "{ solution(X, Y, Z) } :- x(X), y(Y), z(Z).",
+  "hard_constraints": [
+    {
+      "description": "Now class, we must ensure that every single element from our set X is accounted for. This rule tells the solver that for every 'x' we have, it must appear in exactly one triple with some 'y' and 'z'.",
+      "asp_rule": "1 {solution(X, Y, Z) : y(Y), z(Z) } 1 :- x(X)."
+    },
+    {
+      "description": "Similarly, we cannot leave any element of set Y behind, nor can we use it twice! This constraint ensures each 'y' value is matched with exactly one 'x' and one 'z'.",
+      "asp_rule": "1 {solution(X, Y, Z) : x(X), z(Z) } 1 :- y(Y)."
+    },
+    {
+      "description": "To complete our matching, we apply the same logic to set Z. We require that every 'z' value is used in exactly one solution triple to ensure the sets are perfectly synchronized.",
+      "asp_rule": "1 {solution(X, Y, Z) : x(X), y(Y) } 1 :- z(Z)."
+    },
+    {
+      "description": "Let's double-check our math! This rule is an integrity constraint that forbids any triple from being part of our solution if the sum of its three components does not equal our target value 'n'.",
+      "asp_rule": ":- solution(X, Y, Z), X+Y+Z != n."
+    }
+  ],
+  "soft_constraints": []
+}

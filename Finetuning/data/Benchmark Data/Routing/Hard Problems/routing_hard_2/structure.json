@@ -1,0 +1,52 @@
+{
+  "instance_template": "loc(\"LaunchPad\"; \"Tunnel1\"; \"Tunnel2\"; \"StationA\"; \"StationB\"; \"Tunnel3\"; \"CalibEdge\"; \"StationC\").\nedge(\"LaunchPad\",\"Tunnel1\",2).\nedge(\"LaunchPad\",\"Tunnel2\",3).\nedge(\"Tunnel1\",\"StationA\",1).\nedge(\"StationA\",\"Tunnel3\",1).\nedge(\"Tunnel3\",\"Tunnel2\",1).\nedge(\"Tunnel2\",\"StationB\",1).\nedge(\"Tunnel2\",\"CalibEdge\",2).\nedge(\"CalibEdge\",\"StationC\",1).\nedge(\"StationC\",\"Tunnel1\",2).\ntime(0..10).",
+  "generator": "1{ at(L, T): loc(L) }1 :- time(T).\n1 { sampled(\"StationA\",T): time(T) }.\n1 { sampled(\"StationB\",T): time(T) }.\n0 { sampled(\"StationC\",T): time(T) }.",
+  "hard_constraints": [
+    {
+      "description": "Sanity check: make sure the rover is actually following the tunnel map and not just warping around.",
+      "asp_rule": ":- at(L1, T), at(L2, T+1), not edge(L1, L2, _), L1 != L2."
+    },
+    {
+      "description": "Initialize the bot at the pad with a full tank of water juice.",
+      "asp_rule": "at(\"LaunchPad\",0). tank(0,16)."
+    },
+    {
+      "description": "Calculate water drain from moving and the recovery bonus from sampling substrates.",
+      "asp_rule": "tank(T+1, W2) :- tank(T, W1), at(L1,T), at(L2,T+1), edge(L1,L2,C), W2 = W1 - C.\ntank(T+1,W+1) :- tank(T,W), sampled(L,T), W < 16."
+    },
+    {
+      "description": "Don't let the water level drop below zero or we're toast.",
+      "asp_rule": ":- tank(_, W), W < 0."
+    },
+    {
+      "description": "Rover's gotta park it for a minute while sampling, and no double-dipping at the same station back-to-back.",
+      "asp_rule": "at(L,T) :- sampled(L,T). at(L,T+1) :- sampled(L,T). :- sampled(L,T1), sampled(L,T2), T2 = T1+2."
+    },
+    {
+      "description": "StationA has a hard deadline at T-6, so get it done early.",
+      "asp_rule": ":- not sampled(\"StationA\",T): time(T), T <= 6."
+    },
+    {
+      "description": "Handle the 3L refill logic at CalibEdge; it's a one-time two-minute pit stop.",
+      "asp_rule": "refill(T) :- at(\"CalibEdge\",T), at(\"CalibEdge\",T+1).\n:- refill(T1), refill(T2), T1 != T2.\ntank(T+2, V + 3) :- tank(T,V), refill(T), V < 14."
+    },
+    {
+      "description": "Station C is strictly conditional: grab it if and only if the main chores are done by minute 8.",
+      "asp_rule": "mand_done :- sampled(\"StationA\",TA), sampled(\"StationB\",TB), TA <= 8, TB <= 8.\n:- sampled(\"StationC\",_), not mand_done.\n:- mand_done, not sampled(\"StationC\", _)."
+    },
+    {
+      "description": "Cap the total events at 18 so we don't wear out the hardware.",
+      "asp_rule": "event(T) :- at(L1,T-1), at(L2,T), L1 != L2.\nevent(T) :- sampled(_,T).\nevent(T) :- refill(T).\n:- N = #count {E: event(E)}, N > 18."
+    }
+  ],
+  "soft_constraints": [
+    {
+      "description": "Primary goal: maximize the total rock collection count.",
+      "asp_rule": "samples(N) :- N = #count {T: sampled(L,T)}.\n#maximize { N@2: samples(N) }."
+    },
+    {
+      "description": "Tie-breaker: get the mandatory samples done as fast as possible.",
+      "asp_rule": "mtime(M) :- M = #max { TA, TB : sampled(\"StationA\",TA), sampled(\"StationB\",TB) }.\n#minimize { M@1: mtime(M) }."
+    }
+  ]
+}

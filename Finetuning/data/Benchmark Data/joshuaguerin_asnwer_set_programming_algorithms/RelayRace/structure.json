@@ -1,0 +1,60 @@
+{
+  "instance_template": "leg(T, Start, End). legDist(T, Distance). legAscent(T, Climb). legTime(T). participant(P). preferredDistance(P, Distance). preferredPace(P, Pace). preferredAscent(P, Ascent). objective(Priority, Name).",
+  "generator": "{ assignment(P, leg(T, S, E)) : participant(P) } = 1 :- leg(T, S, E).",
+  "hard_constraints": [
+    {
+      "description": "Link participant to leg index.",
+      "asp_rule": "run(P,T) :- assignment(P, leg(T,_,_))."
+    },
+    {
+      "description": "Identify last exchange point for runner.",
+      "asp_rule": "endExchange(P, Exchange) :- leg(T1, _, Exchange), T1=#max{T:run(P, T), legTime(T)}, participant(P)."
+    },
+    {
+      "description": "Identify first exchange point for runner.",
+      "asp_rule": "startExchange(P, Exchange) :- leg(T1, Exchange, _), T1=#min{T:run(P, T), legTime(T)}, participant(P)."
+    },
+    {
+      "description": "Define time indices adjacent to legs.",
+      "asp_rule": "exchangeTime(T1) :- T1 = T + 1, legTime(T). exchangeTime(T1) :- T1 = T - 1, legTime(T)."
+    },
+    {
+      "description": "Detect handoff events for participants.",
+      "asp_rule": "exchange(P, T - 1) :- not run(P, T - 1), run(P, T), participant(P), legTime(T). exchange(P, T + 1) :- run(P, T), not run(P, T + 1), participant(P), legTime(T)."
+    },
+    {
+      "description": "Determine leg pace via runner preference.",
+      "asp_rule": "legPace(T, Max) :- Max > 0, Max = #max{Pace:run(P, T), preferredPace(P,Pace), participant(P)}, legTime(T)."
+    },
+    {
+      "description": "Calculate duration from distance and pace.",
+      "asp_rule": "legDuration(T, Duration) :- Duration = Distance * M, legDist(T,Distance), legPace(T, M), legTime(T)."
+    },
+    {
+      "description": "Total distance run per participant.",
+      "asp_rule": "participantDist(P, Total) :- Total = #sum{Distance: legDist(T,Distance), run(P,T), legTime(T)}, participant(P)."
+    },
+    {
+      "description": "Total ascent climbed per participant.",
+      "asp_rule": "participantAscent(P, Total) :- Total = #sum{Climb: legAscent(T,Climb), run(P,T), legTime(T)}, preferredAscent(P, _), participant(P)."
+    }
+  ],
+  "soft_constraints": [
+    {
+      "description": "Minimize distance preference deviation.",
+      "asp_rule": "#minimize {|Actual - Preferred| @ Priority, P: participantDist(P, Actual), preferredDistance(P, Preferred), participant(P), objective(Priority, \"dist-pref\")}. "
+    },
+    {
+      "description": "Minimize total race duration.",
+      "asp_rule": "#minimize {Duration @ Priority, T: legDuration(T, Duration), legTime(T), objective(Priority, \"duration\")}. "
+    },
+    {
+      "description": "Minimize pace preference deviation.",
+      "asp_rule": "#minimize {|Actual - Preferred| @ Priority, P, T: legPace(T, Actual), run(P, T), preferredPace(P, Preferred), objective(Priority, \"pace-pref\")}. "
+    },
+    {
+      "description": "Minimize total runner handoffs.",
+      "asp_rule": "#minimize{1 @ Priority, P, T: exchange(P,T), exchangeTime(T), participant(P), objective(Priority, \"exchange-count\")}. "
+    }
+  ]
+}

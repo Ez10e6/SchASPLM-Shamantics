@@ -1,0 +1,23 @@
+{
+  "instance_template": "seminar(1..6). timeslot(\"morning\"; \"midday\"; \"afternoon\"). room(1; 2; 3).",
+  "generator": "1 { delivered(S, R, T) : room(R), timeslot(T) } 1 :- seminar(S).",
+  "hard_constraints": [
+    {
+      "description": "Prevent concurrent room occupancy.",
+      "asp_rule": ":- delivered(S1, R, T), delivered(S2, R, T), S1 != S2."
+    },
+    {
+      "description": "Room 3 afternoon usage forbidden.",
+      "asp_rule": ":- delivered(S, 3, \"afternoon\")."
+    },
+    {
+      "description": "Seminar 1 restricted to Room 1.",
+      "asp_rule": ":- delivered(1, R, T), R != 1."
+    },
+    {
+      "description": "Seminar 2 and 3 timing exclusive.",
+      "asp_rule": ":- delivered(2, _, T), delivered(3, _, T)."
+    }
+  ],
+  "soft_constraints": []
+}

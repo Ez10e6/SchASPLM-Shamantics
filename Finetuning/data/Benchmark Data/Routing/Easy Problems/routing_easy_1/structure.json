@@ -1,0 +1,19 @@
+{
+  "instance_template": "loc(\"A\"; \"B\"; \"C\"; \"D\"; \"E\"). edge(\"A\", \"B\"). edge(\"A\", \"C\"). edge(\"B\", \"D\"). edge(\"C\", \"E\"). deliver_to(\"D\"; \"E\"). time(0..6).",
+  "generator": "1 { at(L, T) : loc(L) } 1 :- time(T).",
+  "hard_constraints": [
+    {
+      "description": "Sanity check to make sure the bot doesn't teleport; it can only move between spots that are actually connected.",
+      "asp_rule": ":- at(L1, T), at(L2, T+1), not edge(L1, L2), not edge(L2, L1), time(T)."
+    },
+    {
+      "description": "Hardcode the start point so the bot doesn't just spawn wherever it wants at T=0.",
+      "asp_rule": "at(\"A\", 0)."
+    },
+    {
+      "description": "The bot's gotta hit every delivery site exactly once. No skipping and no camping at the destination.",
+      "asp_rule": "1 { at(L, T) : time(T) } 1 :- deliver_to(L)."
+    }
+  ],
+  "soft_constraints": []
+}
