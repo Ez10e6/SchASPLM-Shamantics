@@ -1,0 +1,19 @@
+There are 12 academic workshops.
+Workshops are on AI, Physics, Math, or Linguistics.
+The schedule spans 3 days, with each day having 3 time slots:
+morning, midday, and evening.
+There are 4 available rooms.
+Every workshop must be scheduled.
+Only one workshop can be held in a room at a time.
+Each room can be used at most twice per day, but not in adjacent time slots.
+Room 2 cannot be used in the evening.
+Room 4 cannot host AI or Physics workshops.
+AI workshops must be scheduled in the morning.
+Physics workshops must be held on the first or second day.
+All Math workshops must be scheduled in Room 1 or Room 3.
+Linguistics workshops must not overlap in time.
+No room may host workshops from different topics on the same day.
+At least one workshop per topic must occur each day.
+The first workshop must be AI, and the last must be Linguistics.
+Try to maximize the number of rooms used in each time slot.
+Try to minimize idle slots, but avoid overbooking.

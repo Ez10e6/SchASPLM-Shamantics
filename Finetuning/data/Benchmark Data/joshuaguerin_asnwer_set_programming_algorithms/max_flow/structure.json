@@ -1,0 +1,12 @@
+{
+  "instance_template": "node(1..4). edge(1,2,10). edge(1,3,5). edge(2,4,10). edge(3,4,5). start(1). terminal(4).",
+  "generator": "{ flow(U,V,F) : F = 0..C } = 1 :- edge(U,V,C).",
+  "hard_constraints": [
+    {
+      "description": "Internal nodes flow conservation.",
+      "asp_rule": ":- node(V), not start(V), not terminal(V), In = #sum{F,U : flow(U,V,F)}, Out = #sum{F,W : flow(V,W,F)}, In != Out."
+    }
+  ],
+  "soft_constraints": [],
+  "global_objective": "#maximize { F,U,V : flow(U,V,F), terminal(V) }."
+}

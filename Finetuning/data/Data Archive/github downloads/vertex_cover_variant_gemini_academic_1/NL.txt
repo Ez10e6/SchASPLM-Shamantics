@@ -1,0 +1,17 @@
+**Exercise 4.12: The Minimum Vertex Cover Problem**
+
+**Problem Statement:**
+Let $G = (V, E)$ be an undirected graph, where $V$ denotes the finite set of vertices and $E \subseteq \{\{u, v\} \mid u, v \in V, u \neq v\}$ represents the set of edges. 
+
+**Definition (Vertex Cover):**
+A subset of vertices $S \subseteq V$ is defined as a *vertex cover* of $G$ if it satisfies the following condition: for every edge $e = \{u, v\} \in E$, the intersection $e \cap S$ is non-empty. Formally, $S$ is a vertex cover if:
+$$\forall \{u, v\} \in E : (u \in S) \lor (v \in S)$$
+
+**Objective:**
+Given the graph $G$, the objective of the Minimum Vertex Cover problem is to identify a vertex cover $S^*$ that minimizes the cardinality of the set. The optimization problem is formulated as follows:
+$$\text{Minimize } |S|$$
+$$\text{subject to } S \subseteq V \text{ and } S \text{ is a vertex cover of } G.$$
+
+**Task:**
+1. Formulate a mathematical proof or an algorithmic approach to determine the optimal subset $S^*$.
+2. Discuss the computational complexity of this optimization task, specifically addressing its classification within the hierarchy of complexity classes (e.g., NP-optimization).

@@ -1,0 +1,21 @@
+**Exercise: The Balanced Partition Problem**
+
+**Problem Statement:**
+Given a finite multiset $S$ of $n$ integers, denoted as $S = \{s_1, s_2, \dots, s_n\}$, formulate a computational procedure to determine the existence of, and subsequently construct, a balanced bi-partition of the set.
+
+**Objective:**
+The goal is to identify two disjoint subsets, $A$ and $B$, derived from the universal set $S$. This partition must be established subject to the following rigorous constraints:
+
+1.  **Completeness and Disjointness:** The subsets must satisfy the fundamental properties of a partition, such that:
+    *   $A \cup B = S$
+    *   $A \cap B = \emptyset$
+    *   Each entity $s_i \in S$ is mapped to exactly one subset.
+
+2.  **Summation Equivalence:** The partition is subject to an equality constraint regarding the additive weight of its members. Specifically, the arithmetic sum of the elements in subset $A$ must be strictly equal to the arithmetic sum of the elements in subset $B$:
+    $$\sum_{a \in A} a = \sum_{b \in B} b$$
+
+**Output Specification:**
+The solution must yield the specific membership of both subsets $A$ and $B$. If the conditions for summation equivalence cannot be satisfied given the input multiset $S$, the procedure should return a formal indication of non-feasibility.
+
+**Complexity Note:** 
+Students should consider the decision version of this problem, which is known to be NP-complete, and discuss the implications for the efficiency of their proposed algorithmic implementation (e.g., dynamic programming or recursive backtracking with pruning).

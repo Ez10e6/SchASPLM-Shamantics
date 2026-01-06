@@ -1,0 +1,24 @@
+**Exercise: The Constrained Graph Traversal Problem (Visit-All Variant)**
+
+**Problem Description:**
+Formalize and solve the path-finding problem within a discrete topological space, hereafter referred to as the "Visit-All" problem. Let the environment be represented as an undirected graph $G = (V, E)$, where $V$ denotes the set of vertices (locations) and $E \subseteq \{ \{u, v\} \mid u, v \in V \}$ denotes the set of edges representing bidirectional connectivity.
+
+Given an initial state $v_0 \in V$, a set of target entities $V_{target} \subseteq V$, and a temporal upper bound $T \in \mathbb{N}$, determine the existence of a feasible trajectory and provide the corresponding sequence of transitions.
+
+**Formal Constraints:**
+A solution is defined as a sequence of vertices $S = (s_0, s_1, s_2, \dots, s_k)$ that satisfies the following conditions:
+
+1.  **Initial Boundary Condition:** The sequence must originate at the specified starting node:
+    $$s_0 = v_0$$
+
+2.  **Adjacency and Continuity:** For every discrete time step $t \in \{0, \dots, k-1\}$, the transition must respect the graph’s topology such that the robot moves to exactly one adjacent vertex:
+    $$(s_t, s_{t+1}) \in E$$
+
+3.  **Target Coverage (Set Inclusion):** The set of vertices visited in the trajectory must be a superset of the target locations. Formally, let $V_{visited} = \{s_t \mid 0 \le t \le k\}$. The following condition must hold:
+    $$V_{target} \subseteq V_{visited}$$
+
+4.  **Temporal Constraint:** The total number of edges traversed (the path length) must not exceed the maximum allowable time steps $T$:
+    $$k \le T$$
+
+**Requirement:**
+Construct an algorithm to identify a valid sequence $S$. If multiple such sequences exist, any sequence satisfying the above constraints is considered an optimal feasibility solution. The output must be rendered as the ordered sequence of vertices representing the robot’s path through the graph.

@@ -1,0 +1,18 @@
+The media lab is assembling a suite of machines for real-time 3D rendering, and while performance
+is paramount, the budget committee is breathing down everyone’s neck about excess spending.
+You’re tasked with selecting exactly one component from each of three categories: CPUs, GPUs,
+and power supplies. Each component is annotated with its wattage and price tag, and while you
+can technically pick anything, there are tight constraints.
+Here’s what’s on the list:
+CPUs — BoltX (wattage: 85W, $400), HydraPro (125W, $550), LiteCore (60W, $350)
+GPUs — StormZ (180W, $800), Nebula9 (150W, $650), VegaLite (95W, $500)
+Power Supplies — PowerMax750 (capacity: 750W, $200), Eco600 (600W, $150), Titan900 (900W, $250)
+You’ll need to ensure that the total system draw—i.e., the sum of selected CPU and GPU
+wattages—remains at least 100W below the selected power supply’s maximum output.
+Apparently, this is to avoid overloading under peak load bursts.
+There’s another thing: the most power-hungry part (by wattage) in your final configuration
+must also be the most expensive. That rule is apparently about cost justification.
+Compatibility is a minefield: HydraPro doesn’t play nicely with VegaLite due to thermal
+constraints, and if you pick Eco600, you can’t use StormZ, which requires better voltage
+regulation. Oh, and you’re not allowed to pick all three cheapest components. Also, no pair of 
+selected parts can differ in cost by more than $400.

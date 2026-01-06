@@ -1,0 +1,7 @@
+I was looking over the inventory for our new smartphone bundles this morning, and I think I’ve finally figured out how we can piece everything together while following all those technical requirements. As you know, we need to build a complete package that includes exactly one data plan, one specific phone model, and a single accessory.
+
+Our options for the data plans are pretty straightforward: we have either the BasicData or the PremiumData. For the hardware, the customer can choose between the ModelX and the ModelY. To finish it off, we need to include an accessory, which will be either CaseA or CaseB.
+
+However, there are a few compatibility issues we have to navigate. For starters, we can't offer the BasicData plan to anyone who picks the ModelY, as they just aren't compatible. Furthermore, the ModelX is designed with a very specific form factor, so if someone chooses that phone, they are required to take CaseA. The final complication is that our PremiumData plan has some interference issues with the materials in CaseA, so those two can never be paired together.
+
+After sitting down and mapping out the dependencies, I’ve found a configuration that works perfectly without breaking any of these rules. We should set the customer up with the PremiumData plan, the ModelY phone, and CaseB. This combination satisfies everything: by choosing the ModelY, we avoid the BasicData conflict, and since we aren't using the ModelX, we aren't forced into using CaseA. This allows us to use CaseB, which keeps the PremiumData plan running exactly as it should.

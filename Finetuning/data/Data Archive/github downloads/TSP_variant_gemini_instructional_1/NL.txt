@@ -1,0 +1,30 @@
+### System Specification: Hamiltonian Path Optimization (TSP Variant)
+
+**1. System Definition**
+The system shall identify an optimal Hamiltonian Path within a weighted undirected graph $G = (V, E)$. The path must originate at a designated source node and terminate at a designated sink node, traversing every vertex in the graph exactly once while minimizing the cumulative edge weight.
+
+**2. Input Parameters**
+*   **Graph $G$**: An undirected graph defined by the tuple $(V, E)$.
+*   **Vertices $V$**: A finite set of $n$ nodes.
+*   **Edges $E$**: A set of unordered pairs $\{u, v\}$ representing bidirectional connections between nodes.
+*   **Weight Function $w$**: A mapping $w: E \rightarrow \mathbb{R}$ that assigns a numerical cost to each edge.
+*   **Start Node $s$**: A specific vertex $s \in V$.
+*   **End Node $e$**: A specific vertex $e \in V$.
+
+**3. Operational Constraints**
+The solution must satisfy the following logical requirements:
+*   **Vertex Coverage (Hamiltonian Property)**: The path must include every node $v \in V$.
+*   **Uniqueness**: Each node $v \in V$ must be visited exactly once.
+*   **Boundary Conditions**: 
+    *   The sequence of nodes must begin with node $s$.
+    *   The sequence of nodes must conclude with node $e$.
+*   **Edge Validity**: For any two consecutive nodes $(v_i, v_{i+1})$ in the path, the edge $\{v_i, v_{i+1}\}$ must exist in the set $E$.
+*   **Path Continuity**: The solution must represent a single, contiguous sequence of $n-1$ edges.
+
+**4. Objective Function**
+Define the path $P$ as a sequence of edges $\{(v_1, v_2), (v_2, v_3), \dots, (v_{n-1}, v_n)\}$.
+Minimize the total cost $C$:
+$$C = \sum_{i=1}^{n-1} w(v_i, v_{i+1})$$
+
+**5. Output Specification**
+The system shall return the ordered set of edges $E_{path} \subset E$ that constitutes the optimal path satisfying all constraints. The output must explicitly define the sequence such that the connectivity from $s$ to $e$ is verifiable.

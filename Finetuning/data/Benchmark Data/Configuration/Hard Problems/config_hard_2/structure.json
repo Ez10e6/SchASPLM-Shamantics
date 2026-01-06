@@ -1,0 +1,37 @@
+{
+  "instance_template": "cpu(\"BoltX\"). cpu(\"HydraPro\"). cpu(\"LiteCore\"). gpu(\"StormZ\"). gpu(\"Nebula9\"). gpu(\"VegaLite\"). psu(\"PowerMax750\"). psu(\"Eco600\"). psu(\"Titan900\"). watt(\"BoltX\", 85). watt(\"HydraPro\", 125). watt(\"LiteCore\", 60). watt(\"StormZ\", 180). watt(\"Nebula9\", 150). watt(\"VegaLite\", 95). cost(\"BoltX\", 400). cost(\"HydraPro\", 550). cost(\"LiteCore\", 350). cost(\"StormZ\", 800). cost(\"Nebula9\", 650). cost(\"VegaLite\", 500). cost(\"PowerMax750\", 200). cost(\"Eco600\", 150). cost(\"Titan900\", 250). capacity(\"PowerMax750\", 750). capacity(\"Eco600\", 600). capacity(\"Titan900\", 900).",
+  "generator": "1 { selected_cpu(C) : cpu(C) } 1. 1 { selected_gpu(G) : gpu(G) } 1. 1 { selected_psu(P) : psu(P) } 1. selected(X) :- selected_cpu(X). selected(X) :- selected_gpu(X). selected(X) :- selected_psu(X).",
+  "hard_constraints": [
+    {
+      "description": "To prevent system failure under peak load, the combined wattage of the selected CPU and GPU must remain at least 100W below the power supply's maximum capacity.",
+      "asp_rule": ":- selected_cpu(C), selected_gpu(G), selected_psu(P), watt(C, WC), watt(G, WG), capacity(P, CP), WC + WG > CP - 100."
+    },
+    {
+      "description": "To ensure cost-performance justification, the component with the highest power draw must also be the most expensive component in the configuration.",
+      "asp_rule": ":- selected(X), watt(X, W), W = #max { W1, I : selected(I), watt(I, W1) }, cost(X, CX), MC = #max { C1, Z : selected(Z), cost(Z, C1) }, CX < MC."
+    },
+    {
+      "description": "HydraPro processors and VegaLite graphics cards are prohibited from being paired together due to thermal incompatibility.",
+      "asp_rule": ":- selected_cpu(\"HydraPro\"), selected_gpu(\"VegaLite\")."
+    },
+    {
+      "description": "The Eco600 power supply unit is incompatible with StormZ GPUs due to insufficient voltage regulation for high-draw components.",
+      "asp_rule": ":- selected_psu(\"Eco600\"), selected_gpu(\"StormZ\")."
+    },
+    {
+      "description": "Company policy forbids a configuration where all three selected components are the lowest-priced options in their respective categories.",
+      "asp_rule": ":- selected_cpu(C), cost(C, VC), VC = #min { V1, C1 : cpu(C1), cost(C1, V1) }, selected_gpu(G), cost(G, VG), VG = #min { V2, G1 : gpu(G1), cost(G1, V2) }, selected_psu(P), cost(P, VP), VP = #min { V3, P1 : psu(P1), cost(P1, V3) }."
+    },
+    {
+      "description": "To maintain pricing balance across system components, no two selected parts may have a cost difference exceeding $400.",
+      "asp_rule": ":- selected(X), selected(Y), cost(X, CX), cost(Y, CY), CX - CY > 400."
+    }
+  ],
+  "soft_constraints": [
+    {
+      "description": "The budget committee requires minimizing the total system cost to prevent excess hardware spending.",
+      "asp_rule": "penalty(\"excess_spending\", Item, Cost) :- selected(Item), cost(Item, Cost)."
+    }
+  ],
+  "global_objective": "#minimize { Cost, Item : penalty(\"excess_spending\", Item, Cost) }."
+}

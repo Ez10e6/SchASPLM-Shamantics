@@ -1,0 +1,38 @@
+### Formal Specification: Ricochet Robots Pathfinding System
+
+#### 1. System Domain
+*   **Grid ($\mathcal{G}$):** A two-dimensional manifold of dimensions $R \times C$, where $R$ is the total rows and $C$ is the total columns.
+*   **Robots ($\mathcal{R}$):** A set of discrete entities $\{r_1, r_2, \dots, r_n\}$, each occupying exactly one cell $(i, j) \in \mathcal{G}$ at any time $t$.
+*   **Barriers ($\mathcal{W}$):** A set of static, impassable boundaries (walls) located between adjacent cells or at the grid perimeter.
+*   **Targets ($\mathcal{T}$):** A set of goal coordinates $(i, j)$ associated with specific robots $r \in \mathcal{R}$.
+
+#### 2. State Definition
+*   **State ($S_t$):** The configuration of all robot positions at discrete time step $t$.
+*   **Initial State ($S_0$):** The starting coordinates for all robots $r \in \mathcal{R}$.
+*   **Occupancy Map:** A function that identifies a cell as occupied if it contains either a barrier $w \in \mathcal{W}$ or a robot $r_i$ where $r_i \neq r_{active}$.
+
+#### 3. Transition Dynamics (The "Slide" Operation)
+A single move is defined as the tuple $(r, \vec{d})$, where $r \in \mathcal{R}$ and $\vec{d} \in \{\text{North, South, East, West}\}$. The transition from $S_t$ to $S_{t+1}$ must adhere to the following logic:
+*   **Unitary Selection:** Exactly one robot $r$ must be selected for displacement per time step. All other robots $\{r_i \in \mathcal{R} \mid r_i \neq r\}$ must remain stationary.
+*   **Continuous Vector Displacement:** Upon selection, the robot $r$ translates along the vector $\vec{d}$ until an obstruction is encountered.
+*   **Obstruction Criteria:** A robot is obstructed if the next cell in direction $\vec{d}$ is:
+    1.  Outside the grid boundaries $\mathcal{G}$.
+    2.  Occupied by a static barrier $w \in \mathcal{W}$.
+    3.  Occupied by another robot $r_j$ (where $j \neq r$).
+*   **Terminal Position:** The robot $r$ must terminate its movement at the last valid (unoccupied) cell immediately preceding the obstruction.
+*   **Incompressibility:** Mid-path termination is prohibited. The robot cannot cease movement until the obstruction criteria are met.
+
+#### 4. System Constraints
+*   **Mutual Exclusion:** No two robots may occupy the same cell $(i, j)$ at any time $t$.
+*   **Static Barriers:** Walls are immutable and cannot be moved or bypassed.
+*   **Step Limit:** The total number of moves $M$ must not exceed the predefined maximum $T_{max}$ ($M \le T_{max}$).
+
+#### 5. Objective Function
+*   **Goal State ($S_{goal}$):** A state where the designated robot(s) $r \in \mathcal{R}$ occupy their respective target coordinates $(i, j) \in \mathcal{T}$.
+*   **Optimization:** Identify a valid sequence of moves $\{(r, \vec{d})_1, (r, \vec{d})_2, \dots, (r, \vec{d})_M\}$ that transforms $S_0$ to $S_{goal}$.
+
+#### 6. Output Specification
+The solution must provide a chronologically ordered sequence of operations. Each entry in the sequence must include:
+*   **Robot ID:** The identifier of the robot moved.
+*   **Direction:** The cardinal direction of the slide.
+*   **Temporal Index:** The step number or time $t$ at which the move occurred.

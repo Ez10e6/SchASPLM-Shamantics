@@ -1,0 +1,20 @@
+% Count the total nodes to define the upper bound of colors.
+max_colors(N) :- N = #count{ X : node(X) }.
+
+% Define the domain of colors.
+color(1..N) :- max_colors(N).
+
+% Edges are symmetric (undirected).
+edge(Y, X) :- edge(X, Y).
+
+% Generate exactly one color assignment for each node.
+1 { assign(N, C) : color(C) } 1 :- node(N).
+
+% Constraint: No two adjacent nodes can share the same color.
+:- edge(X, Y), assign(X, C), assign(Y, C).
+
+% Count the number of distinct colors used.
+chromatic_number(N) :- N = #count{ C : assign(X, C) }.
+
+% Minimize the count of used colors.
+#minimize { N : chromatic_number(N) }.

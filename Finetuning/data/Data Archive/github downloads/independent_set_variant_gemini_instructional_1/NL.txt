@@ -1,0 +1,16 @@
+### Formal Specification: Maximum Independent Set (MIS) Problem
+
+**1. System Input**
+*   Define an undirected graph $G = (V, E)$, where:
+    *   $V$ is a finite set of vertices (nodes).
+    *   $E \subseteq \{\{u, v\} \mid u, v \in V, u \neq v\}$ is a set of unordered pairs representing edges (connections) between vertices.
+
+**2. Output Requirements**
+*   Identify and return a subset of vertices $S \subseteq V$.
+
+**3. Operational Constraints**
+*   **Independence Property:** Ensure that for every pair of vertices $\{u, v\} \subseteq S$, the edge $\{u, v\} \notin E$. No two vertices within the subset $S$ shall be adjacent.
+
+**4. Objective Function**
+*   **Cardinality Maximization:** Select $S$ such that its size $|S|$ is maximized. 
+*   Formally, find $S$ such that $\forall S' \subseteq V$ satisfying the Independence Property, $|S| \geq |S'|$.

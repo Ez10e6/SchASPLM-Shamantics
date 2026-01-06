@@ -1,0 +1,19 @@
+There are 10 presentations.
+Presentations are in AI, Cloud, IoT, or VR.
+The schedule spans 4 days, with 4 time slots per day:
+early morning, late morning, early afternoon, late afternoon.
+There are 5 rooms.
+Each presentation must be scheduled.
+Only one presentation per room‑time.
+Each room can be used at most three times per day.
+Rooms cannot be booked in consecutive slots.
+Room 2 has no projector; AI and Cloud require a projector.
+VR cannot be in room 1.
+IoT presentations must be spread across at least three days.
+VR and AI cannot be on the same day in the same room.
+At most two Cloud and IoT presentations may overlap in any slot.
+Only AI can be in slot 1 of day 1.
+Only VR can be in slot 3 of day 4.
+Each day must have at least one presentation.
+At least two different topics must occur in every time slot across all rooms.
+Maximize the number of rooms used per slot, then minimize idle slots.

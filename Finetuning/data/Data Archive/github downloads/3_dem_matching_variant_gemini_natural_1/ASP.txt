@@ -1,0 +1,14 @@
+% Generate candidate triples using elements from sets X, Y, and Z.
+{ solution(X, Y, Z) } :- x(X), y(Y), z(Z).
+
+% Constraint: Each element of set X must appear in exactly one solution triple.
+1 {solution(X, Y, Z) : y(Y), z(Z) } 1 :- x(X).
+
+% Constraint: Each element of set Y must appear in exactly one solution triple.
+1 {solution(X, Y, Z) : x(X), z(Z) } 1 :- y(Y).
+
+% Constraint: Each element of set Z must appear in exactly one solution triple.
+1 {solution(X, Y, Z) : x(X), y(Y) } 1 :- z(Z).
+
+% Constraint: The sum of the elements in a solution triple must equal n.
+:- solution(X, Y, Z), X+Y+Z != n.

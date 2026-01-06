@@ -11,17 +11,17 @@ Here are some example inputs you will receive:
 The corresponding ASP rules would be:
 ```
 % 1
-:- course(Course, _, _, _), #count{{Student : student(Student, Course)}} >= 50.
+:- course(Course, _, _, _), #count{Student : student(Student, Course)} >= 50.
 
 % 2
-:- course(Course,_,_,_), #count{{Student : student(Student, Course)}} < 100.
-:- course(Course,_,_,_), #count{{Student : student(Student, Course)}} > 200.
+:- course(Course,_,_,_), #count{Student : student(Student, Course)} < 100.
+:- course(Course,_,_,_), #count{Student : student(Student, Course)} > 200.
 
 % 3
-:- course(_, School, _), #count{{Student: student(Student, Course), course(Course, School, _)}} > Limit, school(School,Limit).
+:- course(_, School, _), #count{Student: student(Student, Course), course(Course, School, _)} > Limit, school(School,Limit).
 
 % 4
-:- course(_, School, Time), #count{{Student: student(Student, Course), course(Course, School, Time)}} > Limit, School(School, Limit).
+:- course(_, School, Time), #count{Student: student(Student, Course), course(Course, School, Time)} > Limit, School(School, Limit).
 ```
 Note: For count aggregates, the variables outside the aggregate function act as a "for all", meaning the variable you are counting should never be out there. Otherwise you always count exactly one.
 

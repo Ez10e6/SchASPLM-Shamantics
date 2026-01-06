@@ -1,0 +1,43 @@
+% Define 'run' to map participants to leg indices based on assignments.
+run(P,T) :- assignment(P, leg(T,_,_)).
+
+% Define 'endExchange' as the location of the last leg a participant runs.
+endExchange(P, Exchange) :- leg(T1, _, Exchange), T1=#max{T:run(P, T), legTime(T)}, participant(P).
+
+% Define 'startExchange' as the location of the first leg a participant runs.
+startExchange(P, Exchange) :- leg(T1, Exchange, _), T1=#min{T:run(P, T), legTime(T)}, participant(P).
+
+% Define 'exchangeTime' as the time immediately before or after a leg.
+exchangeTime(T1) :- T1 = T + 1, legTime(T).
+exchangeTime(T1) :- T1 = T - 1, legTime(T).
+
+% Identify 'exchange' events when a participant starts or stops running.
+exchange(P, T - 1) :- not run(P, T - 1), run(P, T), participant(P), legTime(T).
+exchange(P, T + 1) :- run(P, T), not run(P, T + 1), participant(P), legTime(T).
+
+% Calculate 'legPace' as the maximum preferred pace of the participant running that leg.
+legPace(T, Max) :- Max > 0, Max = #max{Pace:run(P, T), preferredPace(P,Pace), participant(P)}, legTime(T).
+
+% Calculate 'legDuration' based on distance and pace.
+legDuration(T, Duration) :- Duration = Distance * M, legDist(T,Distance), legPace(T, M), legTime(T).
+
+% Count the number of legs run by each participant.
+legCount(P, C) :- C = #count{T: run(P, T), participant(P)}, participant(P).
+
+% Calculate 'participantDist' as the sum of distances of legs run by a participant.
+participantDist(P, Total) :- Total = #sum{Distance: legDist(T,Distance), run(P,T), legTime(T)}, participant(P).
+
+% Calculate 'participantAscent' as the sum of ascent of legs run by a participant.
+participantAscent(P, Total) :- Total = #sum{Climb: legAscent(T,Climb), run(P,T), legTime(T)}, preferredAscent(P, _), participant(P).
+
+% Minimize the absolute difference between actual and preferred distance for participants.
+#minimize {|Actual - Preferred| @ Priority, P: participantDist(P, Actual), preferredDistance(P, Preferred), participant(P), objective(Priority, "dist-pref")}.
+
+% Minimize the total duration of all legs.
+#minimize {Duration @ Priority, T: legDuration(T, Duration), legTime(T), objective(Priority, "duration")}.
+
+% Minimize the absolute difference between actual leg pace and preferred pace.
+#minimize {|Actual - Preferred| @ Priority, P, T: legPace(T, Actual), run(P, T), preferredPace(P, Preferred), objective(Priority, "pace-pref")}.
+
+% Minimize the count of exchanges to encourage consecutive legs.
+#minimize{1 @ Priority, P, T: exchange(P,T), exchangeTime(T), participant(P), objective(Priority, "exchange-count")}.

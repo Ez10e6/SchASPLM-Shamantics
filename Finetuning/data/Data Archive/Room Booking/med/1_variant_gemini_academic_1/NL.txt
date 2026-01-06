@@ -1,0 +1,26 @@
+### Exercise 4.12: The Multi-Dimensional Resource Allocation Problem
+
+**Problem Context:**
+Consider a scheduling optimization problem involving a set of ten seminars, denoted as $\mathcal{S} = \{s_1, s_2, \dots, s_{10}\}$. Each seminar $s_i$ is categorized by a specific knowledge domain $T_i \in \{\text{Artificial Intelligence (AI), Biology, Mathematics}\}$. The objective is to assign each seminar to a unique coordinate within a three-dimensional discrete space defined by:
+*   **Days:** $\mathcal{D} = \{1, 2\}$
+*   **Time Slots:** $\mathcal{P} = \{p_1, p_2, p_3\}$ (representing morning, midday, and afternoon)
+*   **Rooms:** $\mathcal{R} = \{1, 2, 3, 4\}$
+
+Let the assignment function be defined as $f: \mathcal{S} \to \mathcal{D} \times \mathcal{P} \times \mathcal{R}$, where $f(s) = (d, p, r)$.
+
+**Constraints:**
+The assignment must satisfy the following logical conditions:
+
+1.  **Injectivity (Resource Conflict):** No two seminars may occupy the same spatial-temporal coordinate. For any $s_i, s_j \in \mathcal{S}$, if $i \neq j$, then $f(s_i) \neq f(s_j)$.
+2.  **Domain-Specific Temporal Restriction (AI):** For all $s \in \mathcal{S}$ where $T_s = \text{AI}$, the assigned time slot $p$ must satisfy $p \in \{p_1, p_2\}$. (Seminars in AI are excluded from afternoon slots).
+3.  **Spatial Dispersion (Biology):** Let $\mathcal{S}_{Bio} \subseteq \mathcal{S}$ be the subset of seminars focused on Biology. The set of rooms assigned to $\mathcal{S}_{Bio}$ must have a cardinality $|\{r \mid \exists s \in \mathcal{S}_{Bio}, f(s) = (d, p, r)\}| \geq 2$.
+4.  **Venue Exclusion:** The coordinate $(d, p_2, 4)$ is unavailable for all $d \in \mathcal{D}$. Room 4 is strictly prohibited for use during the midday slot on both days.
+5.  **Temporal Mutual Exclusion (Mathematics):** Let $\mathcal{S}_{Math} \subseteq \mathcal{S}$ be the subset of seminars focused on Mathematics. For any $s_i, s_j \in \mathcal{S}_{Math}$ where $i \neq j$, the temporal components $(d_i, p_i)$ and $(d_j, p_j)$ must be distinct, regardless of the room assignment $r$.
+6.  **Specific Entity Constraints:**
+    *   **Seminar 5:** The assignment $f(s_5) = (d, p, r)$ must satisfy $d = 2$ and $p \neq p_1$.
+    *   **Seminars 6 and 7:** Let $f(s_6) = (d_6, p_6, r_6)$ and $f(s_7) = (d_7, p_7, r_7)$. The assignments must satisfy $r_6 = r_7$ and $d_6 \neq d_7$.
+
+**Task:**
+1.  Formulate this problem as a **Constraint Satisfaction Problem (CSP)**, identifying the variables, domains, and formal algebraic constraints.
+2.  Determine if a valid schedule exists by evaluating the intersection of the constraints. 
+3.  Discuss the impact of Constraint 5 on the total available state space for Mathematics seminars.

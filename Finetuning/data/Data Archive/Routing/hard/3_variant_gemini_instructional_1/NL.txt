@@ -1,0 +1,58 @@
+### **System Specification: Undersea Survey Drone Routing and Calibration**
+
+#### **1. Graph Topology and Costs**
+The operational environment is a bidirectional graph $G = (V, E)$. Let $H(e)$ be the heat cost and $D(e)$ be the time duration for any edge $e \in E$.
+*   **Nodes ($V$):** {SubDock, CoralPass, VentStream, BeaconAlpha, BeaconBeta, NodeX, BeaconGamma, DeepLoop}.
+*   **Edges and Heat Loads ($E, H$):**
+    *   (SubDock, CoralPass): 2 units
+    *   (SubDock, VentStream): 4 units
+    *   (CoralPass, BeaconAlpha): 1 unit
+    *   (CoralPass, DeepLoop): 1 unit
+    *   (DeepLoop, VentStream): 1 unit
+    *   (VentStream, BeaconBeta): 2 units
+    *   (VentStream, NodeX): 1 unit
+    *   (NodeX, BeaconGamma): 3 units
+    *   (BeaconGamma, BeaconAlpha): 4 units
+*   **Edge Duration ($D$):** All traversals $D(e) = 1$ time unit.
+
+#### **2. Drone State Variables**
+*   **$C_{heat}$:** Current heat accumulation (Initial: 0; Maximum: 10).
+*   **$T_{total}$:** Elapsed mission time in minutes (Initial: 0).
+*   **$A_{count}$:** Total number of discrete actions performed (Initial: 0; Maximum: 16).
+*   **$P_{status}$:** Boolean set {Alpha_Pulse, Beta_Pulse, Gamma_Pulse} (Initial: False).
+
+#### **3. Operational Actions**
+*   **Move:** Transition between adjacent nodes.
+    *   Increment $T_{total}$ by 1.
+    *   Increment $A_{count}$ by 1.
+    *   Increment $C_{heat}$ by $H(e)$.
+*   **Acoustic Pulse:** Perform data calibration at a Beacon or NodeX.
+    *   Increment $T_{total}$ by 2.
+    *   Increment $A_{count}$ by 1.
+    *   Increment $C_{heat}$ by 1.
+*   **Cooldown:** Linger at NodeX to shed heat.
+    *   Increment $T_{total}$ by 2.
+    *   Increment $A_{count}$ by 1 (Note: This occupies one action slot despite taking 2 minutes).
+    *   Set $C_{heat}$ to 0.
+
+#### **4. Mission Constraints**
+*   **Heat Threshold:** $C_{heat}$ must never exceed 10 units at any point during a move or pulse.
+*   **Mandatory Objectives:**
+    *   Perform an Acoustic Pulse at **BeaconAlpha**.
+    *   Perform an Acoustic Pulse at **BeaconBeta**.
+*   **Temporal Constraints:**
+    *   The pulse at BeaconAlpha must be completed such that $T_{total} \le 5$.
+    *   Total actions $A_{count}$ must not exceed 16.
+*   **Conditional Objective (BeaconGamma):**
+    *   If and only if (iff) pulses at BeaconAlpha and BeaconBeta are completed by $T_{total} \le 8$, the drone must perform an Acoustic Pulse at **BeaconGamma**.
+*   **NodeX Protocol:**
+    *   Upon entering NodeX, the drone must execute exactly one of the following before exiting:
+        1.  Perform an Acoustic Pulse.
+        2.  Perform a Cooldown.
+*   **Signal Overlap Prevention:**
+    *   Consecutive Acoustic Pulses are prohibited.
+    *   The drone must transition through (or stop at) **VentStream** between any two Pulse actions to reconfigure systems.
+
+#### **5. Optimization Objective**
+*   **Primary Priority:** Minimize "Wasted Time," defined as $T_{wasted} = T_{total} - \sum T_{pulse\_durations}$.
+*   The architect must select the route that minimizes time spent moving or cooling down relative to time spent pulsing.

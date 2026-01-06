@@ -1,0 +1,37 @@
+You’ve been given the task of organizing ten presentations spanning four specialized
+domains: Artificial Intelligence, Cloud Computing, the Internet of Things,
+and Virtual Reality. The event unfolds over four days, and each day is
+structured into four distinct sessions: early morning, late morning, early
+afternoon, and late afternoon. A total of five rooms are available throughout
+the event.
+Each of the ten presentations must be scheduled — no omissions — and
+only one presentation can take place in a unique room-time pairing. A room can host
+no more than three presentations per day, and its use must be non-consecutive,
+meaning you can’t assign it to back-to-back sessions.
+The schedule must avoid this kind of compression for all rooms.
+There are several equipment and room-specific limitations to consider. Room 2 lacks
+a projector, so it cannot be used for topics that require one — namely, AI and Cloud
+presentations. Meanwhile, VR sessions are not permitted in Room 1 at all, regardless
+of the time or day.
+Topical and temporal separation also plays a role in the schedule design. IoT
+presentations must be distributed across at least three different days, so they
+can’t be grouped too tightly. There is a strict spatial constraint that forbids
+AI and VR from being scheduled in the same room on the same day — those topics
+must not share a physical space within any single day, even at different times.
+You’ll also need to control how much simultaneous activity occurs among closely
+related topics. Cloud and IoT are allowed to overlap with each other, but not
+excessively: no more than two such presentations may occur during the
+same time slot, regardless of room.
+A few time-critical constraints must be obeyed. The first scheduled session on Day 1,
+occurring in the early morning, must be an AI presentation — no other topic is
+permitted to occupy that slot. At the other end of the schedule, the early afternoon
+session on Day 4 must be reserved exclusively for VR; no other topic may take that
+position.
+To ensure consistent coverage and audience engagement, each day must include at least
+one presentation, even if others remain unassigned. And each time slot, across all
+rooms, should exhibit at least two different topics — no slot should be monopolized
+by a single subject area.
+Finally, when multiple valid schedules satisfy all the constraints, preference should
+be given to those that maximize the number of rooms in use during each session.
+Once that’s achieved, the next priority is to minimize idle room-time slots overall,
+without violating any rule that would otherwise disqualify a more efficient layout.

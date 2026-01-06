@@ -1,0 +1,13 @@
+You are tasked with solving the Sokoban puzzle.
+The environment is a grid where some cells contain stones, some are empty (clear), and some are walls.
+There is a player (pusher) at a specific starting location.
+The goal is to push all stones onto designated goal locations.
+
+The rules are:
+1. The player can move to an adjacent clear square (North, South, East, West).
+2. The player can push a stone to an adjacent square if the square behind the stone is clear.
+3. You cannot pull stones.
+4. You cannot push two stones at once.
+5. You cannot move through walls or stones.
+
+The solution must output the sequence of actions (move or push) to reach the goal state where all stones are on goal squares.

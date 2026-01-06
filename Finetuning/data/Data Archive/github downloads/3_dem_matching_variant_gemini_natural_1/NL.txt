@@ -1,0 +1,5 @@
+Imagine you’ve been handed a complex logistics puzzle involving three separate lists of numbers, which we’ll call sets X, Y, and Z. Each of these lists contains the exact same amount of integers, and your goal is to organize them into a perfectly balanced collection of three-part teams.
+
+To solve this, you need to form a series of triples where every single group contains exactly one integer from set X, one from set Y, and one from set Z. The real challenge lies in the strict inventory management of these numbers: you must use every single element from all three sets exactly once. You cannot leave any number behind, nor can you reuse a number once it has been assigned to a triple.
+
+The final requirement that ties everything together is a specific target sum, referred to as 'n'. As you assemble these triples, you have to ensure that the three numbers in each group—the one from X, the one from Y, and the one from Z—add up to exactly that target value. Your ultimate objective is to provide the complete set of these valid triples that accounts for every integer while hitting that precise sum every single time.

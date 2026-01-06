@@ -1,0 +1,8 @@
+There are 6 seminars.
+There are 3 time slots: morning, midday, afternoon.
+There are 3 rooms.
+All seminars must be delivered.
+Only one seminar can be scheduled in a room at a time.
+Seminars can not be delivered in the afternoon in room 3.
+Seminar 1 must be in Room 1.
+Seminars 2 and 3 must not be at the same time.

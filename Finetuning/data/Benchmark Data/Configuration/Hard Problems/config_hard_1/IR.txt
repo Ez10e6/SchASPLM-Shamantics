@@ -1,0 +1,16 @@
+Components: CPUs = {X9, ZetaCore, Alpha8}, GPUs = {QuasarRTX, NovaX, GammaGTX},
+Storage = {UltraSSD, MegaHDD, FusionDrive}.
+Select exactly one CPU, one GPU, and one storage device.
+CPU Costs: [X9: 300, ZetaCore: 500, Alpha8: 450].
+GPU Costs: [QuasarRTX: 700, NovaX: 600, GammaGTX: 450].
+Storage Costs: [UltraSSD: 250, MegaHDD: 200, FusionDrive: 300].
+CPU Performance: [X9: 95, ZetaCore: 120, Alpha8: 110].
+GPU Performance: [QuasarRTX: 130, NovaX: 125, GammaGTX: 90].
+Storage Performance: [UltraSSD: 100, MegaHDD: 60, FusionDrive: 95].
+The most expensive selected component must also be the one with the highest
+performance among selected parts.
+You may not select all three top-performing components.
+The difference in cost between any two selected components must be ≤ 250.
+The selected GPU must not have higher performance than the selected CPU.
+Alpha8 is incompatible with NovaX.
+FusionDrive can only be used with ZetaCore.

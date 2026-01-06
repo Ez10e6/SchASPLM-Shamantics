@@ -1,0 +1,5 @@
+You are tasked with solving the 0-1 Knapsack problem.
+The input consists of a set of items, where each item has a specific value and a weight, and a maximum capacity 'n' for the knapsack.
+
+The objective is to select a subset of these items to maximize the total value.
+The selection must satisfy the constraint that the total weight of the selected items does not exceed the capacity 'n'.

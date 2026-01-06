@@ -1,0 +1,21 @@
+**Exercise: Constraint Satisfaction in Resource Allocation**
+
+**Problem Statement:**
+Formalize the following scheduling scenario as a Constraint Satisfaction Problem (CSP). Consider a set of six distinct academic seminars, denoted as $S = \{s_1, s_2, s_3, s_4, s_5, s_6\}$. Each seminar must be assigned a unique spatio-temporal coordinate $(t, r)$, where $t$ represents a discrete time slot and $r$ represents a specific venue.
+
+**Given Sets:**
+*   **Temporal Domain ($T$):** $\{t_{morning}, t_{midday}, t_{afternoon}\}$
+*   **Spatial Domain ($R$):** $\{r_1, r_2, r_3\}$
+
+**Objective:**
+Define a mapping $f: S \to T \times R$ such that all seminars are scheduled subject to the following logical and environmental constraints:
+
+1.  **Injective Mapping (Resource Conflict):** No two distinct seminars may occupy the same room during the same time slot. Formally, for any $s_i, s_j \in S$, if $s_i \neq s_j$, then $f(s_i) \neq f(s_j)$.
+2.  **Domain Restriction (Spatial-Temporal Exclusion):** Room $r_3$ is unavailable during the final temporal period $t_{afternoon}$. For any $s_i \in S$, if $f(s_i) = (t, r)$, then $(t, r) \neq (t_{afternoon}, r_3)$.
+3.  **Unary Spatial Constraint:** Seminar $s_1$ must be allocated to room $r_1$, regardless of the temporal assignment. Formally, let $f(s_1) = (t, r)$; it must hold that $r = r_1$.
+4.  **Binary Temporal Constraint (Mutual Exclusion):** Seminars $s_2$ and $s_3$ are subject to a temporal disjointness constraint. If $f(s_2) = (t_a, r_b)$ and $f(s_3) = (t_c, r_d)$, then $t_a \neq t_c$.
+
+**Task:**
+1.  Represent this problem by defining the variables, domains, and the explicit set of constraints.
+2.  Determine if a feasible solution exists under the provided constraints. 
+3.  Calculate the total number of possible valid configurations $(T \times R)$ and identify the size of the search space before and after applying the unary constraints.

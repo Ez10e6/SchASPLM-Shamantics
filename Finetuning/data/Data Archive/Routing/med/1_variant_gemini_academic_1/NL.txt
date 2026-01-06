@@ -1,0 +1,28 @@
+**Exercise: Constrained Path Optimization for Autonomous Inspection Agents**
+
+**Problem Statement:**
+
+Consider an autonomous inspection drone modeled as an agent operating within a discrete topological space represented by a graph $G = (V, E)$. The vertex set $V$ defines the set of industrial facilities and routing nodes: $V = \{S_1, J_1, J_2, A, B\}$, where $S_1$ denotes the deployment station, $J_1$ and $J_2$ represent junction nodes, and $A$ and $B$ represent substations requiring inspection. The set of undirected edges $E$ is defined by the following adjacency relations:
+*   $S_1$ is adjacent to $\{J_1, J_2\}$
+*   $J_1$ is adjacent to $\{A, J_2\}$
+*   $J_2$ is adjacent to $\{B, J_1\}$
+
+**Operational Constraints:**
+
+1.  **Task Requirements:** The agent must perform an inspection operation at both $A$ and $B$ at least once. An inspection is defined as a stationary action performed at a target vertex.
+2.  **Energy Model:** 
+    *   **Traversal Cost:** The transition between any two adjacent vertices $u, v \in V$ incurs a constant energy expenditure of $1 \, \text{kJ}$.
+    *   **Action Cost:** Each inspection operation performed at $A$ or $B$ incurs an energy expenditure of $1 \, \text{kJ}$.
+    *   **Capacity:** The agent is initialized with a total energy budget of $E_{max} = 8 \, \text{kJ}$.
+3.  **Signal Interference Constraint:** Let $P = (v_0, v_1, \dots, v_n)$ be the sequence of vertices visited by the agent. If there exists an index $i$ such that $v_i = J_2$ and $v_k \neq A$ for all $k < i$, then the sub-path $(v_i, \dots, A)$ leading to the first inspection of $A$ must not traverse $J_1$ if $J_1 \in \{v_0, \dots, v_{i-1}\}$. (Formally: if $J_2$ precedes the first visit to $A$ in the traversal sequence, the agent is prohibited from backtracking through $J_1$ to reach $A$ if $J_1$ was already part of the path prefix).
+
+**Objective:**
+
+Identify the set of all valid routes that satisfy the task requirements and the signal interference constraint within the energy budget. From this set, determine the optimal path $P^*$ that minimizes the total cumulative energy expenditure $E_{total}$ upon completion of the final required inspection.
+
+**Required:**
+
+1.  Represent the problem as a state-space search graph.
+2.  Formulate the cost function $f(P)$ for a path $P$.
+3.  Identify the optimal sequence of vertices and actions that minimizes energy usage.
+4.  Justify whether the optimal path is unique under the provided constraints.

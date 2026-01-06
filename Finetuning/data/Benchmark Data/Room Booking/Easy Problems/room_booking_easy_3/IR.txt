@@ -1,0 +1,7 @@
+There are 4 training sessions.
+Sessions are on Networking or Security.
+There are 2 rooms and 2 time slots: morning and afternoon, on one day.
+Each session must be scheduled.
+Only one session per room‑time.
+Security sessions must be in the afternoon.
+Networking sessions cannot be in room 1.

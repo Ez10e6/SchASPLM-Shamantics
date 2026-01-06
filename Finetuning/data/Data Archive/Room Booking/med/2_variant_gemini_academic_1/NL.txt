@@ -1,0 +1,29 @@
+**Exercise: Constrained Optimization in Resource Scheduling**
+
+**Problem Statement:**
+Consider a resource allocation problem involving the scheduling of a set $W$ of eight discrete graduate workshops ($|W| = 8$) over a temporal horizon of two days, $D = \{d_1, d_2\}$. Each day is partitioned into a set of three contiguous time slots $T = \{t_1, t_2, t_3\}$, representing morning, midday, and afternoon, respectively. The workshops are conducted within a set of three distinct venues $R = \{r_1, r_2, r_3\}$.
+
+Each workshop $w \in W$ must be assigned to a specific subject category $s \in S$, where $S = \{\text{Artificial Intelligence (AI)}, \text{Mathematics (M)}, \text{Biology (B)}\}$. An assignment is defined as a mapping of a workshop to a unique triplet $(d, t, r) \in D \times T \times R$.
+
+The schedule must satisfy the following system of constraints:
+
+1.  **Exclusivity and Capacity Constraints:**
+    *   **Unit Occupancy:** For any given $(d, t, r)$, at most one workshop $w \in W$ may be scheduled.
+    *   **Daily Room Bound:** For each room $r \in R$ on any day $d \in D$, the total number of scheduled workshops $n_{d,r}$ must satisfy $1 \le n_{d,r} \le 2$. Consequently, every room must remain vacant for at least one time slot per day.
+    *   **Venue Availability:** Room $r_2$ is restricted such that no workshops may be scheduled during $t_3$ on either $d_1$ or $d_2$.
+
+2.  **Subject-Specific Temporal and Spatial Constraints:**
+    *   **AI Temporal Restriction:** Workshops where $s = \text{AI}$ must be scheduled exclusively during the morning slot $t_1$.
+    *   **Mathematics Non-Concurrency:** Let $W_M \subset W$ be the subset of workshops where $s = \text{M}$. For any $w_i, w_j \in W_M$ ($i \neq j$), the assigned time slots $(d_i, t_i)$ and $(d_j, t_j)$ must be distinct. No two Mathematics workshops may occur simultaneously, regardless of room assignment.
+    *   **Subject Segregation:** For any day $d \in D$ and room $r \in R$, the room may not host both a workshop of subject AI and a workshop of subject B. If an AI workshop is assigned to $(d, r, t_i)$, then no Biology workshop may be assigned to $(d, r, t_j)$ for any $t_j \in T$, and vice versa.
+
+3.  **Distributional Requirements:**
+    *   **Daily Subject Coverage:** For each day $d \in D$, the schedule must include at least one workshop from each subject category $s \in S$. 
+
+**Objective:**
+Identify a feasible schedule that satisfies all aforementioned logical and physical constraints. In the event of multiple feasible solutions, the optimal schedule is defined as the one that maximizes the utilization of available spatio-temporal slots (minimizing the cardinality of the set of unused valid room-time pairs).
+
+**Deliverables:**
+1.  Define the decision variables for the scheduling problem.
+2.  Provide a formal mapping of the eight workshops to the coordinates $(d, t, r)$.
+3.  Verify that the proposed schedule adheres to the daily room capacity and the AI/Biology segregation rule.

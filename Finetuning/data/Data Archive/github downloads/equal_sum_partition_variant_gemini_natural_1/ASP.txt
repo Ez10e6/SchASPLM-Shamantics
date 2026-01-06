@@ -1,0 +1,11 @@
+% Generate a partition: each value must be assigned to exactly one of two sets (a or b).
+1 { a(V) ; b(V) } 1 :- value(V).
+
+% Calculate the total sum for set 'a'.
+total(a, S) :- S = #sum{ A : a(A) }.
+
+% Calculate the total sum for set 'b'.
+total(b, S) :- S = #sum{ B : b(B) }.
+
+% Constraint: The total sum of set 'a' must equal the total sum of set 'b'.
+:- total(a, S1), total(b, S2), S1 != S2.

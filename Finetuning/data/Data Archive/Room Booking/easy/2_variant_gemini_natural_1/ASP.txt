@@ -1,0 +1,22 @@
+% There are 5 lectures to schedule.
+lecture(1..5).
+
+% Topics are: AI, Math, or Physics.
+topic("AI"; "Math"; "Physics").
+1 { topicOf(L, T) : topic(T) } 1 :- lecture(L).
+
+% There are 3 rooms and 2 time slots: morning and afternoon.
+room(1..3).
+slot("morning"; "afternoon").
+
+% Each lecture must be scheduled once.
+1 { scheduled(L, R, S) : room(R), slot(S) } 1 :- lecture(L).
+
+% Only one lecture per room-time.
+:- scheduled(L1, R, S), scheduled(L2, R, S), L1 != L2.
+
+% AI lectures must be in the morning.
+:- scheduled(L, _, S), topicOf(L, "AI"), S != "morning".
+
+% Math and Physics may not happen in the same room.
+:- scheduled(L1, R, _), scheduled(L2, R, _), topicOf(L1, "Math"), topicOf(L2, "Physics").

@@ -1,0 +1,24 @@
+{
+  "instance_template": "pos(1..n).",
+  "generator": "{ queen(R,C) : pos(R), pos(C) } = N :- N = #count { I : pos(I) }.",
+  "hard_constraints": [
+    {
+      "description": "Business policy mandates that no two queens occupy the same row to prevent horizontal conflicts and ensure regulatory compliance.",
+      "asp_rule": ":- queen(R,C1), queen(R,C2), C1 < C2."
+    },
+    {
+      "description": "Organizational compliance requires that no two queens are positioned in the same column to avoid vertical operational overlaps.",
+      "asp_rule": ":- queen(R1,C), queen(R2,C), R1 < R2."
+    },
+    {
+      "description": "To maintain system integrity, rules prohibit placing multiple queens on the same ascending diagonal, as this violates board security protocols.",
+      "asp_rule": ":- queen(R1,C1), queen(R2,C2), R1 < R2, R1 + C1 == R2 + C2."
+    },
+    {
+      "description": "Standard operating procedures dictate that no two queens can be located on the same descending diagonal to prevent potential collisions.",
+      "asp_rule": ":- queen(R1,C1), queen(R2,C2), R1 < R2, R1 - C1 == R2 - C2."
+    }
+  ],
+  "soft_constraints": [],
+  "global_objective": null
+}

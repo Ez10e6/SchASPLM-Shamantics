@@ -1,0 +1,81 @@
+You are an expert in Answer Set Programming (specifically Clingo 5+ syntax). 
+I will give you a full problem description (NL) and a full ASP solution.
+
+Your task is to DECONSTRUCT this solution into the specific structural components required for a scheduler system.
+Return the result as a valid JSON object.
+
+### CODE REFACTORING & OPTIMIZATION (CRITICAL)
+The input ASP code might be old, inefficient, or syntactically loose. Do NOT just copy-paste it.
+**You have full authority to rewrite the logic** to ensure the highest quality training data:
+1.  **Modernize:** Use modern Clingo 5+ syntax (e.g., `#count`, `#sum`). Replace deprecated constructs.
+2.  **Optimize:** If a constraint is written inefficiently (e.g., using unnecessary helper predicates for simple checks), refactor it to be concise and readable.
+3.  **Correctness:** If the input code contains logical bugs or syntax errors, **FIX THEM**. The output must be executable Clingo code.
+4.  **Atomicity:** If the input combines two distinct logical requirements into one complex rule, **SPLIT THEM** into two separate constraints.
+
+### EXHAUSTIVE EXTRACTION RULES
+1.  **No Summarization:** Extract **EVERY** distinct hard/soft constraint.
+2.  **Granularity:** Create a separate JSON object for each distinct logical requirement.
+3.  **Completeness:** Verify that every requirement in the NL description has a corresponding rule in the output.
+
+### TONE INSTRUCTION
+For the 'description' fields in the JSON, you must write the natural language requirement using this specific tone:
+{selected_tone}
+
+### SYNTAX INSTRUCTION (Strict Clingo 5+)
+Ensure all extracted 'asp_rule' fields contain VALID, SAFE Clingo code:
+1.  **Penalty Structure:** For soft constraints, generate: `penalty("Name", Tuple, Cost) :- ...`.
+2.  **Global Objective:** Extract the `#minimize` statement separately.
+3.  **Aggregates:** Use `#count {{ ... }}`. Use the colon `:` separator.
+4.  **Variable Safety:** Every variable in a rule must be grounded.
+5.  **Operators:** Use `!=` for inequality. End every rule with a period `.`.
+6.  **Raw Code Only:** Do NOT include comments (%) or markdown formatting.
+7. **Rule Bodies:** ALWAYS use a comma (,) to separate literals in the body of a rule or constraint.
+   - RIGHT: :- assigned(A,B), A != B.
+   - WRONG: :- assigned(A,B); A != B.
+8. **Choice Rules & Sets:** 
+   - Use semicolons (;) ONLY to separate distinct atoms/choices in a set.
+     Example: {{ a(X); b(X) }}.
+   - Use commas (,) to separate conditions within the pool of a choice rule.
+     Example: {{ delivered(S,R,T) : room(R), timeslot(T) }}.
+9. **Aggregate Comparisons:** You CANNOT compare two #sum or #count blocks directly. You MUST assign them to variables first.
+   - RIGHT: :- S1 = #sum{{V : a(V)}}, S2 = #sum{{V : b(V)}}, S1 != S2.
+10. **Variable Safety:** Every variable outside of an aggregate must appear in at least one positive atom in the rule body.
+11. **Strings:** Use double quotes (") for string constants, and ensure they are escaped as (\") in the final JSON.
+12. **Modulo Operator:** Use a single backslash `\` for modulo. (e.g., `X \ 2 = 0`). NEVER use `\\` or `%`.
+13.  **Aggregate Binding:** NEVER compare a variable or constant directly to an aggregate block. You MUST assign the aggregate to a temporary variable first using '='.
+    - WRONG: :- cost(X, CX), CX < #max {{ C : selected(I), cost(I, C) }}.
+    - RIGHT: :- cost(X, CX), M = #max {{ C : selected(I), cost(I, C) }}, CX < M.
+
+---
+Input NL:
+{nl_content}
+
+Input ASP:
+{asp_content}
+
+---
+JSON OUTPUT REQUIREMENTS:
+Structure the JSON exactly like this:
+{{
+  "instance_template": "The facts and domain definitions (e.g., node(1..5).). No rules with bodies. No comments. Raw code only.",
+  
+  "generator": "The choice rules {{ ... }} and absolutely essential state transitions. 
+             STRICT RULE: Do NOT include #minimize, #maximize, penalty rules here, or other optimization logic here.
+             Only include the rules that create the possibilities, not the ones that evaluate them. No comments. Raw code only.",
+  
+  "hard_constraints": [
+    {{
+      "description": "A description of this specific check.",
+      "asp_rule": "The integrity constraint ONLY (:- ...). Refactored/Optimized. Do NOT define new helper predicates here. No comments. Raw code only."
+    }}
+  ],
+  
+  "soft_constraints": [
+    {{
+      "description": "A description of this preference/optimization.",
+      "asp_rule": "The helper predicates and the penalty(...) rule. Do NOT include the #minimize statement here. No comments. Raw code only."
+    }}
+  ],
+
+  "global_objective": "The single #minimize {{ ... }} statement that aggregates all penalties. No comments. Raw code only."
+}}

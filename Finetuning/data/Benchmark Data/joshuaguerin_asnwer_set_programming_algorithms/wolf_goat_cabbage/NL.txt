@@ -1,0 +1,10 @@
+A farmer needs to transport a wolf, a goat, and a cabbage across a river. 
+They start on the left bank and must reach the right bank within a specific number of time steps. 
+The boat is small: it can only hold the farmer and one item (or the farmer can row alone). 
+The farmer must always be in the boat to row. 
+
+There are safety constraints:
+1. If the wolf is left alone with the goat (without the farmer), the wolf will eat the goat.
+2. If the goat is left alone with the cabbage (without the farmer), the goat will eat the cabbage.
+
+Find a valid sequence of crossings that gets everyone to the other side safely.

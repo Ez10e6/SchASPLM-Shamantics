@@ -1,0 +1,13 @@
+CPUs = {FalconX, CoreZen, EcoMini};
+Costs: [600, 500, 300]; Performance: [125, 115, 90].
+GPUs = {TitanZ, MidlineGT, Pixie};
+Costs: [700, 500, 400]; Performance: [135, 100, 95].
+Drives = {FlashNova, Terabox, BudgetDisk};
+Costs: [250, 300, 150]; Performance: [110, 100, 60].
+Select one CPU, one GPU, one drive.
+Mid-performance component must be the cheapest.
+If CPU > $500 can not use Pixie GPU.
+Max - min performance ≤ 50.
+If drive is FlashNova, GPU performance ≥ 100.
+Exactly two selected components must cost > $300.
+GPU performance must be between CPU and drive.

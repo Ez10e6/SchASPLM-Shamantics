@@ -1,0 +1,31 @@
+### System Specification: Modified Towers of Hanoi
+
+**1. System Entities and Parameters**
+*   **Disk Set ($D$):** A set of $k$ elements, indexed $1, \dots, k$.
+*   **Fixed Pegs ($P$):** The subset of disks $\{1, 2, 3, 4\} \subset D$. These elements are stationary and serve as the base for stacks.
+*   **Movable Disks ($M$):** The subset of disks $\{5, 6, \dots, k\} \subset D$.
+*   **Size Relation:** For any two disks $d_i, d_j \in D$, disk $d_i$ is physically smaller than $d_j$ if and only if $i > j$.
+*   **Temporal Domain ($T$):** A sequence of discrete time steps $\{1, 2, \dots, n\}$.
+
+**2. State Definitions**
+*   **Configuration ($S$):** A mapping that defines the vertical adjacency of all disks. Each movable disk $m \in M$ must be positioned "on top of" exactly one other disk $d \in D$.
+*   **Initial State ($S_0$):** The configuration of all disks at $t = 0$.
+*   **Goal State ($S_G$):** The required configuration of all disks at $t = n$.
+*   **Top Disk Property:** A disk $d$ is considered "top" if no other disk $x \in M$ is positioned on top of it in the current configuration.
+
+**3. Operational Constraints**
+A move at time $t$ is defined as the relocation of a disk $d$ from a source $s$ to a target $target$. The system must adhere to the following logic:
+
+*   **Peg Immobility:** No disk $p \in P$ shall be moved. Only disks $m \in M$ are subject to relocation.
+*   **Single-Step Execution:** Exactly one disk must be moved per time step $t \in T$.
+*   **Top-Level Extraction:** A disk $d$ can be moved if and only if it is the top disk of its current stack.
+*   **Valid Placement (Size Constraint):** A disk $d$ may only be placed on a target disk $target$ if $d > target$ (i.e., the disk being moved is physically smaller than the disk it is being placed upon).
+*   **Temporal Non-Consecutivity:** A disk $d$ moved at time $t$ shall not be moved at time $t+1$.
+*   **Stack Integrity:** At any time $t$, every movable disk must be part of a stack originating from a fixed peg $p \in P$.
+
+**4. Objective**
+Generate a valid sequence of moves $M_1, M_2, \dots, M_n$ that transforms the system from the initial state $S_0$ to the goal state $S_G$ while satisfying all operational constraints.
+
+**5. Output Requirements**
+*   Provide a chronological sequence of moves.
+*   Each move must specify the disk being moved and its destination.

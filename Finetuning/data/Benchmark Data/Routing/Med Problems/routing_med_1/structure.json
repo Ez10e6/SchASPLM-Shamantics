@@ -1,0 +1,29 @@
+{
+  "instance_template": "loc(\"Station1\"; \"Junction1\"; \"Junction2\"; \"SubstationA\"; \"SubstationB\").\nedge(\"Station1\", \"Junction1\"). edge(\"Junction1\", \"Station1\").\nedge(\"Station1\", \"Junction2\"). edge(\"Junction2\", \"Station1\").\nedge(\"Junction1\", \"SubstationA\"). edge(\"SubstationA\", \"Junction1\").\nedge(\"Junction2\", \"SubstationB\"). edge(\"SubstationB\", \"Junction2\").\nedge(\"Junction1\", \"Junction2\"). edge(\"Junction2\", \"Junction1\").\ntarget(\"SubstationA\"; \"SubstationB\").\nenergy_limit(8).",
+  "generator": "energy(0..L) :- energy_limit(L).\n1 { visit(Loc, P) : loc(Loc) } 1 :- energy(P).\nvisit(\"Station1\", 0).\n{ inspect_at(Target, P) : energy(P), P < 8 } :- target(Target).",
+  "hard_constraints": [
+    {
+      "description": "Spatial transitions between non-adjacent locations are prohibited; a move between distinct facilities at consecutive energy increments is only valid if a direct edge connection exists.",
+      "asp_rule": ":- visit(L1, P), visit(L2, P+1), L1 != L2, not edge(L1, L2)."
+    },
+    {
+      "description": "Each designated facility in the inspection set must be inspected at least once within the operational energy budget.",
+      "asp_rule": ":- target(T), #count{ P : inspect_at(T, P) } < 1."
+    },
+    {
+      "description": "An inspection action requires the agent to be physically present at the target location for the duration of the energy expenditure, spanning from the start of the action to its completion.",
+      "asp_rule": ":- inspect_at(L, P), visit(L, P) != L.\n:- inspect_at(L, P), visit(L, P+1) != L."
+    },
+    {
+      "description": "To prevent signal interference, the traversal of Junction1 is strictly forbidden at any temporal point that occurs after a visit to Junction2 but before the initiation of an inspection at SubstationA.",
+      "asp_rule": ":- visit(\"Junction2\", P1), inspect_at(\"SubstationA\", P2), visit(\"Junction1\", P3), P1 < P3, P3 < P2."
+    }
+  ],
+  "soft_constraints": [
+    {
+      "description": "Preference is given to routes that minimize the cumulative energy consumption recorded at the point of completing the final required inspection.",
+      "asp_rule": "completion_power(P) :- P = #max{ T+1 : inspect_at(L, T) }.\npenalty(\"energy_efficiency\", \"total\", P) :- completion_power(P)."
+    }
+  ],
+  "global_objective": "#minimize { Cost, Tag, Tuple : penalty(Tag, Tuple, Cost) }."
+}

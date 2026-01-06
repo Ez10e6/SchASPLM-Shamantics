@@ -1,0 +1,37 @@
+{
+  "instance_template": "workshop(1..6). topic(\"Data\"; \"DevOps\"; \"UI\"). slot(\"morning\"; \"midday\"; \"afternoon\"). room(1..3).",
+  "generator": "1 { topicOf(W, T) : topic(T) } 1 :- workshop(W).\n1 { scheduled(W, R, Sl) : room(R), slot(Sl) } 1 :- workshop(W).",
+  "hard_constraints": [
+    {
+      "description": "Please ensure that no two workshops are scheduled in the same room at the same time, as rooms cannot be shared.",
+      "asp_rule": ":- scheduled(W1, R, Sl), scheduled(W2, R, Sl), W1 != W2."
+    },
+    {
+      "description": "To maintain the venue's policy, we must limit the use of each room to no more than two sessions across the entire day.",
+      "asp_rule": ":- room(R), #count { W, Sl : scheduled(W, R, Sl) } > 2."
+    },
+    {
+      "description": "The DevOps workshops are restricted strictly to the midday time slot; they cannot be scheduled in the morning or afternoon.",
+      "asp_rule": ":- scheduled(W, _, Sl), topicOf(W, \"DevOps\"), Sl != \"midday\"."
+    },
+    {
+      "description": "Due to equipment requirements, workshops focusing on Data must not be placed in Room 3.",
+      "asp_rule": ":- scheduled(W, 3, _), topicOf(W, \"Data\")."
+    },
+    {
+      "description": "We must prevent UI and Data workshops from occurring at the same time, regardless of which room they are in.",
+      "asp_rule": ":- scheduled(W1, _, Sl), scheduled(W2, _, Sl), topicOf(W1, \"UI\"), topicOf(W2, \"Data\")."
+    },
+    {
+      "description": "To ensure a diverse agenda, we require that at least one workshop for every topic is included in the final schedule.",
+      "asp_rule": "topic_represented(T) :- scheduled(W, _, _), topicOf(W, T).\n:- topic(T), not topic_represented(T)."
+    }
+  ],
+  "soft_constraints": [
+    {
+      "description": "In the interest of efficiency, we should try to avoid leaving room-time slots empty whenever possible.",
+      "asp_rule": "penalty(\"idle_slot\", R, Sl, 1) :- room(R), slot(Sl), not scheduled(_, R, Sl)."
+    }
+  ],
+  "global_objective": "#minimize { P, N, R, Sl : penalty(N, R, Sl, P) }."
+}

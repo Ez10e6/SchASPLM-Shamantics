@@ -1,0 +1,10 @@
+Frames: Lightweight (Endurance 50), Standard (Endurance 40), Reinforced (Endurance 30).
+Motors: Eco (Endurance 60), Standard (Endurance 70), HighTorque (Endurance 90).
+Batteries: SmallCell (Endurance 30), MediumCell (Endurance 50), LongLife (Endurance 80).
+Select one frame, one motor, one battery.
+HighTorque motors require LongLife battery.
+Lightweight frame is incompatible with HighTorque motor.
+LongLife battery requires Reinforced frame.
+SmallCell battery only works with Eco motor.
+MediumCell battery works with Eco or Standard motors.
+Maximize endurance.

@@ -1,0 +1,37 @@
+### Exercise: Constrained Path Optimization in a Resource-Limited Directed Graph
+
+**Problem Environment**
+Consider a directed graph $G = (V, E)$ representing a network of navigational nodes and flight corridors. The vertex set $V$ is defined as:
+$V = \{\text{CommandCenter (CC)}, \text{PathA (PA)}, \text{PathB (PB)}, \text{TowerX (TX)}, \text{TowerY (TY)}, \text{MidRelay (MR)}, \text{TowerZ (TZ)}\}$.
+
+**Edge Weights and Transitions**
+Each directed edge $e \in E$ is associated with an energy cost $c(e)$ and a uniform traversal time $\Delta t = 1$ minute. The transitions are defined as follows:
+1. $(CC, PA): c=2$
+2. $(CC, PB): c=3$
+3. $(PA, TX): c=2$
+4. $(PB, TY): c=2$
+5. $(PB, PA): c=1$
+6. $(TX, PB): c=2$
+7. $(TY, MR): c=3$
+8. $(MR, TZ): c=2$
+9. $(TZ, TX): c=4$
+
+**Agent State and Operational Constraints**
+An autonomous agent begins at $CC$ at $t=0$ with an initial energy capacity $E_{max} = 14$ units. The agent’s state is subject to the following conditions:
+*   **Energy Constraint:** The cumulative energy expenditure must not exceed $E_{max}$. The energy level is capped at 14; any recovery exceeding this value is truncated.
+*   **Scanning Protocol:** At nodes $\{TX, TY, TZ\}$, the agent may perform a "Scan" action. A scan requires an uninterrupted duration of $\Delta t_{scan} = 2$ minutes.
+*   **Mandatory Objectives:** The agent must complete at least one scan at both $TX$ and $TY$.
+*   **Temporal Constraint:** The scan at $TX$ must be completed (finalized) such that $t_{end} \le 5$ minutes.
+*   **Sequence Constraints:**
+    1. If the agent enters $MR$, it may perform an "Idle" action for exactly 2 minutes to recover 4 energy units. 
+    2. Any visit to $MR$ (with or without idling) mandates that the subsequent transition must be to $TZ$ in the following minute.
+    3. Consecutive scan actions at the same vertex are prohibited.
+*   **Step Limit:** The total number of discrete actions (traversals, scans, or idling) must not exceed $N = 20$.
+
+**Optimization Objective**
+Define a policy $\pi$ that determines the sequence of actions to:
+1.  **Primary:** Maximize the total number of successful scans $S$ across all valid towers.
+2.  **Secondary (Tie-breaker):** Minimize the total time $T_{req}$ required to complete the mandatory scans at $TX$ and $TY$.
+
+**Task**
+Formulate the state-space representation for this problem. Determine the optimal sequence of nodes and actions that satisfies all constraints while maximizing the objective function. Provide the total energy consumed and the timestamps for each scan completion.

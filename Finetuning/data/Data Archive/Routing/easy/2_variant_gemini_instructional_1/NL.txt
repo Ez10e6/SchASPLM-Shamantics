@@ -1,0 +1,25 @@
+### **System Specification: Drone Path Execution**
+
+#### **1. System Topology**
+The operational environment is defined as a discrete graph $G = (V, E)$ where:
+*   **Vertices ($V$):** $\{1, 2, 3, 4\}$, representing physical locations.
+*   **Edges ($E$):** $\{(1, 2), (1, 3), (2, 4)\}$.
+*   **Adjacency:** Movement is permitted if and only if a direct edge exists between two vertices. 
+
+#### **2. Temporal and Kinematic Constraints**
+*   **Duration:** The path must consist of exactly $T = 5$ discrete time units.
+*   **Traversal Cost:** Each transition between adjacent vertices consumes exactly 1 time unit.
+*   **Path Length:** The resulting sequence must contain exactly 6 nodes $(v_0, v_1, \dots, v_5)$, corresponding to $t=0$ through $t=5$.
+
+#### **3. Initial State**
+*   **Origin:** The drone must be positioned at vertex $1$ at $t = 0$.
+*   **Configuration:** $v_0 = 1$.
+
+#### **4. Operational Requirements**
+*   **Adjacency Adherence:** For every transition $(v_t, v_{t+1})$, the condition $(v_t, v_{t+1}) \in E$ must be satisfied.
+*   **Scanning Objectives:** The set of visited vertices $\{v_0, v_1, \dots, v_5\}$ must be a superset of the target scan locations $S = \{3, 4\}$.
+*   **Order Independence:** The vertices in $S$ may be appended to the path sequence in any order or at any time index $t \in [0, 5]$.
+
+#### **5. Termination Criteria**
+*   The process terminates at $t = 5$.
+*   A path is valid if and only if it satisfies the temporal duration, starting position, adjacency rules, and scanning objectives simultaneously.

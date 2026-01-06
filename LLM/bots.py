@@ -1,9 +1,5 @@
-import json
-import pandas as pd
 from huggingface_hub import InferenceClient
 from transformers import AutoModelForCausalLM, AutoTokenizer, pipeline, BitsAndBytesConfig
-import json
-import time
 from dotenv import load_dotenv
 import os
 import torch
@@ -297,69 +293,82 @@ def load_pipe(model_checkpoint="meta-llama/Meta-Llama-3-8B-Instruct", local_dir=
 
     # If HF_KEY is present, set HUGGINGFACE_HUB_TOKEN
     if HF_KEY:
-        os.environ.setdefault('HUGGINGFACE_HUB_TOKEN', HF_KEY)
+        print("Using Huggingface Hub Token from .env")
+        #os.environ.setdefault('HUGGINGFACE_HUB_TOKEN', HF_KEY)
     
-    # 1. Clear Cache dynamically
-    if torch.cuda.is_available():
+    is_cuda = torch.cuda.is_available()
+    is_mps = torch.mps.is_available()
+
+    # Clear Cache dynamically
+    if is_cuda:
         torch.cuda.empty_cache()
-    elif torch.backends.mps.is_available():
+    elif is_mps:
         torch.mps.empty_cache()
 
-    # 2. Select Dtype dynamically
-    # Use float16 for CUDA or MPS, bfloat16 for others (or if specific hardware requires it)
-    dtype = torch.bfloat16
-    if torch.cuda.is_available() or torch.backends.mps.is_available():
-        dtype = torch.float16
+    #choose device_map dynamically
+    if is_mps:
+        device_map="mps"
+    else:
+        device_map="auto"
 
-    # 3. Check Quantization compatibility
+    # Select Dtype dynamically
+    # Only use float16 if you are on an old CUDA card that doesn't support bfloat16
+    dtype = torch.bfloat16
+    if not is_cuda and not is_mps:
+        dtype = torch.float16
+    print(f"Using dtype: {dtype}")
+
+    # Check Quantization compatibility
     if quantization_config is not None and not torch.cuda.is_available():
         print("Warning: Quantization (bitsandbytes) is only supported on CUDA. Disabling quantization.")
         quantization_config = None
 
-    # Check if the model and tokenizer are already stored locally
-    model_directory = local_dir + '/' + model_checkpoint
+    model_directory = os.path.join(local_dir, model_checkpoint)
+
     if not os.path.exists(model_directory):
         print('downloading model...')
         # Download and save the model and tokenizer locally
-        tokenizer = AutoTokenizer.from_pretrained(model_checkpoint)
+        tokenizer = AutoTokenizer.from_pretrained(model_checkpoint, token=HF_KEY)
 
         # Load model with correct qunatization settings
         if quantization_config == '8bit':
             quantization_config = BitsAndBytesConfig(load_in_8bit=True)
-            model = AutoModelForCausalLM.from_pretrained(model_checkpoint, device_map="auto", trust_remote_code=True, quantization_config=quantization_config)
+            model = AutoModelForCausalLM.from_pretrained(model_checkpoint, device_map=device_map, trust_remote_code=True, quantization_config=quantization_config, token=HF_KEY)
         
         elif quantization_config == '4bit':
             quantization_config = BitsAndBytesConfig(load_in_4bit=True, bnb_4bit_compute_dtype=torch.float16)
-            model = AutoModelForCausalLM.from_pretrained(model_checkpoint, device_map="auto", trust_remote_code=True, quantization_config=quantization_config)
+            model = AutoModelForCausalLM.from_pretrained(model_checkpoint, device_map=device_map, trust_remote_code=True, quantization_config=quantization_config, token=HF_KEY)
         
         else:
-            # use the chosen dtype variable for consistency
-            model = AutoModelForCausalLM.from_pretrained(model_checkpoint, device_map="auto", torch_dtype=dtype)
+            model = AutoModelForCausalLM.from_pretrained(model_checkpoint, device_map=device_map, dtype=dtype, token=HF_KEY)
         
         # Save model and tokenizer locally
         if save:
-            print('saving model...')
+            print('saving model and tokenizer...')
             # Save them locally for future use
             tokenizer.save_pretrained(model_directory)
             model.save_pretrained(model_directory)
 
         # Load the model and tokenizer
-        print('loading model...')
+        print('loading model and tokenizer...')
         pipe = pipeline(
             "text-generation",
             model=model,
             tokenizer=tokenizer,
-            model_kwargs={"dtype": dtype},  # <--- CHANGED from torch.bfloat16 to dtype
-            device_map="auto",
+            model_kwargs={"dtype": dtype},
+            device_map=device_map,
         )
     else:
         # Load the model and tokenizer
-        print('loading model...')
+        print('loading local model and tokenizer...')
+        tokenizer = AutoTokenizer.from_pretrained(model_directory)
+
         pipe = pipeline(
             "text-generation",
             model=model_directory,
-            model_kwargs={"dtype": dtype},  # <--- CHANGED from torch.bfloat16 to dtype
-            device_map="auto",
+            tokenizer=tokenizer,
+            model_kwargs={"dtype": dtype},
+            device_map=device_map,
         )
 
     return pipe

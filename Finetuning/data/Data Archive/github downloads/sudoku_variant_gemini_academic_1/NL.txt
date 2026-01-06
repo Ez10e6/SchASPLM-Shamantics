@@ -1,0 +1,18 @@
+**Exercise 4.12: Constraint Satisfaction in Finite Discrete Domains**
+
+**Problem Statement:**
+Consider a square matrix $\mathbf{M}$ of order $n=9$, defined over the integer domain $\mathcal{D} = \{1, 2, \dots, 9\}$. The matrix is partitioned into a set of rows $\mathcal{R} = \{r_1, \dots, r_9\}$, a set of columns $\mathcal{C} = \{c_1, \dots, c_9\}$, and a set of non-overlapping $3 \times 3$ sub-matrices (blocks) $\mathcal{B} = \{B_{k,l} : 0 \le k, l \le 2\}$. 
+
+Formally, an element $m_{i,j}$ denotes the value at the intersection of the $i$-th row and $j$-th column. The blocks are defined such that $B_{k,l}$ contains all elements $m_{i,j}$ satisfying:
+$$3k + 1 \le i \le 3k + 3 \quad \text{and} \quad 3l + 1 \le j \le 3l + 3$$
+
+**Objective:**
+Given a partially instantiated matrix $\mathbf{M}_0$, determine a complete assignment of values to all vacant cells such that the resulting configuration satisfies the following global constraints:
+
+1.  **Cellular Uniqueness:** Each entry $m_{i,j}$ must be assigned exactly one scalar value from the domain $\mathcal{D}$.
+2.  **Row-wise Permutation:** For every row $r_i \in \mathcal{R}$, the mapping $f: j \to m_{i,j}$ must be a bijection from the index set $\{1, \dots, 9\}$ to the domain $\mathcal{D}$.
+3.  **Column-wise Permutation:** For every column $c_j \in \mathcal{C}$, the mapping $g: i \to m_{i,j}$ must be a bijection from the index set $\{1, \dots, 9\}$ to the domain $\mathcal{D}$.
+4.  **Sub-matrix Integrity:** For every block $B_{k,l} \in \mathcal{B}$, the set of constituent elements must form a complete permutation of the domain $\mathcal{D}$, such that $\forall v \in \mathcal{D}, \exists! (i, j) \in B_{k,l}$ where $m_{i,j} = v$.
+
+**Task:**
+Provide the formal derivation of the completed matrix $\mathbf{M}$ that adheres to the initial state $\mathbf{M}_0$ while remaining subject to the constraints defined above. Ensure that the solution demonstrates total consistency across all overlapping constraint regions.

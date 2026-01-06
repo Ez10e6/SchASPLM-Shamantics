@@ -1,0 +1,28 @@
+{
+  "instance_template": "frame(\"Lightweight\", 50). frame(\"Standard\", 40). frame(\"Reinforced\", 30). motor(\"Eco\", 60). motor(\"Standard\", 70). motor(\"HighTorque\", 90). battery(\"SmallCell\", 30). battery(\"MediumCell\", 50). battery(\"LongLife\", 80).",
+  "generator": "1 { selected_frame(F) : frame(F, EF) } 1. 1 { selected_motor(M) : motor(M, EM) } 1. 1 { selected_battery(B) : battery(B, EB) } 1.",
+  "hard_constraints": [
+    {
+      "description": "The co-occurrence of a frame designated as Lightweight and a motor classified as HighTorque is strictly prohibited due to structural integrity limitations.",
+      "asp_rule": ":- selected_frame(\"Lightweight\"), selected_motor(\"HighTorque\")."
+    },
+    {
+      "description": "The selection of a LongLife battery necessitates the concurrent selection of a Reinforced frame to accommodate the specific weight and mount requirements.",
+      "asp_rule": ":- selected_battery(\"LongLife\"), selected_frame(F), F != \"Reinforced\"."
+    },
+    {
+      "description": "The operation of a HighTorque motor requires the integration of a LongLife battery to ensure sufficient power delivery.",
+      "asp_rule": ":- selected_motor(\"HighTorque\"), selected_battery(B), B != \"LongLife\"."
+    },
+    {
+      "description": "Any configuration utilizing a SmallCell battery is restricted exclusively to the use of an Eco motor.",
+      "asp_rule": ":- selected_battery(\"SmallCell\"), selected_motor(M), M != \"Eco\"."
+    },
+    {
+      "description": "The MediumCell battery is incompatible with HighTorque motors, being restricted to Eco or Standard motor types.",
+      "asp_rule": ":- selected_battery(\"MediumCell\"), selected_motor(\"HighTorque\")."
+    }
+  ],
+  "soft_constraints": [],
+  "global_objective": "#maximize { EF,frame : selected_frame(F), frame(F, EF); EM,motor : selected_motor(M), motor(M, EM); EB,battery : selected_battery(B), battery(B, EB) }."
+}

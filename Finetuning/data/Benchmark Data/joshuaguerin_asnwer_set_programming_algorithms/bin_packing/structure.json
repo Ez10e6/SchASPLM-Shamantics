@@ -1,0 +1,21 @@
+{
+  "instance_template": "item(1, 5). item(2, 10). item(3, 7). item(4, 2). #const n=15.",
+  "generator": "{ assign(I, B) : item(B, _) } :- item(I, _).",
+  "hard_constraints": [
+    {
+      "description": "Every item needs a home, and only one home. No double-dipping.",
+      "asp_rule": ":- item(I, _), #count{ B : assign(I, B) } != 1."
+    },
+    {
+      "description": "Sanity check: make sure the total weight in a bin doesn't blow past the capacity limit.",
+      "asp_rule": ":- item(B, _), #sum{ W, I : assign(I, B), item(I, W) } > n."
+    }
+  ],
+  "soft_constraints": [
+    {
+      "description": "We want to be stingy with our resources, so mark whenever a bin is actually being used.",
+      "asp_rule": "penalty(\"bin_used\", B, 1) :- assign(_, B)."
+    }
+  ],
+  "global_objective": "#minimize { Cost, Name, ID : penalty(Name, ID, Cost) }."
+}

@@ -1,0 +1,19 @@
+You're customizing a gaming laptop by selecting a CPU, GPU, and a cooling system.
+Each component has a performance rating, and your goal is to maximize performance
+without violating thermal constraints.
+You can pick from:
+CPUs: Ryzen9, i7, or M1.
+GPUs: RTX3070, RX6700XT, and IrisXe.
+Cooling systems: AirCool, LiquidCool, and PassiveCool.
+
+Performance matters — the faster the CPU and GPU, the better. But cooling must be
+sufficient:
+LiquidCool is required for high-performance parts like Ryzen9 or RTX3070.
+PassiveCool is insufficient for discrete GPUs.
+M1 chips are low-heat and can use PassiveCool.
+RX6700XT is incompatible with M1.
+
+Performance scores:
+Ryzen9: 95, i7: 85, M1: 70
+RTX3070: 90, RX6700XT: 88, IrisXe: 65
+AirCool: 20, LiquidCool: 40, PassiveCool: 5

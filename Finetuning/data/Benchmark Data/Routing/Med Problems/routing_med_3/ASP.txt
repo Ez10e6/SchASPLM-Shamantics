@@ -1,0 +1,40 @@
+% Locations: BaseCamp, Fork1, Fork2, OutpostX, OutpostY, RelayStation
+loc("BaseCamp"; "Fork1"; "Fork2"; "OutpostX"; "OutpostY"; "RelayStation").
+
+% Edges
+edge("BaseCamp", "Fork1").
+edge("BaseCamp", "Fork2").
+edge("Fork1", "OutpostX").
+edge("Fork1", "RelayStation").
+edge("Fork2", "OutpostY").
+edge("Fork2", "RelayStation").
+
+% 10 Minutes maximum time.
+time(0..10).
+
+% The rover starts at BaseCamp.
+at("BaseCamp", 0).
+
+% Inspect OutpostX and OutpostY exactly once each.
+1 { inspect_at("OutpostX", T) : time(T) } 1.
+1 { inspect_at("OutpostY", T) : time(T) } 1.
+
+% Moves between adjacent nodes takes 1 timestep.
+1 { at(L, T) : loc(L) } 1 :- time(T).
+:- at(L1, T), at(L2, T+1), not edge(L1, L2), not edge(L2, L1), L1 != L2.
+
+% Each inspection requires 1 full timestep at the inspection site.
+at(L, T) :- inspect_at(L, T).
+at(L, T+1) :- inspect_at(L, T), T < 10.
+
+% Each movement consumes 1 battery unit.
+move(L1, L2, T) :- at(L1, T), at(L2, T+1), edge(L1, L2), L1 != L2.
+used_battery(N, T) :- N = #count { T1 : move(_, _, T1), T1 < T }, time(T).
+
+% The battery stores 6 units.
+remaining_battery(N1, T) :- used_battery(N2, T), N1 = 6 - N2.
+
+% Only allow inspection of RelayStation if there are >2 battery units once the other sites are scanned.
+0 { inspect_at("RelayStation", T) : time(T) } 1.
+:- inspect_at("RelayStation", _), remaining_battery(N, T), N <= 2, sites_scanned(T).
+sites_scanned(T) :- T = #max { T1 : inspect_at(L, T1), L != "RelayStation"}.

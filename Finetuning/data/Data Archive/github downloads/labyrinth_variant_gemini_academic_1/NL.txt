@@ -1,0 +1,29 @@
+**Exercise: State-Space Search and Path Connectivity in a Toroidal Grid with Cyclic Permutations**
+
+**Problem Statement:**
+Consider a discrete dynamical system defined over a two-dimensional grid $G$ of dimensions $M \times N$. Each cell $(r, c)$ in the grid, where $0 \le r < M$ and $0 \le c < N$, is occupied by a distinct entity termed a "field." Each field $f$ possesses an immutable set of connectivity ports $P_f \subseteq \{ \text{North, South, East, West} \}$. 
+
+Two fields $f_1$ and $f_2$ located at adjacent grid coordinates are said to be **connected** if the port of $f_1$ facing $f_2$ and the port of $f_2$ facing $f_1$ are both active. Formally, let field $f$ be at $(r, c)$ and field $f'$ be at $(r', c')$. A connection exists if:
+1. $(r', c')$ is an immediate neighbor of $(r, c)$ under **toroidal topology** (i.e., indices are evaluated modulo $M$ and $N$).
+2. The specific directional port of $f$ toward $(r', c')$ is $p \in P_f$ and the reciprocal port of $f'$ toward $(r, c)$ is $p' \in P_{f'}$.
+
+**Initial Configuration:**
+The system is initialized with a specific distribution of fields across the grid. Two specific fields are designated: the **Source Field** $f_{start}$ and the **Goal Field** $f_{goal}$.
+
+**State Transitions (Grid Manipulation):**
+The configuration of the grid may be modified through a set of discrete operations. At each time step $t$, exactly one of the following cyclic permutations may be applied:
+1. **Row Shift:** For a selected row $i \in \{0, \dots, M-1\}$, all fields in row $i$ are shifted one position in direction $d \in \{\text{East, West}\}$. Due to the toroidal constraint, a field shifted beyond index $N-1$ or $0$ reappears at the opposite boundary.
+2. **Column Shift:** For a selected column $j \in \{0, \dots, N-1\}$, all fields in column $j$ are shifted one position in direction $d \in \{\text{North, South}\}$. Fields shifted beyond index $M-1$ or $0$ wrap around accordingly.
+
+Note that connectivity is a property of the fields' relative spatial adjacency; as fields change their grid coordinates via shifts, the graph representing the reachability relation is dynamically reconstructed.
+
+**Objective:**
+Define the reachability set $R(f_{start})$ as the transitive closure of the connectivity relation starting from the Source Field. The system reaches a **Terminal State** if $f_{goal} \in R(f_{start})$.
+
+**Task:**
+Given an initial grid configuration, the coordinates of $f_{start}$ and $f_{goal}$, and a maximum step constraint $K$, derive an optimal or valid sequence of operations $O = \{o_1, o_2, \dots, o_k\}$ where $k \le K$, such that the application of $O$ results in a Terminal State.
+
+**Constraints and Requirements:**
+1. **Formalism:** Describe the state space and the transition function $\delta: S \times A \to S$.
+2. **Search Algorithm:** Propose an efficient algorithm (e.g., Breadth-First Search, A*, or Iterative Deepening) to traverse the state space of grid configurations.
+3. **Output:** The solution must be a sequential list of tuples $(type, index, direction)$, representing the row/column, the specific index, and the shift direction for each step.

@@ -1,0 +1,15 @@
+You are tasked with solving the Towers of Hanoi puzzle.
+The input consists of 'k' disks, where disks 1 to 4 represent fixed pegs and disks 5 to k are movable.
+Larger disk numbers correspond to smaller physical disks.
+The initial state specifies which disk is on top of which.
+The goal state specifies the desired final configuration.
+
+The objective is to move the disks from the initial configuration to the goal configuration in a specified number of time steps.
+Rules:
+1. Only one disk can be moved at a time.
+2. A disk can only be moved if it is the top disk on its stack.
+3. A disk can only be placed on top of a larger disk (or a peg).
+4. No disk can be moved in two consecutive time steps.
+5. Pegs cannot be moved.
+
+The solution must output the sequence of moves.

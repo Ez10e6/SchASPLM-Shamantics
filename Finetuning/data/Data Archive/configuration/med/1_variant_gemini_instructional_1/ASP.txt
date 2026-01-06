@@ -1,0 +1,45 @@
+% Select exactly one CPU from {Ryzen7, i9, Xeon}.
+cpu("Ryzen7", 300; "i9", 400; "Xeon", 500).
+1 { selected_cpu(C) : cpu(C, _) } 1.
+
+% Select exactly one GPU from {RTX4060, RTX3090, Quadro}.
+gpu("RTX4060", 350; "RTX3090", 700; "Quadro", 800).
+1 { selected_gpu(G) : gpu(G, _) } 1.
+
+% Select exactly one motherboard from {X670, Z690, C621}.
+mobo("X670", 180; "Z690", 200; "C621", 250).
+1 { selected_mobo(M) : mobo(M, _) } 1.
+
+% Select exactly one PSU from {Bronze, Gold, Platinum}.
+psu("Bronze", 80; "Gold", 120; "Platinum", 160).
+1 { selected_psu(P) : psu(P, _) } 1.
+
+% RTX3090 and Quadro are HighPower GPUs.
+high_power("RTX3090"; "Quadro").
+
+% HighPower GPUs require PSU ∈ {Gold, Platinum}.
+:- selected_gpu(G), high_power(G), selected_psu("Bronze").
+
+% Xeon requires C621 motherboard.
+:- selected_cpu("Xeon"), selected_mobo(M), M != "C621".
+
+% Ryzen7 requires X670 motherboard.
+:- selected_cpu("Ryzen7"), selected_mobo(M), M != "X670".
+
+% i9 is incompatible with X670 motherboard.
+:- selected_cpu("i9"), selected_mobo("X670").
+
+% Quadro requires Xeon CPU.
+:- selected_gpu("Quadro"), selected_cpu(C), C != "Xeon".
+
+% Quadro is incompatible with Z690 motherboard.
+:- selected_gpu("Quadro"), selected_mobo("Z690").
+
+% Minimize total cost.
+total_cost(Cost) :-
+    selected_cpu(C), cpu(C, CCost),
+    selected_gpu(G), gpu(G, GCost),
+    selected_mobo(M), mobo(M, MCost),
+    selected_psu(P), psu(P, PCost),
+    Cost = CCost + GCost + MCost + PCost.
+#minimize { C : total_cost(C) }.

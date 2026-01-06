@@ -1,0 +1,49 @@
+### System Design Specification: High-Performance Laptop Configuration
+
+#### 1. Objective
+Design a hardware configuration for a gaming laptop that maximizes the **Total Performance Score ($P_{total}$)** while adhering to all thermal, compatibility, and architectural constraints.
+
+#### 2. Component Domains and Performance Metrics ($P$)
+The system must consist of exactly one Central Processing Unit ($CPU$), one Graphics Processing Unit ($GPU$), and one Thermal Management System ($Cooling$).
+
+**2.1 Central Processing Units ($C \in \{C_1, C_2, C_3\}$)**
+*   $C_{Ryzen9}$: $P = 95$
+*   $C_{i7}$: $P = 85$
+*   $C_{M1}$: $P = 70$
+
+**2.2 Graphics Processing Units ($G \in \{G_1, G_2, G_3\}$)**
+*   $G_{RTX3070}$: $P = 90$
+*   $G_{RX6700XT}$: $P = 88$
+*   $G_{IrisXe}$: $P = 65$
+
+**2.3 Thermal Management Systems ($S \in \{S_1, S_2, S_3\}$)**
+*   $S_{LiquidCool}$: $P = 40$
+*   $S_{AirCool}$: $P = 20$
+*   $S_{PassiveCool}$: $P = 5$
+
+#### 3. Objective Function
+Maximize the aggregate performance value:
+$$P_{total} = P(C) + P(G) + P(S)$$
+
+#### 4. Design Constraints
+
+**4.1 High-Thermal Load Requirements**
+*   If the configuration includes $C_{Ryzen9}$ or $G_{RTX3070}$, the system **must** utilize $S_{LiquidCool}$.
+*   Formal Logic: $(C = C_{Ryzen9} \lor G = G_{RTX3070}) \implies S = S_{LiquidCool}$
+
+**4.2 Discrete GPU Thermal Constraints**
+*   $S_{PassiveCool}$ is prohibited for use with discrete GPUs ($G_{RTX3070}$ and $G_{RX6700XT}$).
+*   Formal Logic: $G \in \{G_{RTX3070}, G_{RX6700XT}\} \implies S \neq S_{PassiveCool}$
+
+**4.3 Low-Power Architecture Constraints**
+*   $S_{PassiveCool}$ is compatible exclusively with the $C_{M1}$ architecture.
+*   Formal Logic: $S = S_{PassiveCool} \implies C = C_{M1}$
+
+**4.4 Hardware Interoperability**
+*   The $G_{RX6700XT}$ is strictly incompatible with the $C_{M1}$ processor.
+*   Formal Logic: $C = C_{M1} \implies G \neq G_{RX6700XT}$
+
+#### 5. Execution Instructions
+1.  Evaluate all valid permutations of $\{C, G, S\}$ against the constraints defined in Section 4.
+2.  Calculate $P_{total}$ for each valid configuration.
+3.  Select the configuration yielding the maximum $P_{total}$.

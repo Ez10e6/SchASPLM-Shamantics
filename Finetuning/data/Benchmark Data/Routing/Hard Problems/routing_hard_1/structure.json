@@ -1,0 +1,49 @@
+{
+  "instance_template": "loc(\"CommandCenter\"; \"PathA\"; \"PathB\"; \"TowerX\"; \"TowerY\"; \"MidRelay\"; \"TowerZ\").\nedge(\"CommandCenter\",\"PathA\",2).\nedge(\"CommandCenter\",\"PathB\",3).\nedge(\"PathA\",\"TowerX\",2).\nedge(\"PathB\",\"TowerY\",2).\nedge(\"PathB\",\"PathA\",1).\nedge(\"TowerX\",\"PathB\",2).\nedge(\"TowerY\",\"MidRelay\",3).\nedge(\"MidRelay\",\"TowerZ\",2).\nedge(\"TowerZ\",\"TowerX\",4).\nhorizon(19).",
+  "generator": "at(\"CommandCenter\", 0).\n1 { at(L, T) : loc(L) } 1 :- T = 1..H, horizon(H).\n{ scan_at(L, T) : loc(L), T = 0..H-2, horizon(H) }.\nstep_cost(T, C) :- at(L1, T), at(L2, T+1), edge(L1, L2, C).\nstep_cost(T, 0) :- at(L, T), at(L, T+1).\nrecharge_gain(T+2, 4) :- at(\"MidRelay\", T), at(\"MidRelay\", T+1), at(\"MidRelay\", T+2).\nrecharge_gain(T, 0) :- T = 1..H, horizon(H), not recharge_gain(T, 4).\nbatt(0, 0).\nbatt(T+1, B + C - G) :- batt(T, B), step_cost(T, C), recharge_gain(T+1, G).",
+  "hard_constraints": [
+    {
+      "description": "Don't just teleport; follow the flight corridors or stay put.",
+      "asp_rule": ":- at(L1, T), at(L2, T+1), L1 != L2, not edge(L1, L2, _)."
+    },
+    {
+      "description": "If you're scanning, stay still for two whole minutes. No twitching.",
+      "asp_rule": ":- scan_at(L, T), at(L, T+1) != L. :- scan_at(L, T), at(L, T+2) != L."
+    },
+    {
+      "description": "Gotta scan TowerX and TowerY. Non-negotiable.",
+      "asp_rule": ":- not scan_at(\"TowerX\", _). :- not scan_at(\"TowerY\", _)."
+    },
+    {
+      "description": "TowerX scan has to be done and dusted by minute 5.",
+      "asp_rule": ":- #count{ T : scan_at(\"TowerX\", T), T+2 <= 5 } == 0."
+    },
+    {
+      "description": "Keep an eye on the juice; 14 units is the hard ceiling.",
+      "asp_rule": ":- batt(T, B), B > 14."
+    },
+    {
+      "description": "MidRelay exit protocol: if you leave MidRelay, you better be heading to TowerZ.",
+      "asp_rule": ":- at(\"MidRelay\", T), at(L, T+1), L != \"MidRelay\", L != \"TowerZ\"."
+    },
+    {
+      "description": "Exactly two minutes for recharging at MidRelay. Don't loiter.",
+      "asp_rule": ":- at(\"MidRelay\", T), at(\"MidRelay\", T+1), at(\"MidRelay\", T+2), at(\"MidRelay\", T+3)."
+    },
+    {
+      "description": "Sanity check: no double-scanning the same spot back-to-back. Let the sensors cool down.",
+      "asp_rule": ":- scan_at(L, T1), scan_at(L, T2), T2 > T1, T2 < T1+3."
+    }
+  ],
+  "soft_constraints": [
+    {
+      "description": "Priority one: squeeze in as many tower scans as possible.",
+      "asp_rule": "penalty(\"scans\", (L, T), -1) :- scan_at(L, T)."
+    },
+    {
+      "description": "Secondary goal: wrap up those mandatory scans ASAP.",
+      "asp_rule": "mandatory_finish(F) :- F = #max{ T+2 : scan_at(\"TowerX\", T); T2+2 : scan_at(\"TowerY\", T2) }.\npenalty(\"time\", F, 1) :- mandatory_finish(F)."
+    }
+  ],
+  "global_objective": "#minimize { P@2, T : penalty(\"scans\", T, P); P@1, T : penalty(\"time\", T, P) }."
+}

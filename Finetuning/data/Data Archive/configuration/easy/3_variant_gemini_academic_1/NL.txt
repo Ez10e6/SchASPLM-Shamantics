@@ -1,0 +1,21 @@
+**Exercise: Constraint Satisfaction in System Configuration**
+
+**Problem Statement:**
+Consider a configuration problem for a mobile telecommunications package. A valid system configuration is defined as a 3-tuple $(d, m, a)$ belonging to the Cartesian product $D \times M \times A$, where $D, M,$ and $A$ represent the finite sets of available data plans, hardware models, and peripheral accessories, respectively.
+
+The domains for these entities are defined as follows:
+*   $D = \{ \text{BasicData}, \text{PremiumData} \}$
+*   $M = \{ \text{ModelX}, \text{ModelY} \}$
+*   $A = \{ \text{CaseA}, \text{CaseB} \}$
+
+A feasible solution must satisfy the set of logical constraints $\mathcal{C}$ defined below:
+
+1.  **Mutual Exclusion (Service-Hardware):** The selection of $\text{BasicData} \in D$ precludes the selection of $\text{ModelY} \in M$. 
+    $$\text{BasicData} \implies \neg \text{ModelY}$$
+2.  **Hardware Dependency:** The selection of $\text{ModelX} \in M$ necessitates the selection of $\text{CaseA} \in A$ as a mandatory prerequisite.
+    $$\text{ModelX} \implies \text{CaseA}$$
+3.  **Incompatibility (Service-Accessory):** The selection of $\text{PremiumData} \in D$ is strictly incompatible with the selection of $\text{CaseA} \in A$.
+    $$\text{PremiumData} \implies \neg \text{CaseA}$$
+
+**Task:**
+Identify a configuration $(d, m, a)$ that constitutes a feasible solution by satisfying all constraints in $\mathcal{C}$ simultaneously. Provide a brief proof of validity by demonstrating that your chosen assignment does not violate any of the specified logical predicates.

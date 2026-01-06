@@ -18,7 +18,7 @@ penalty("RoomCapacity",assigned(Course,Room,Day,Period),(N_students-Cap)*1) :- a
 
 % 2
 working_day(Course,Day) :- assigned(Course,_,Day,Period).
-penalty("MinWorkingDays",course(Course,N_days,N),(N_days-N)*5) :- course(Course,_,_,N_days,_), N = {{ working_day(Course,Day) }}, N < N_days.
+penalty("MinWorkingDays",course(Course,N_days,N),(N_days-N)*5) :- course(Course,_,_,N_days,_), N = { working_day(Course,Day) }, N < N_days.
 
 % 3
 scheduled_curricula(Curriculum,Day,Period) :- assigned(Course,_,Day,Period), curriculum(Curriculum,Course).
@@ -26,7 +26,7 @@ penalty("IsolatedLectures",isolated_lectures(Curriculum,Day,Period),2) :- schedu
 
 % 4
 using_room(Course,Room) :- assigned(Course,Room,Day,Period).
-penalty("RoomStability",using_room(Course,N),(N-1)*1) :- course(Course,_,_,_,_), N = {{ using_room(Course,R) }}, N > 1.
+penalty("RoomStability",using_room(Course,N),(N-1)*1) :- course(Course,_,_,_,_), N = { using_room(Course,R) }, N > 1.
 ```
 
 <<problem_description>>

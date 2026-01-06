@@ -1,0 +1,32 @@
+### Exercise: Formal Specification of a Discrete Resource Allocation Problem
+
+**Problem Context:**
+Consider a scheduling problem involving a set of four distinct training sessions, denoted by $S = \{s_1, s_2, s_3, s_4\}$. Each session $s_i$ is characterized by an attribute $A$, representing its technical domain, such that $A(s_i) \in \{\text{Networking}, \text{Security}\}$.
+
+**Available Resources:**
+The allocation must occur within a discrete spatio-temporal domain defined by:
+1.  A set of temporal slots $T = \{t_{morning}, t_{afternoon}\}$.
+2.  A set of spatial venues $R = \{r_1, r_2\}$.
+
+**Objective:**
+Define a schedule as a mapping $f: S \to T \times R$ that assigns each session to a unique coordinate in the resource grid, subject to the following system of constraints:
+
+**1. Resource Exclusivity (Injectivity Constraint):**
+The mapping $f$ must be injective. Specifically, for any two distinct sessions $s_i, s_j \in S$:
+$$s_i \neq s_j \implies f(s_i) \neq f(s_j)$$
+This ensures that no two sessions occupy the same room during the same time slot. Given $|S| = |T \times R|$, the mapping must be bijective.
+
+**2. Domain-Specific Temporal Constraints:**
+Let $proj_T$ be the projection of the schedule onto the temporal set $T$. For any session $s_i \in S$:
+$$\text{If } A(s_i) = \text{Security}, \text{ then } proj_T(f(s_i)) = t_{afternoon}$$
+
+**3. Domain-Specific Spatial Constraints:**
+Let $proj_R$ be the projection of the schedule onto the set of rooms $R$. For any session $s_i \in S$:
+$$\text{If } A(s_i) = \text{Networking}, \text{ then } proj_R(f(s_i)) \in R \setminus \{r_1\}$$
+
+---
+
+**Tasks:**
+1.  **Feasibility Analysis:** Determine the maximum number of sessions that can be categorized as 'Networking' and 'Security' respectively for a valid schedule to exist.
+2.  **Formal Modeling:** Represent this problem as a Constraint Satisfaction Problem (CSP). Define the variables, domains, and the consistency requirements.
+3.  **Assignment:** Assume two sessions are 'Networking' and two are 'Security'. Provide a valid assignment $f$ that satisfies all aforementioned conditions.

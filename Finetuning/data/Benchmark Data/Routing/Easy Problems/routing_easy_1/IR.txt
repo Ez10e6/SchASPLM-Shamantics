@@ -1,0 +1,7 @@
+Robot starts at A.
+Locations: A, B, C, D, E.
+Adjacent nodes: (A–B), (A–C), (B–D), (C–E).
+The robot can only move between adjacent nodes.
+There are 6 timesteps.
+Delivery destinations: D, E.
+Each delivery location must be visited exactly once.

@@ -1,0 +1,37 @@
+### Exercise 4.2: Constrained Optimization in System Configuration
+
+**Problem Statement:**
+In the design of a specialized workstation for data-intensive computational simulations, a systems architect must select a hardware configuration consisting of exactly one Central Processing Unit (CPU), one Graphics Processing Unit (GPU), and one Storage Unit (SU). The selection is restricted to a predefined catalog provided by procurement. Each component $i$ is characterized by a cost $C_i$ and a performance rating $P_i$.
+
+**Table 1: Hardware Component Specifications**
+
+| Category | Entity Name | Performance ($P$) | Cost ($C$) |
+| :--- | :--- | :---: | :---: |
+| **CPU** | X9 | 95 | $300 |
+| | ZetaCore | 120 | $500 |
+| | Alpha8 | 110 | $450 |
+| **GPU** | QuasarRTX | 130 | $700 |
+| | NovaX | 125 | $600 |
+| | GammaGTX | 90 | $450 |
+| **Storage** | UltraSSD | 100 | $250 |
+| | FusionDrive | 95 | $300 |
+| | MegaHDD | 60 | $200 |
+
+**Constraints:**
+Let $c \in \text{CPU}$, $g \in \text{GPU}$, and $s \in \text{Storage}$ represent the selected entities. A valid configuration must satisfy the following logical and arithmetic conditions:
+
+1.  **Cost-Performance Justification:** The component possessing the maximum cost within the configuration must also possess the maximum performance rating. Formally, if $x \in \{c, g, s\}$ such that $C_x = \max(C_c, C_g, C_s)$, then $P_x = \max(P_c, P_g, P_s)$.
+2.  **Global Maxima Exclusion:** The configuration is prohibited from simultaneously selecting the highest-rated performance component from every category. 
+3.  **Budgetary Variance Constraint:** To ensure component parity, the absolute difference in cost between any two selected components must not exceed $250. Formally, $\forall i, j \in \{c, g, s\}, |C_i - C_j| \le 250$.
+4.  **Processing Hierarchy:** The performance rating of the GPU must not exceed the performance rating of the CPU ($P_g \le P_c$).
+5.  **Inter-Component Compatibility:**
+    *   The CPU 'Alpha8' is incompatible with the GPU 'NovaX' due to firmware limitations.
+    *   The Storage Unit 'FusionDrive' may only be selected if the 'ZetaCore' CPU is also selected.
+
+**Task:**
+Identify all valid triplets $(c, g, s)$ that satisfy the aforementioned constraints. If multiple solutions exist, determine which configuration yields the highest aggregate performance $\sum P$.
+
+**Deliverables:**
+1.  Formulate the problem as a Constraint Satisfaction Problem (CSP).
+2.  Provide a step-by-step elimination of invalid configurations based on the constraints provided.
+3.  State the optimal configuration and its total cost and performance.

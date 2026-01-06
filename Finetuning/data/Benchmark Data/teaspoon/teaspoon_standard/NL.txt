@@ -1,0 +1,20 @@
+You are tasked with solving the Curriculum-Based Course Timetabling problem.
+The goal is to schedule a set of courses into specific time periods (days and timeslots) and assign them to suitable rooms.
+
+The schedule must satisfy the following hard constraints:
+1. All lectures defined for a course must be scheduled.
+2. Two lectures for the same course cannot be scheduled in the same period.
+3. Lectures belonging to the same curriculum or taught by the same teacher cannot overlap in the same period.
+4. No two lectures can occupy the same room in the same period.
+5. Lectures cannot be scheduled in periods where the teacher is unavailable.
+
+Additionally, the solution should minimize penalties for the following soft preferences:
+1. Room Capacity: The number of students should not exceed the room capacity.
+2. Minimum Working Days: Lectures for a course should be spread across a minimum number of days.
+3. Isolated Lectures: Lectures in a curriculum should be adjacent to each other in a day.
+4. Windows: There should not be empty gaps (windows) between lectures in a curriculum on the same day.
+5. Room Stability: All lectures for a course should ideally take place in the same room.
+6. Student Load: The number of lectures per day for a curriculum should be within a specified minimum and maximum range.
+7. Travel Distance: Consecutive lectures in a curriculum should not take place in different buildings.
+8. Room Suitability: Courses should be scheduled in rooms that satisfy their specific constraints.
+9. Double Lectures: If a course requires grouped lectures, they should be scheduled together.

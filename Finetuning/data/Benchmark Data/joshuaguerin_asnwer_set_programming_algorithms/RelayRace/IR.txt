@@ -1,0 +1,14 @@
+Define 'run' to map participants to leg indices based on assignments.
+Define 'endExchange' as the location of the last leg a participant runs.
+Define 'startExchange' as the location of the first leg a participant runs.
+Define 'exchangeTime' as the time immediately before or after a leg.
+Identify 'exchange' events when a participant starts or stops running.
+Calculate 'legPace' as the maximum preferred pace of the participant running that leg.
+Calculate 'legDuration' based on distance and pace.
+Count the number of legs run by each participant.
+Calculate 'participantDist' as the sum of distances of legs run by a participant.
+Calculate 'participantAscent' as the sum of ascent of legs run by a participant.
+Minimize the absolute difference between actual and preferred distance for participants.
+Minimize the total duration of all legs.
+Minimize the absolute difference between actual leg pace and preferred pace.
+Minimize the count of exchanges to encourage consecutive legs.

@@ -1,0 +1,43 @@
+**Exercise 4.2: Constrained Combinatorial Optimization in System Architecture**
+
+**Problem Statement:**
+A research laboratory is designing a specialized computational unit for real-time 3D rendering. The objective is to select a feasible hardware configuration consisting of exactly one Central Processing Unit (CPU), one Graphics Processing Unit (GPU), and one Power Supply Unit (PSU) from a provided catalog. The selection must satisfy a series of thermal, electrical, and budgetary constraints.
+
+**Component Catalog:**
+Each component $i$ is defined by a tuple $(W_i, P_i)$, where $W_i$ denotes wattage (consumption for CPUs/GPUs; capacity for PSUs) and $P_i$ denotes unit cost in USD.
+
+1.  **CPUs ($\mathcal{C}$):** 
+    *   BoltX: (85W, \$400)
+    *   HydraPro: (125W, \$550)
+    *   LiteCore: (60W, \$350)
+2.  **GPUs ($\mathcal{G}$):** 
+    *   StormZ: (180W, \$800)
+    *   Nebula9: (150W, \$650)
+    *   VegaLite: (95W, \$500)
+3.  **PSUs ($\mathcal{P}$):** 
+    *   PowerMax750: (750W, \$200)
+    *   Eco600: (600W, \$150)
+    *   Titan900: (900W, \$250)
+
+**Feasibility Constraints:**
+A configuration $S = \{c, g, p\}$ (where $c \in \mathcal{C}, g \in \mathcal{G}, p \in \mathcal{P}$) is considered valid if and only if it satisfies the following conditions:
+
+1.  **Electrical Margin Constraint:** The aggregate power draw of the processing units must maintain a safety buffer of at least 100W relative to the PSU capacity.
+    $$W_c + W_g \le W_p - 100$$
+
+2.  **Cost-Wattage Correlation:** To ensure proportional investment, the component with the highest wattage in the configuration must also be the component with the highest price.
+    $$\text{argmax}_{x \in S} (W_x) = \text{argmax}_{x \in S} (P_x)$$
+    *(Note: If multiple components share the maximum value, the condition must hold for at least one such mapping.)*
+
+3.  **Component Compatibility:** Certain hardware pairings are restricted due to technical externalities:
+    *   $\{HydraPro, VegaLite\}$ is an impermissible set.
+    *   $\{Eco600, StormZ\}$ is an impermissible set.
+
+4.  **Minimal Expenditure Restriction:** The configuration $S$ cannot simultaneously consist of the least expensive element from each of the three categories.
+    $$S \neq \{LiteCore, VegaLite, Eco600\}$$
+
+5.  **Price Dispersion Limit:** To maintain balanced component quality, the absolute difference in price between any two selected components must not exceed \$400.
+    $$\forall x, y \in S: |P_x - P_y| \le 400$$
+
+**Task:**
+Identify all valid configurations $S = \{c, g, p\}$ that satisfy the above constraints. If multiple solutions exist, rank them by total system cost $P_{total} = P_c + P_g + P_p$.

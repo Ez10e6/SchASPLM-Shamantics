@@ -1,0 +1,26 @@
+### System Specification: Home Audio Configuration
+
+#### 1. Objective
+Define and select a valid configuration tuple $(s, a, m)$ consisting of exactly one Speaker, one Amplifier, and one Media Player, such that all compatibility constraints are satisfied.
+
+#### 2. Component Domains
+The system shall draw components from the following sets:
+*   **Speakers ($S$):** {Alpha, Beta}
+*   **Amplifiers ($A$):** {AmpX, AmpY}
+*   **Media Players ($M$):** {Streamer1, Streamer2}
+
+#### 3. Configuration Requirements
+The final configuration must adhere to the following selection criteria:
+*   Select exactly one element $s \in S$.
+*   Select exactly one element $a \in A$.
+*   Select exactly one element $m \in M$.
+
+#### 4. Logical Constraints
+The selection must satisfy the following Boolean conditions:
+*   **C1 (Speaker-Amplifier Dependency):** If $s = \text{Alpha}$, then $a$ must be $\text{AmpX}$.
+*   **C2 (Amplifier-Player Mutual Exclusion):** The combination of $a = \text{AmpY}$ and $m = \text{Streamer1}$ is prohibited.
+*   **C3 (Player-Speaker Dependency):** If $m = \text{Streamer2}$, then $s$ must be $\text{Beta}$.
+
+#### 5. Verification
+A configuration is deemed **Valid** if and only if:
+$$\text{Valid}(s, a, m) \iff (C1 \land C2 \land C3)$$

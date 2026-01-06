@@ -1,0 +1,31 @@
+**Exercise: Constrained Optimization in Multi-Agent Scheduling**
+
+**Problem Statement**
+An academic institution is organizing a two-day research symposium consisting of ten discrete seminars. Each seminar $s \in S$ is categorized into one of four disjoint fields $F = \{\text{Artificial Intelligence (AI), Biology (B), Mathematics (M), Chemistry (C)}\}$. The symposium schedule must be mapped to a set of temporal slots $T$ and spatial resources $R$.
+
+**1. Dimensionality and Domain**
+*   **Temporal Domain:** The symposium spans two days ($D = \{d_1, d_2\}$). Each day is partitioned into four sequential segments: morning ($t_1$), late morning ($t_2$), early afternoon ($t_3$), and late afternoon ($t_4$).
+*   **Spatial Domain:** There are five distinct venues available ($R = \{r_1, r_2, r_3, r_4, r_5\}$).
+*   **Capacity:** Each room may host at most one seminar per time segment.
+
+**2. Spatial and Operational Constraints**
+*   **Utilization Limits:** For any room $r \in R$ and any day $d \in D$, the total number of scheduled seminars cannot exceed two (50% of daily capacity).
+*   **Temporal Adjacency:** To ensure adequate transition intervals, no room may host seminars in consecutive time segments (e.g., if a seminar occurs in $t_n$, the room must remain vacant during $t_{n-1}$ and $t_{n+1}$).
+*   **Venue-Specific Availability:** Room $r_3$ is unavailable during the afternoon segments ($t_3, t_4$) of both days.
+*   **Technical Specifications:** Seminars in the fields of AI and Mathematics require projection hardware. Room $r_5$ lacks such hardware and is therefore ineligible to host sessions from these domains.
+
+**3. Domain-Specific Constraints**
+*   **AI Temporal Preference:** Seminars in Artificial Intelligence are restricted to the morning segments ($t_1, t_2$) of either day.
+*   **Biology Distribution:** Biology seminars must be distributed across both $d_1$ and $d_2$; they cannot be concentrated on a single day. Furthermore, no two Biology seminars may occur concurrently.
+*   **Chemistry Spatial Exclusivity:** A room $r$ may host at most one Chemistry seminar over the entire duration of the symposium.
+*   **Field Incompatibility:** On any given day $d$, a room $r$ cannot host both a Biology seminar and a Chemistry seminar. These domains are mutually exclusive within the same spatial-temporal day-track.
+*   **Boundary Conditions:** The symposium must be bounded by Mathematics. The initial seminar of the program ($d_1, t_1$) and the terminal seminar of the program ($d_2, t_4$) must both belong to the Mathematics domain.
+
+**4. Global Optimization Objectives**
+The resulting schedule must satisfy the following meta-conditions:
+*   **Gap Minimization:** The schedule should minimize idle time segments between the first and last seminar of each day.
+*   **Field Diversity:** Within any single time segment $t$, the schedule must maximize the variety of fields represented across different rooms.
+*   **Concurrency Limits:** At any time $t$, the total number of concurrent seminars from the set $\{B, C\}$ must not exceed two.
+
+**Assignment**
+Formulate this problem as a Constraint Satisfaction Problem (CSP). Define the variables, domains, and formalize the constraints using first-order logic or algebraic inequalities. Construct a valid schedule that satisfies all 10 seminars while adhering to the operational and technical constraints provided.

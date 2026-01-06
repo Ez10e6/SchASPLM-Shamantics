@@ -1,0 +1,77 @@
+{
+  "instance_template": "seminar(1..10). topic(\"AI\"; \"Bio\"; \"Math\"; \"Chem\"). day(1..2). timeslot(\"morning\"; \"late morning\"; \"early afternoon\"; \"late afternoon\"). room(1..5). follows(\"morning\", \"late morning\"). follows(\"late morning\", \"early afternoon\"). follows(\"early afternoon\", \"late afternoon\").",
+  "generator": "1 { topicOf(S, T) : topic(T) } 1 :- seminar(S). 1 { delivered(S, R, T, D) : room(R), timeslot(T), day(D) } 1 :- seminar(S).",
+  "hard_constraints": [
+    {
+      "description": "Ensure no more than one seminar is scheduled in the same room at the same time.",
+      "asp_rule": ":- delivered(S1, R, T, D), delivered(S2, R, T, D), S1 != S2."
+    },
+    {
+      "description": "Restrict rooms to a maximum of two sessions per day to comply with capacity policies.",
+      "asp_rule": ":- room(R), day(D), #count{ S, T : delivered(S, R, T, D) } > 2."
+    },
+    {
+      "description": "Enforce a break policy by prohibiting back-to-back sessions in the same room.",
+      "asp_rule": ":- delivered(_, R, T1, D), delivered(_, R, T2, D), follows(T1, T2)."
+    },
+    {
+      "description": "Comply with Room 3 maintenance by prohibiting bookings during the early afternoon slot.",
+      "asp_rule": ":- delivered(_, 3, \"early afternoon\", _)."
+    },
+    {
+      "description": "Comply with Room 3 maintenance by prohibiting bookings during the late afternoon slot.",
+      "asp_rule": ":- delivered(_, 3, \"late afternoon\", _)."
+    },
+    {
+      "description": "Prohibit AI seminars in Room 5 due to the lack of necessary projection equipment.",
+      "asp_rule": ":- topicOf(S, \"AI\"), delivered(S, 5, _, _)."
+    },
+    {
+      "description": "Prohibit Mathematics seminars in Room 5 due to the lack of necessary projection equipment.",
+      "asp_rule": ":- topicOf(S, \"Math\"), delivered(S, 5, _, _)."
+    },
+    {
+      "description": "Restrict AI seminars to morning or late morning slots based on presenter preferences.",
+      "asp_rule": ":- topicOf(S, \"AI\"), delivered(S, _, T, _), T != \"morning\", T != \"late morning\"."
+    },
+    {
+      "description": "Ensure Biology seminars are distributed across both days of the symposium.",
+      "asp_rule": ":- topicOf(_, \"Bio\"), day(D), not 1 { delivered(S, R, T, D) : topicOf(S, \"Bio\"), room(R), timeslot(T) }."
+    },
+    {
+      "description": "Enforce policy that no two Biology seminars may occur at the same time across different rooms.",
+      "asp_rule": ":- topicOf(S1, \"Bio\"), topicOf(S2, \"Bio\"), delivered(S1, _, T, D), delivered(S2, _, T, D), S1 != S2."
+    },
+    {
+      "description": "Maintain spatial separation for Chemistry talks by ensuring no room hosts more than one Chemistry session over the entire event.",
+      "asp_rule": ":- topicOf(S1, \"Chem\"), topicOf(S2, \"Chem\"), delivered(S1, R, _, _), delivered(S2, R, _, _), S1 != S2."
+    },
+    {
+      "description": "Enforce room segregation policy by prohibiting Biology and Chemistry sessions in the same room on the same day.",
+      "asp_rule": ":- topicOf(S1, \"Bio\"), topicOf(S2, \"Chem\"), delivered(S1, R, _, D), delivered(S2, R, _, D)."
+    },
+    {
+      "description": "Mandate that the symposium opens with a Mathematics seminar in the first session of Day 1.",
+      "asp_rule": ":- not 1 { topicOf(S, \"Math\") : delivered(S, R, \"morning\", 1), room(R) }."
+    },
+    {
+      "description": "Mandate that the symposium closes with a Mathematics seminar in the final session of Day 2.",
+      "asp_rule": ":- not 1 { topicOf(S, \"Math\") : delivered(S, R, \"late afternoon\", 2), room(R) }."
+    },
+    {
+      "description": "Limit temporal congestion by allowing no more than two combined Biology or Chemistry seminars simultaneously.",
+      "asp_rule": ":- day(D), timeslot(T), #count{ S : topicOf(S, \"Bio\"), delivered(S, R, T, D), room(R) ; S : topicOf(S, \"Chem\"), delivered(S, R, T, D), room(R) } > 2."
+    }
+  ],
+  "soft_constraints": [
+    {
+      "description": "Maximize venue utilization by penalizing unassigned room time slots.",
+      "asp_rule": "penalty(\"WastedSlot\", (R, T, D), 1) :- room(R), timeslot(T), day(D), not delivered(_, R, T, D)."
+    },
+    {
+      "description": "Encourage topic diversity by penalizing time slots that feature fewer than the four available fields.",
+      "asp_rule": "penalty(\"LowDiversity\", (T, D), 4 - N) :- day(D), timeslot(T), N = #count{ To : topic(To), topicOf(S, To), delivered(S, _, T, D) }."
+    }
+  ],
+  "global_objective": "#minimize { Cost,Name,Args : penalty(Name, Args, Cost) }."
+}

@@ -1,0 +1,40 @@
+### Exercise 4.12: Multi-Attribute Component Selection under Discrete Constraints
+
+**Problem Statement:**
+In the architectural design of specialized data-processing workstations, system equilibrium is often prioritized over raw peak performance. Consider a selection problem where an engineer must choose exactly one entity from each of three disjoint sets of components: Central Processing Units ($\mathcal{C}$), Graphics Processing Units ($\mathcal{G}$), and Storage Drives ($\mathcal{D}$). Each component $i$ is defined by a cost attribute $p_i$ (in USD) and a performance metric $v_i$ (in points).
+
+The available component specifications are provided in the following tables:
+
+**Table 1: CPUs ($\mathcal{C}$)**
+| Component ($c$) | Cost ($p_c$) | Performance ($v_c$) |
+| :--- | :--- | :--- |
+| FalconX | \$600 | 125 |
+| CoreZen | \$500 | 115 |
+| EcoMini | \$300 | 90 |
+
+**Table 2: GPUs ($\mathcal{G}$)**
+| Component ($g$) | Cost ($p_g$) | Performance ($v_g$) |
+| :--- | :--- | :--- |
+| TitanZ | \$700 | 135 |
+| MidlineGT | \$500 | 100 |
+| Pixie | \$400 | 95 |
+
+**Table 3: Storage Drives ($\mathcal{D}$)**
+| Component ($d$) | Cost ($p_d$) | Performance ($v_d$) |
+| :--- | :--- | :--- |
+| FlashNova | \$250 | 110 |
+| Terabox | \$300 | 100 |
+| BudgetDisk | \$150 | 60 |
+
+**Constraints:**
+A valid system configuration $S = \{c, g, d\}$ must satisfy the following six conditions:
+
+1.  **Strict Performance Intermediate:** The performance metric of the GPU ($v_g$) must strictly reside between the performance metrics of the CPU ($v_c$) and the Storage Drive ($v_d$). That is, $v_g \neq \max(v_c, v_g, v_d)$ and $v_g \neq \min(v_c, v_g, v_d)$.
+2.  **Median Cost Minimality:** The component $i \in S$ possessing the median performance value must also satisfy the condition $p_i = \min(p_c, p_g, p_d)$.
+3.  **Conditional GPU Exclusion:** If $p_c > 500$, then $g \neq \text{Pixie}$.
+4.  **Performance Variance Limitation:** The performance spread, defined as $\max(v_c, v_g, v_d) - \min(v_c, v_g, v_d)$, must not exceed 50 units.
+5.  **Subsystem Dependency:** If $d = \text{FlashNova}$, then $v_g \geq 100$.
+6.  **Cardinality of High-Cost Components:** The set of components $\{i \in S \mid p_i > 300\}$ must have a cardinality of exactly 2.
+
+**Required:**
+Determine the feasible configuration(s) that satisfy all aforementioned constraints. Show that your solution is unique or list all valid permutations.

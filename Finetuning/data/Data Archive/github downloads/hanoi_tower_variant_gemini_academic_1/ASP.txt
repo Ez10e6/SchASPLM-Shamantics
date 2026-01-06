@@ -1,0 +1,31 @@
+% Constraint: Smaller disks must always be on top of larger ones (N1 < N).
+:- time(T), on(T,N1,N), N1>=N.
+
+% Generate exactly one move per time step: select a disk to move.
+{ occurs(some_action,T) } :- time(T), T>0.
+1 { move(T,N) : disk(N) } 1 :- occurs(some_action,T).
+
+% Generate a destination: select a disk (or peg) to place the moved disk on.
+1 { where(T,N) : disk(N) }1 :- occurs(some_action,T).
+
+% Constraint: Pegs (disks < 5) cannot be moved.
+:- move(T,N), N<5.
+
+% Constraint: Only the top disk on a stack can be moved.
+:- on(T-1,N,N1), move(T,N).
+
+% Constraint: A disk can only be placed on top of the top disk of a stack.
+:- on(T-1,N,N1), where(T,N).
+
+% Constraint: A disk cannot be moved in two consecutive time steps.
+:- move(T,N), move(TM1,N), TM1=T-1.
+
+% Effect: If disk N moves to M, then N is on M at the next time step.
+on(T,N1,N) :- move(T,N), where(T,N1).
+
+% Inertia: If a disk is not moved, it stays where it is.
+on(T,N,N1) :- time(T), T>0, on(T-1,N,N1), not move(T,N1).
+
+% Goal: The final state must match the specified goal configuration.
+:- not on(T,N,N1), ongoal(N1,N), steps(T).
+:- on(T,N,N1), not ongoal(N1,N), steps(T).

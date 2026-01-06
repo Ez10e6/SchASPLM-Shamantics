@@ -1,0 +1,16 @@
+{
+  "instance_template": "num(1..n).",
+  "generator": "{ perfect(N) : num(N) }. divisor(M,N) :- num(N), num(M), M < N, N \\ M == 0.",
+  "hard_constraints": [
+    {
+      "description": "It is formally required that any integer N designated as a perfect number must satisfy the condition that the summation of its set of proper divisors is numerically equivalent to the value of N.",
+      "asp_rule": ":- perfect(N), S = #sum { M : divisor(M,N) }, S != N."
+    },
+    {
+      "description": "It is mandatory that every integer N within the defined domain that fulfills the arithmetic definition of a perfect number must be categorized as such in the solution set.",
+      "asp_rule": ":- num(N), S = #sum { M : divisor(M,N) }, S == N, not perfect(N)."
+    }
+  ],
+  "soft_constraints": [],
+  "global_objective": null
+}

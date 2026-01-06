@@ -1,0 +1,11 @@
+Edges are symmetric (undirected).
+Generate a set of path edges from the available edges.
+Each node must have at most one incoming edge in the path.
+Each node must have at most one outgoing edge in the path.
+The start node must not have any incoming edges.
+The end node must not have any outgoing edges.
+Define reachability: the start node is reachable, and any node connected to a reachable node via a path edge is reachable.
+The end node must be reachable from the start.
+All nodes in the graph must be reachable (Hamiltonian property).
+Minimize the total cost of the selected path edges.
+Output the path predicate.

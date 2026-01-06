@@ -16,22 +16,22 @@ Here are some arbitrary example inputs from different problems:
 The corresponding ASP rules would be:
 ```
 % 1
-student_count(Count, Course, Room) :- course(Course, _, _, _, _), room(Room, _), #count{{Student : student(Student, Course), assigned(Course,Room,_,_)}} = Count.
+student_count(Count, Course, Room) :- course(Course, _, _, _, _), room(Room, _), #count{Student : student(Student, Course), assigned(Course,Room,_,_)} = Count.
 penalty("RoomCapacity",student_count(Count,Course,Room),(Count-Cap)*1) :- student_count(Count,_,Room), room(Room,Cap), Count > Cap.
 
 % 2
-student_count(Count, School, Time) :- school(School), course(_, _, Time), #count{{Student:, student(Student, Course), course(Course, Room, Time), room(Room, School)}} = Count.
+student_count(Count, School, Time) :- school(School), course(_, _, Time), #count{Student:, student(Student, Course), course(Course, Room, Time), room(Room, School)} = Count.
 penalty("SchoolLimit",student_count(Count, School, Time, Limit),(Count-Limit)*1) :- count(Count,School,Time), school(School, Limit), Count > Limit.
 
 % 3
 % Note: Please use this solution when we have an interval. Do not use an absolute value function.
-exam_count(Count, Time) :- period(Time), #count{{Exam : assigned(Exam,_,_,Time)}} = Count.
-room_count(Count, Time) :- period(Time), #count{{Room : assigned(_,_,Room,Time)}} = Count.
+exam_count(Count, Time) :- period(Time), #count{Exam : assigned(Exam,_,_,Time)} = Count.
+room_count(Count, Time) :- period(Time), #count{Room : assigned(_,_,Room,Time)} = Count.
 penalty("RoomStability",exam_count(ExamCount, Time),(ExamCount-RoomCount)*10) :- exam_count(ExamCount, Time), room_count(RoomCount, Time), ExamCount > RoomCount.
 penalty("RoomStability",exam_count(ExamCount, Time),(RoomCount-ExamCount)*5) :- exam_count(ExamCount, Time), room_count(RoomCount, Time), ExamCount < RoomCount.
 
 % 4 
-surgery_count(Count, Surgeon, Day) :- surgeon(Surgeon), timeslots(_, _, Day), #count{{surgery: assigned(Surgery, Time, _), timeslots(_, Time, Day), surgery(Surgery, _, Surgeon)}} = Count.
+surgery_count(Count, Surgeon, Day) :- surgeon(Surgeon), timeslots(_, _, Day), #count{surgery: assigned(Surgery, Time, _), timeslots(_, Time, Day), surgery(Surgery, _, Surgeon)} = Count.
 penalty("SameTimeSurgery",surgery_count(Count, Hospital, Time),2) :- surgery_count(Count, Hospital, Time), Count != 2.
 
 ```

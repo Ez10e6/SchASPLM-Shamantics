@@ -1,0 +1,16 @@
+You are tasked with solving a dynamic Labyrinth puzzle.
+The puzzle consists of a grid of fields with specific dimensions (rows and columns).
+The input defines the initial location of a starting point (reach) and a goal point.
+It also defines connections between fields in specific directions (North, South, East, West).
+
+The objective is to manipulate the grid to create a path from the start point to the goal point.
+Manipulation is done by "pushing" entire rows or columns in a specific direction.
+Rules:
+1. At each time step, you can choose to push either a row or a column.
+2. Pushing a row/column shifts all fields in that row/column in the specified direction.
+3. The grid wraps around (toroidal), meaning fields pushed off one edge reappear on the opposite edge.
+4. Connections between fields move with the fields when they are pushed.
+5. Reachability propagates through connected fields.
+6. The goal is reached when the goal field is marked as reachable.
+
+The solution must output the sequence of push actions required to reach the goal within a maximum number of steps.

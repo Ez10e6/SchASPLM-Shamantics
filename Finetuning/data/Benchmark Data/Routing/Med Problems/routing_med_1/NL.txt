@@ -1,0 +1,12 @@
+A mobile inspection drone must visit a series of facilities distributed across an
+industrial site. The drone begins at Station1 and is required to inspect both
+SubstationA and SubstationB at least once during its route. Movement between facilities
+takes 1kJ of energy, and inspections require another 1kJ. The map layout
+consists of the following connections: Station1 is adjacent to Junction1 and
+Junction2. Junction1 connects to SubstationA, while Junction2 connects to SubstationB.
+In addition, Junction1 and Junction2 are directly connected. The drone has 8kJ
+in total to complete the route. However, energy efficiency is a concern—among all valid
+routes, the one with the lowest power usage by the time inspections are complete (including both
+movement and inspection) is preferred. Also, if the drone visits Junction2 before 
+SubstationA, it must not backtrack through Junction1 to reach SubstationA due to signal
+interference.

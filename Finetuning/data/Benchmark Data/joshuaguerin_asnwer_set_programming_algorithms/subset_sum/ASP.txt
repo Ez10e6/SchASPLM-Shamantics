@@ -1,0 +1,5 @@
+% Generate a candidate subset from the available values.
+{ sum(X) : value(X) }.
+
+% Constraint: The sum of the selected values must be exactly n.
+:- #sum {X : sum(X)} != n.

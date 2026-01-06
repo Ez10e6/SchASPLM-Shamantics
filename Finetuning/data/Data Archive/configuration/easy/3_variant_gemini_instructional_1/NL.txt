@@ -1,0 +1,30 @@
+### System Specification: Smartphone Plan Configuration
+
+#### 1. Component Domains
+The system shall consist of exactly one selection from each of the following discrete sets:
+
+*   **Data Plans ($D$):** {BasicData, PremiumData}
+*   **Phone Models ($M$):** {ModelX, ModelY}
+*   **Accessories ($A$):** {CaseA, CaseB}
+
+#### 2. Configuration Constraints
+A valid system state must satisfy the following logical predicates:
+
+*   **C1 (Data-Model Exclusion):** If $D = \text{BasicData}$, then $M \neq \text{ModelY}$.
+*   **C2 (Model-Accessory Dependency):** If $M = \text{ModelX}$, then $A$ must be $\text{CaseA}$.
+*   **C3 (Data-Accessory Exclusion):** If $D = \text{PremiumData}$, then $A \neq \text{CaseA}$.
+
+#### 3. Formal Selection Criteria
+Identify a triplet $(d, m, a)$ such that $d \in D, m \in M, a \in A$ and all constraints (C1, C2, C3) evaluate to TRUE.
+
+#### 4. Compliant Configuration
+The following selection satisfies all specified constraints:
+
+*   **Data Plan:** BasicData
+*   **Phone Model:** ModelX
+*   **Accessory:** CaseA
+
+**Validation Trace:**
+1.  **C1 Check:** BasicData is paired with ModelX (Valid).
+2.  **C2 Check:** ModelX is paired with CaseA (Valid).
+3.  **C3 Check:** CaseA is paired with BasicData, not PremiumData (Valid).

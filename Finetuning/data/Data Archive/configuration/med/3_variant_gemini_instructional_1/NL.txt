@@ -1,0 +1,39 @@
+### **System Specification: Drone Configuration Optimization**
+
+#### **1. Optimization Objective**
+Maximize the **Total Flight Endurance Score ($E_{total}$)**, defined as the sum of the endurance values of the selected components:
+$E_{total} = E_{frame} + E_{motor} + E_{battery}$
+
+#### **2. Domain Definitions**
+The system configuration consists of exactly one selection from each of the following three sets:
+
+*   **Frames ($\mathcal{F}$):** {Lightweight, Standard, Reinforced}
+*   **Motors ($\mathcal{M}$):** {Eco, Standard, HighTorque}
+*   **Batteries ($\mathcal{B}$):** {SmallCell, MediumCell, LongLife}
+
+#### **3. Attribute Values (Endurance Scores)**
+| Component Category | Option | Endurance Score ($E$) |
+| :--- | :--- | :--- |
+| **Frame** | Lightweight | 50 |
+| | Standard | 40 |
+| | Reinforced | 30 |
+| **Motor** | Eco | 60 |
+| | Standard | 70 |
+| | HighTorque | 90 |
+| **Battery** | SmallCell | 30 |
+| | MediumCell | 50 |
+| | LongLife | 80 |
+
+#### **4. Functional Constraints**
+The configuration must adhere to the following logic gates and dependencies:
+
+*   **C1 (Frame-Motor Compatibility):** If **Frame** is *Lightweight*, then **Motor** must not be *HighTorque*.
+*   **C2 (Battery-Frame Requirement):** If **Battery** is *LongLife*, then **Frame** must be *Reinforced*.
+*   **C3 (Motor-Battery Requirement):** If **Motor** is *HighTorque*, then **Battery** must be *LongLife*.
+*   **C4 (SmallCell Power Constraint):** If **Battery** is *SmallCell*, then **Motor** must be *Eco*.
+*   **C5 (MediumCell Power Constraint):** If **Battery** is *MediumCell*, then **Motor** must be either *Eco* or *Standard*.
+
+#### **5. Execution Requirements**
+1.  Identify all valid permutations of $\{\mathcal{F}, \mathcal{M}, \mathcal{B}\}$ that satisfy constraints **C1** through **C5**.
+2.  Calculate $E_{total}$ for each valid permutation.
+3.  Select the configuration that yields the maximum $E_{total}$.

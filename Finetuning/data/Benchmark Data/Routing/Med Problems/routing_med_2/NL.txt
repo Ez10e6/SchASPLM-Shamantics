@@ -1,0 +1,24 @@
+A water‑sampling drone is launched from the LaunchPad into a branching 
+network of subterranean aqueducts. It must collect samples at StationA 
+and StationB, but can optionally sample at StationC if time allows. 
+The aqueducts are one‑way tunnels, each carrying a distinct water volume 
+cost that reduces the drone’s internal tank capacity (max 16 L). Moving 
+through any tunnel takes exactly 1 minute, and collecting a sample at a 
+station requires 1 minute and fills 1 L.
+From LaunchPad, two connectors diverge: Tunnel1 (cost 2 L) and Tunnel2 
+(cost 3 L). Tunnel1 leads to StationA (1 L), then onward to Tunnel3 
+(1 L) which loops back to Tunnel2. Tunnel2 goes to StationB (1 L) or to 
+a calibration shaft CalibEdge (2 L), which itself permits entry into 
+StationC (1 L). StationC then funnels back to Tunnel1 at heavier volume 
+cost (2 L).
+The drone begins with a full 16 L tank at time 0 and must operate within 
+10 minutes. It cannot exceed its tank capacity. It may refill 3 L by 
+idling 2 consecutive minutes at CalibEdge, but only once. The mission 
+requires at least one sample at StationA and StationB, with StationA’s 
+sample completed by minute 6. StationC must only be sampled if and only 
+if both mandatory samples finish within 8 minutes. The total count of 
+movements, samplings, and refills must not exceed 18 events. The 
+drone may never sample twice in a row at the same station (to avoid 
+cross‑contamination). Primary objective: maximize the total number of 
+samples (including optional). Secondary: minimize the time at which the 
+last mandatory sample completes.

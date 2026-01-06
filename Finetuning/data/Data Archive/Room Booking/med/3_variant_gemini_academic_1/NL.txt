@@ -1,0 +1,32 @@
+**Exercise: Constrained Resource Allocation in Multi-Track Scheduling**
+
+**Problem Description**
+Consider a set of six distinct entities representing workshops, denoted by $W = \{w_1, w_2, \dots, w_6\}$. Each workshop $w_i$ is associated with exactly one topic $t$ from the set of topics $T = \{\text{Data, DevOps, UI}\}$. Let $\tau: W \to T$ be a function mapping workshops to topics. The scheduling environment consists of a set of discrete time slots $S = \{s_1, s_2, s_3\}$ (Morning, Midday, Afternoon) and a set of available venues $R = \{r_1, r_2, r_3\}$.
+
+The objective is to define a schedule mapping $f: W \to S \times R$ that assigns each workshop to a unique time-room pair $(s, r)$, subject to the following constraints:
+
+**1. Workshop Existence and Uniqueness**
+Each workshop $w \in W$ must be assigned to exactly one time slot and one room. No two workshops may occupy the same room during the same time slot; that is, $f$ must be an injective function.
+
+**2. Topic Coverage (Surjectivity)**
+The schedule must ensure representation from all topic areas. The mapping $\tau$ must satisfy the condition that the image $\tau(W) = T$. Specifically, there must exist at least one $w \in W$ for each $t \in T$.
+
+**3. Room Capacity Constraints**
+The total number of workshops assigned to any single room $r \in R$ over the duration of all time slots $S$ is limited by a maximum cardinality. Formally:
+$$\forall r \in R, |\{w \in W \mid \text{proj}_R(f(w)) = r\}| \leq 2$$
+where $\text{proj}_R$ denotes the projection of the schedule onto the set of rooms.
+
+**4. Domain-Specific Temporal and Spatial Restrictions**
+The mapping $f$ is subject to the following logical predicates:
+*   **DevOps Temporal Constraint:** If $\tau(w) = \text{DevOps}$, then $\text{proj}_S(f(w)) = s_2$ (Midday).
+*   **Data Spatial Constraint:** If $\tau(w) = \text{Data}$, then $\text{proj}_R(f(w)) \in \{r_1, r_2\}$. (Data workshops are prohibited from $r_3$).
+*   **Topic Concurrency Prohibition:** Workshops focusing on **Data** and **UI** are mutually exclusive in the temporal dimension. Formally, for any $w_i, w_j \in W$:
+    $$\text{if } \tau(w_i) = \text{Data and } \tau(w_j) = \text{UI, then } \text{proj}_S(f(w_i)) \neq \text{proj}_S(f(w_j)).$$
+
+**5. Optimization Objective**
+While satisfying the above feasibility conditions, the schedule must maximize the utilization of the available spatio-temporal resources. Define the utilization $U$ as the ratio of occupied slots to total available slots $|S \times R|$. Given that $|W|=6$ and $|S \times R|=9$, provide a configuration that minimizes the count of null assignments (empty room-slots) while maintaining strict adherence to the constraints.
+
+**Task:**
+1. Formulate a feasible schedule $f(w)$ for all $w \in W$.
+2. Prove that your proposed schedule satisfies the **Topic Concurrency Prohibition** and the **Room Capacity Constraints**.
+3. Determine if a valid schedule exists if the number of workshops $|W|$ were increased to seven. Justify your answer using the constraints provided.

@@ -1,0 +1,17 @@
+{
+  "instance_template": "item(10,2). item(20,5). item(30,10). capacity(15).",
+  "generator": "{ selected(V,W) : item(V,W) }.",
+  "hard_constraints": [
+    {
+      "description": "Total weight must not exceed capacity.",
+      "asp_rule": ":- TotalWeight = #sum { W,V : selected(V,W) }, capacity(MaxWeight), TotalWeight > MaxWeight."
+    }
+  ],
+  "soft_constraints": [
+    {
+      "description": "Maximize total value of selected items.",
+      "asp_rule": "penalty(\"ValueGain\", (V,W), -V) :- selected(V,W)."
+    }
+  ],
+  "global_objective": "#minimize { Weight,Tuple,Name : penalty(Name,Tuple,Weight) }."
+}

@@ -1,0 +1,9 @@
+You are tasked with solving the Equal Sum Partition problem.
+The input consists of a set of integer values.
+
+The objective is to partition this set of values into two distinct subsets, labeled 'a' and 'b'.
+The partition must satisfy two conditions:
+1. Every value from the input set must belong to exactly one of the two subsets.
+2. The sum of the values in subset 'a' must be exactly equal to the sum of the values in subset 'b'.
+
+The output should identify which values belong to which subset.

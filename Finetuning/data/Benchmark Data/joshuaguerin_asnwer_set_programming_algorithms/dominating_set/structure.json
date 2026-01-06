@@ -1,0 +1,12 @@
+{
+  "instance_template": "value(1..10).",
+  "generator": "1 { in_subset(V, \"a\"); in_subset(V, \"b\") } 1 :- value(V).",
+  "hard_constraints": [
+    {
+      "description": "To satisfy the core requirement of the Equal Sum Partition problem, we must ensure that the total weight of subset 'a' is exactly the same as the total weight of subset 'b'. This rule calculates the sum for each subset and rejects any configuration where the two sums are not equal.",
+      "asp_rule": ":- S1 = #sum{ V : in_subset(V, \"a\") }, S2 = #sum{ V : in_subset(V, \"b\") }, S1 != S2."
+    }
+  ],
+  "soft_constraints": [],
+  "global_objective": null
+}

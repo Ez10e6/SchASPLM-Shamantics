@@ -1,0 +1,20 @@
+% Generate potential bin assignments: each item can be assigned to a bin (where the number of potential bins equals the number of items).
+{ bin(B, I) } :- item(B), item(I).
+
+% Constraint: Each item must be assigned to exactly one bin.
+1 { bin(B, I) : item(B) } 1 :- item(I).
+
+% Identify the set of bins that are actually used.
+bin(B) :- bin(B, _).
+
+% Calculate the total weight of items stored in each bin.
+weight(B, T) :- T = #sum{C, I : bin(B, I), item(I, C)}, bin(B).
+
+% Constraint: The total weight of a bin must not exceed the capacity 'n'.
+:- weight(B, W), W > n.
+
+% Count the total number of used bins.
+count(C) :- C = #count{B : bin(B)}.
+
+% Minimize the total count of used bins.
+#minimize{C : count(C)}.

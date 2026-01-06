@@ -1,0 +1,12 @@
+There are 10 seminars
+Seminars have topics: AI, Bio, or Math.
+There are 2 days.
+There are 3 time slots per day: morning, midday, afternoon.
+There are 4 rooms.
+Only one seminar can be scheduled in a room at a time.
+AI seminars must be in the morning or midday.
+Bio seminars must happen in at least 2 different rooms.
+Room 4 is not available at midday on either day.
+No two Math seminars can happen at the same time.
+Seminar 5 must happen on Day 2 but not in the morning.
+Seminars 6 and 7 must happen in the same room but on different days.

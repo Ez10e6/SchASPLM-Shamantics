@@ -1,0 +1,11 @@
+You are assembling a basic custom PC build using three components: a CPU, a GPU, and a motherboard.
+There are two options for each component type:
+CPUs: Ryzen5 or i5
+GPUs: GTX1660 or RX580
+Motherboards: B450 or Z390
+Each final build must include exactly one CPU, one GPU, and one motherboard.
+However, there are compatibility rules:
+The Ryzen5 CPU is only compatible with the B450 motherboard.
+The i5 CPU is only compatible with the Z390 motherboard.
+The RX580 GPU is not compatible with the Z390 motherboard.
+You must select a valid combination of components that satisfies all compatibility constraints.

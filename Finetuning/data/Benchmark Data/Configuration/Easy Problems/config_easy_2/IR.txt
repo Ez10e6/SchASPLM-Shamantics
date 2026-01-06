@@ -1,0 +1,6 @@
+Select exactly one speaker from {Alpha, Beta}.
+Select exactly one amplifier from {AmpX, AmpY}.
+Select exactly one media player from {Streamer1, Streamer2}.
+Speaker Alpha is only compatible with AmpX.
+AmpY is incompatible with Streamer1.
+Streamer2 can only be used with Speaker Beta.

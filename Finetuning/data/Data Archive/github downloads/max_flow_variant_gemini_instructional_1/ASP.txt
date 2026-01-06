@@ -1,0 +1,18 @@
+% Define the domain of possible flow values based on the maximum edge capacity.
+flow_vals(0..T) :- T = #max{C : edge(X, Y, C)}.
+
+% Generate exactly one flow value for each defined edge.
+1 { flow(S, E, V) : flow_vals(V) } 1 :- edge(S, E, _).
+
+% Constraint: The flow on any edge must not exceed its capacity.
+:- flow(S, E, V), edge(S, E, C), C < V.
+
+% Calculate the total incoming and outgoing flow for each node.
+incoming(V, I) :- I = #sum{C : flow(S, V, C)}, node(V).
+outgoing(V, O) :- O = #sum{C : flow(V, E, C)}, node(V).
+
+% Constraint: For internal nodes (not start or terminal), incoming flow must equal outgoing flow.
+:- node(V), not start(V), not terminal(V), incoming(V, I), outgoing(V, O), I!=O.
+
+% Maximize the total flow arriving at the terminal node.
+#maximize{I : incoming(T, I), terminal(T)}.

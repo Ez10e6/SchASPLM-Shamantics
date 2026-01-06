@@ -1,0 +1,28 @@
+### Exercise: Formal State-Space Analysis of the Classical River-Crossing Problem
+
+**Problem Description**
+Consider a state-space search problem involving a set of entities $E = \{F, W, G, C\}$, where $F$ represents the human agent (farmer), $W$ represents a predator (wolf), $G$ represents a herbivore (goat), and $C$ represents a resource (cabbage). The objective is to transition all entities from an initial location, the left bank ($L$), to a terminal location, the right bank ($R$), across a traversable boundary (a river).
+
+**State Representation**
+Let a state $s \in S$ be defined as a mapping $s: E \to \{L, R\}$, where $s(e)$ denotes the current location of entity $e$. The initial state $s_{start}$ is defined such that $\forall e \in E, s_{start}(e) = L$. The goal state $s_{goal}$ is defined such that $\forall e \in E, s_{goal}(e) = R$.
+
+**Transition Constraints**
+A transition between state $s_i$ and $s_{i+1}$ is governed by the following operational constraints:
+1.  **Agent Necessity:** Every transition requires the movement of the agent; thus, $s_{i+1}(F) \neq s_i(F)$.
+2.  **Transport Capacity:** The transport vessel has a maximum capacity of two entities, one of which must be the agent $F$. Consequently, at most one entity $e \in \{W, G, C\}$ may change location such that $s_{i+1}(e) = s_{i+1}(F)$. All other entities $e' \in E \setminus \{F, e\}$ must remain stationary: $s_{i+1}(e') = s_i(e')$.
+
+**Safety Constraints (Invariants)**
+A state $s$ is considered **valid** if and only if it satisfies the following safety predicates:
+1.  **Predation Constraint I:** $(s(W) = s(G)) \implies (s(F) = s(W))$
+    *(The wolf and goat may not be co-located in the absence of the agent.)*
+2.  **Predation Constraint II:** $(s(G) = s(C)) \implies (s(F) = s(G))$
+    *(The goat and cabbage may not be co-located in the absence of the agent.)*
+
+**Formal Task**
+Let $T$ be a positive integer representing the maximum temporal horizon (total steps). Determine a sequence of states $(s_0, s_1, \dots, s_k)$ where $k \le T$, such that:
+1.  $s_0 = s_{start}$ and $s_k = s_{goal}$.
+2.  Each state $s_i$ (for $0 \le i \le k$) satisfies all safety constraints.
+3.  Each pair $(s_i, s_{i+1})$ (for $0 \le i < k$) constitutes a valid transition under the transport capacity constraints.
+
+**Discussion Question**
+Model this problem as a directed graph $G = (V, E)$. Define the vertex set $V$ based on the safety constraints and describe the criteria for an edge to exist between two vertices. Prove whether a solution exists for $T=7$.

@@ -1,0 +1,37 @@
+{
+  "instance_template": "loc(\"BaseCamp\"; \"Fork1\"; \"Fork2\"; \"OutpostX\"; \"OutpostY\"; \"RelayStation\").\nedge(\"BaseCamp\", \"Fork1\").\nedge(\"BaseCamp\", \"Fork2\").\nedge(\"Fork1\", \"OutpostX\").\nedge(\"Fork1\", \"RelayStation\").\nedge(\"Fork2\", \"OutpostY\").\nedge(\"Fork2\", \"RelayStation\").\ntime(0..10).",
+  "generator": "1 { at(L, T) : loc(L) } 1 :- time(T).\n1 { inspect_at(\"OutpostX\", T) : time(T) } 1.\n1 { inspect_at(\"OutpostY\", T) : time(T) } 1.\n0 { inspect_at(\"RelayStation\", T) : time(T) } 1.\nmove(T) :- at(L1, T), at(L2, T+1), L1 != L2.",
+  "hard_constraints": [
+    {
+      "description": "The rover is required to occupy the BaseCamp location at the initial temporal index.",
+      "asp_rule": ":- not at(\"BaseCamp\", 0)."
+    },
+    {
+      "description": "Transitions between distinct locations are restricted to pairs defined by the adjacency matrix of the terrain.",
+      "asp_rule": ":- at(L1, T), at(L2, T+1), L1 != L2, not edge(L1, L2), not edge(L2, L1)."
+    },
+    {
+      "description": "An inspection operation requires the rover to be physically present at the target location during the designated time step.",
+      "asp_rule": ":- inspect_at(L, T), not at(L, T)."
+    },
+    {
+      "description": "Temporal continuity of location is mandatory during the execution of an inspection task, necessitating a stationary state for one full minute.",
+      "asp_rule": ":- inspect_at(L, T), move(T)."
+    },
+    {
+      "description": "The cumulative energy consumption, calculated as the total number of movements between distinct locations, must not exceed the maximum storage capacity of six units.",
+      "asp_rule": ":- #count { T : move(T) } > 6."
+    },
+    {
+      "description": "An inspection at the RelayStation is permissible only if the remaining energy capacity exceeds two units upon the conclusion of all mandatory scanning tasks.",
+      "asp_rule": ":- inspect_at(\"RelayStation\", _), T_max = #max { T+1 : inspect_at(L, T), L != \"RelayStation\" }, #count { Tm : move(Tm), Tm < T_max } >= 4."
+    }
+  ],
+  "soft_constraints": [
+    {
+      "description": "A penalty is associated with the failure to collect bonus diagnostic data from the RelayStation, incentivizing its inclusion in the rover's itinerary.",
+      "asp_rule": "penalty(\"RelayStationBonusForegone\", (), 1) :- not inspect_at(\"RelayStation\", _)."
+    }
+  ],
+  "global_objective": "#minimize { Cost,Name,Tuple : penalty(Name,Tuple,Cost) }."
+}

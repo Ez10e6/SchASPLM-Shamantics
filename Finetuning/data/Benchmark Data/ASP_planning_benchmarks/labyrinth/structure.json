@@ -1,0 +1,21 @@
+{
+  "instance_template": "field(1,1). init_on(1,1). goal_on(3,3). connect(1,1,e). max_steps(10).",
+  "generator": "dir(n;s;e;w). inverse(n,s). inverse(s,n). inverse(e,w). inverse(w,e).\nstep(1..M) :- max_steps(M).\nrow(X) :- field(X,Y).\ncol(Y) :- field(X,Y).\nnum_rows(N) :- N = #max{ R : row(R) }.\nnum_cols(M) :- M = #max{ C : col(C) }.\nadj(n,X,Y,X-1,Y) :- field(X,Y), field(X-1,Y).\nadj(s,X,Y,X+1,Y) :- field(X,Y), field(X+1,Y).\nadj(w,X,Y,X,Y-1) :- field(X,Y), field(X,Y-1).\nadj(e,X,Y,X,Y+1) :- field(X,Y), field(X,Y+1).\nneighbor(D,X,Y,NX,NY) :- adj(D,X,Y,NX,NY).\nneighbor(n,1,Y,N,Y) :- field(1,Y), num_rows(N).\nneighbor(s,N,Y,1,Y) :- field(N,Y), num_rows(N).\nneighbor(w,X,1,X,M) :- field(X,1), num_cols(M).\nneighbor(e,X,M,X,1) :- field(X,M), num_cols(M).\ngoal_reached(T) :- goal(X,Y,T), reach(X,Y,T).\n{ push(row,R,D,T) : row(R), D = (e;w); push(col,C,D,T) : col(C), D = (n;s) } = 1 :- step(T), not goal_reached(T-1).\nrow_pushed(R,T) :- push(row,R,D,T).\ncol_pushed(C,T) :- push(col,C,D,T).\nshift(X,Y,NX,NY,T) :- push(row,X,e,T), neighbor(e,X,Y,NX,NY).\nshift(X,Y,NX,NY,T) :- push(row,X,w,T), neighbor(w,X,Y,NX,NY).\nshift(X,Y,NX,NY,T) :- push(col,Y,n,T), neighbor(n,X,Y,NX,NY).\nshift(X,Y,NX,NY,T) :- push(col,Y,s,T), neighbor(s,X,Y,NX,NY).\nshift(X,Y,X,Y,T) :- field(X,Y), step(T), not row_pushed(X,T), not col_pushed(Y,T).\nconn(X,Y,D,0) :- connect(X,Y,D).\nconn(NX,NY,D,T) :- conn(X,Y,D,T-1), shift(X,Y,NX,NY,T).\ngoal(X,Y,0) :- goal_on(X,Y).\ngoal(NX,NY,T) :- goal(X,Y,T-1), shift(X,Y,NX,NY,T).\nreach(X,Y,0) :- init_on(X,Y).\nreach(NX,NY,T) :- reach(X,Y,T-1), shift(X,Y,NX,NY,T).\nreach(X,Y,T) :- reach(XX,YY,T), adj(D,XX,YY,X,Y), conn(XX,YY,D,T), conn(X,Y,E,T), inverse(D,E).",
+  "hard_constraints": [
+    {
+      "description": "To successfully solve the puzzle, the target field must be marked as reachable by the final time step.",
+      "asp_rule": ":- max_steps(M), not goal_reached(M)."
+    },
+    {
+      "description": "An action must be performed at every time step until the goal is achieved to ensure continuous progress.",
+      "asp_rule": ":- step(T), not goal_reached(T-1), not row_pushed(_,T), not col_pushed(_,T)."
+    }
+  ],
+  "soft_constraints": [
+    {
+      "description": "We should aim to find the most efficient solution by minimizing the total number of push actions taken.",
+      "asp_rule": "penalty(\"step_cost\", T, 1) :- push(_,_,_,T)."
+    }
+  ],
+  "global_objective": "#minimize { C,T : penalty(N,T,C) }."
+}

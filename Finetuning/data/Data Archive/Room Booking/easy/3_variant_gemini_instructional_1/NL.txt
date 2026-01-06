@@ -1,0 +1,26 @@
+### System Specification: Training Session Scheduling
+
+**1. System Entities and Domains**
+*   **Sessions ($S$):** A set of four discrete training sessions $\{s_1, s_2, s_3, s_4\}$.
+*   **Topics ($T$):** {Networking, Security}.
+*   **Time Slots ($TS$):** {Morning, Afternoon}.
+*   **Rooms ($R$):** {Room 1, Room 2}.
+
+**2. Objective**
+Assign each session $s \in S$ a unique combination of $(r, ts)$, where $r \in R$ and $ts \in TS$, such that all sessions are scheduled and all domain constraints are satisfied.
+
+**3. Allocation Constraints**
+*   **Completeness:** Every session $s \in S$ must be assigned exactly one Room and one Time Slot.
+*   **Exclusivity:** No two sessions may share the same Room and Time Slot simultaneously. 
+*   **Capacity:** Total session count $|S|$ must equal the total available resource slots ($|R| \times |TS| = 4$).
+*   **Bijective Mapping:** The assignment function $f: S \to (R \times TS)$ must be a bijection, ensuring 100% utilization of available space-time coordinates with no overlaps.
+
+**4. Topic-Specific Constraints**
+*   **Security Session Temporal Constraint:**
+    *   If $Topic(s) = \text{Security}$, then $TimeSlot(s) = \text{Afternoon}$.
+*   **Networking Session Spatial Constraint:**
+    *   If $Topic(s) = \text{Networking}$, then $Room(s) \neq \text{Room 1}$ (Session must be assigned to Room 2).
+
+**5. Operational Requirements**
+*   All scheduling must be contained within a single operational day.
+*   The system must validate that the distribution of session topics (Networking vs. Security) allows for a feasible solution given the constraints in Section 4.

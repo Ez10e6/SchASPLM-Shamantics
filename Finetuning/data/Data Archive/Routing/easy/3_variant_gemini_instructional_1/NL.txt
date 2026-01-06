@@ -1,0 +1,32 @@
+### System Specification: Warehouse Autonomous Navigation and Delivery
+
+#### 1. System Topology
+The environment is defined as a graph $G = (V, E)$, where $V$ represents the set of stations and $E$ represents the set of bidirectional traversable paths.
+*   **Nodes ($V$):** $\{A, B, C, D, E\}$
+*   **Edges ($E$):** 
+    *   $(A, B)$
+    *   $(A, D)$
+    *   $(B, C)$
+    *   $(D, E)$
+
+#### 2. Initial State
+*   **Starting Location:** The bot shall be initialized at node $A$ at time $t = 0$.
+*   **Current Location ($L_t$):** $L_0 = A$.
+
+#### 3. Execution Constraints
+*   **Temporal Budget:** The system is limited to a maximum of 6 discrete moves ($t_{max} = 6$).
+*   **Move Duration:** Each edge traversal $(\Delta t)$ is equal to 1 time unit.
+*   **Adjacency Requirement:** For any transition from $L_t$ to $L_{t+1}$, the pair $(L_t, L_{t+1})$ must exist within the set of defined edges $E$.
+*   **Node Revisit:** The bot may revisit any node within the temporal budget to fulfill objective requirements.
+
+#### 4. Objective Criteria
+The bot must achieve a "Delivered" status for specific target stations. The mission is successful if and only if:
+*   **Target C:** There exists some $t \in [1, 6]$ such that $L_t = C$.
+*   **Target E:** There exists some $t \in [1, 6]$ such that $L_t = E$.
+*   **Delivery Sequence:** Targets $C$ and $E$ may be visited in any order.
+
+#### 5. Operational Logic
+1.  **Initialize** at $L_0 = A$.
+2.  **Execute** a sequence of moves $M = \{m_1, m_2, \dots, m_n\}$ where $n \le 6$.
+3.  **Validate** that for every move $m_i$, the destination is adjacent to the previous node.
+4.  **Terminate** upon reaching the state where both $\{C, E\}$ have been included in the set of visited nodes, or when $t = 6$.

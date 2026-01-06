@@ -1,0 +1,47 @@
+### System Specification: Sokoban Logic Engine
+
+#### 1. System Domain
+The system operates within a discrete 2D grid environment $G$, where each cell $(x, y)$ is assigned a static attribute and may contain dynamic entities.
+
+*   **Static Attributes:**
+    *   **Wall:** An impassable boundary.
+    *   **Clear:** An traversable floor space.
+    *   **Goal:** A designated target location for stones.
+*   **Dynamic Entities:**
+    *   **Player (Pusher):** A single mobile agent.
+    *   **Stones:** A set of $N$ movable objects.
+
+#### 2. State Definitions
+*   **Initial State:** The starting coordinates of the Player and all Stones within the grid.
+*   **Current State:** The instantaneous configuration of the Player and Stones.
+*   **Goal State:** A configuration where the set of all Stone coordinates is a subset of the set of all Goal coordinates.
+
+#### 3. Permitted Actions
+The agent shall execute a sequence of discrete moves $A \in \{North, South, East, West\}$. Each action is categorized as either a **Move** or a **Push**.
+
+**3.1 Move Logic**
+An action is defined as a Move if the target adjacent cell is **Clear** or a **Goal** and does not currently contain a Stone.
+*   **Precondition:** The target cell must not be a Wall.
+*   **Precondition:** The target cell must not contain a Stone.
+*   **Effect:** The Player’s coordinates are updated to the target cell.
+
+**3.2 Push Logic**
+An action is defined as a Push if the target adjacent cell contains a Stone and the cell immediately beyond that stone (in the same direction) is unoccupied.
+*   **Precondition:** The cell adjacent to the Player (Cell A) must contain a Stone.
+*   **Precondition:** The cell adjacent to the Stone in the direction of travel (Cell B) must be **Clear** or a **Goal**.
+*   **Precondition:** Cell B must not contain another Stone.
+*   **Effect:** The Stone is displaced from Cell A to Cell B.
+*   **Effect:** The Player’s coordinates are updated to the previous coordinates of the Stone (Cell A).
+
+#### 4. System Constraints
+To maintain logical integrity, the system must enforce the following invariants:
+*   **Incompressibility:** No two entities (Player/Stone or Stone/Stone) may occupy the same cell simultaneously.
+*   **Impassability:** Neither the Player nor Stones may enter or pass through a Wall cell.
+*   **Unidirectionality (No Pulling):** Stones may only be moved via displacement from the Player's forward momentum; the Player cannot move a stone toward its own current coordinate.
+*   **Singularity (No Multi-Push):** The Player is prohibited from pushing more than one Stone in a single action. If two or more Stones are adjacent in the line of movement, the action is void.
+*   **Boundary Enforcement:** All entities must remain within the defined grid dimensions.
+
+#### 5. Output Requirements
+Upon reaching the Goal State, the system shall provide a formal execution trace consisting of:
+*   The ordered sequence of directional actions (N, S, E, W) required to transition from the Initial State to the Goal State.
+*   Verification that every Stone coordinate matches a Goal coordinate in the final state.

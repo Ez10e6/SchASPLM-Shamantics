@@ -1,0 +1,26 @@
+### **Specification: Prime Number Identification System (Prime Sieve)**
+
+#### **1. System Objective**
+The system must implement a deterministic procedure to identify the subset of prime integers within a specified numerical domain.
+
+#### **2. Input Specification**
+*   **$n$**: An integer representing the inclusive upper bound of the search interval.
+
+#### **3. Formal Definitions**
+*   **Domain ($D$):** The set of all integers $x$ such that $2 \le x \le n$.
+*   **Composite Property:** An integer $x$ is defined as composite if and only if there exists an integer divisor $d$ such that $1 < d < x$ and $x \pmod d = 0$.
+*   **Prime Property:** An integer $x$ is defined as prime if and only if it is not composite.
+
+#### **4. Functional Requirements**
+*   **Range Initialization:** Define the search space as the closed interval $[2, n]$.
+*   **Primality Evaluation:** Iterate through each integer $x \in D$ to determine its status based on the Prime Property.
+*   **Identification Logic:** 
+    *   Exclude any $x$ where a divisor $d$ exists such that $1 < d < x$.
+    *   Retain any $x$ that possesses no divisors other than 1 and itself.
+*   **Output Generation:** Return the set $P$ containing all identified prime numbers, such that $P = \{x \in \mathbb{Z} \mid 2 \le x \le n \land \text{is\_prime}(x)\}$.
+
+#### **5. Constraints and Logic Bounds**
+*   **Lower Bound:** The system must ignore all integers $x < 2$.
+*   **Upper Bound:** The system must terminate evaluation at the integer $n$.
+*   **Null Case:** If $n < 2$, the system shall return an empty set ($\emptyset$).
+*   **Integrity:** The output set must be exhaustive for the range $[2, n]$ and must not contain any composite numbers.

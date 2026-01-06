@@ -1,0 +1,40 @@
+{
+  "instance_template": "location(l1). location(l2). truck(t1). package(p1). fuelcost(5,l1,l2). at(t1,l1,0). at(p1,l1,0). fuel(t1,10,0). goal(p1,l2). step(1..10).",
+  "generator": "{ occurs(load(P,T,L),S) : package(P), truck(T), location(L); occurs(unload(P,T,L),S) : package(P), truck(T), location(L); occurs(drive(T,L1,L2),S) : truck(T), location(L1), location(L2), fuelcost(_,L1,L2) } <= 1 :- step(S).\nat(P,L,S) :- occurs(unload(P,T,L),S).\nat(T,L2,S) :- occurs(drive(T,L1,L2),S).\nin(P,T,S) :- occurs(load(P,T,L),S).\nfuel(T,F2,S) :- occurs(drive(T,L1,L2),S), fuel(T,F1,S-1), fuelcost(D,L1,L2), F2 = F1 - D.\nat(O,L,S) :- at(O,L,S-1), not moved(O,S), step(S).\nmoved(P,S) :- occurs(load(P,_,_),S).\nmoved(P,S) :- occurs(unload(P,_,_),S).\nmoved(T,S) :- occurs(drive(T,_,_),S).\nin(P,T,S) :- in(P,T,S-1), not moved(P,S), step(S).\nfuel(T,F,S) :- fuel(T,F,S-1), not fuel_consumed(T,S), step(S).\nfuel_consumed(T,S) :- occurs(drive(T,_,_),S).",
+  "hard_constraints": [
+    {
+      "description": "Actions must occur sequentially.",
+      "asp_rule": ":- occurs(_,S), not occurs(_,S-1), S > 1, step(S)."
+    },
+    {
+      "description": "Load requires package at location.",
+      "asp_rule": ":- occurs(load(P,T,L),S), not at(P,L,S-1)."
+    },
+    {
+      "description": "Load requires truck at location.",
+      "asp_rule": ":- occurs(load(P,T,L),S), not at(T,L,S-1)."
+    },
+    {
+      "description": "Unload requires truck at location.",
+      "asp_rule": ":- occurs(unload(P,T,L),S), not at(T,L,S-1)."
+    },
+    {
+      "description": "Unload requires package in truck.",
+      "asp_rule": ":- occurs(unload(P,T,L),S), not in(P,T,S-1)."
+    },
+    {
+      "description": "Drive requires truck at start location.",
+      "asp_rule": ":- occurs(drive(T,L1,L2),S), not at(T,L1,S-1)."
+    },
+    {
+      "description": "Drive requires sufficient fuel.",
+      "asp_rule": ":- occurs(drive(T,L1,L2),S), fuel(T,F,S-1), fuelcost(D,L1,L2), F < D."
+    },
+    {
+      "description": "All goals must be satisfied at final step.",
+      "asp_rule": ":- goal(P,L), not at(P,L,S), step(S), not step(S+1)."
+    }
+  ],
+  "soft_constraints": [],
+  "global_objective": null
+}

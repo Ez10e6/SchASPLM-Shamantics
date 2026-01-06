@@ -1,0 +1,7 @@
+There are 5 lectures to schedule.
+Topics are: AI, Math, or Physics.
+There are 3 rooms and 2 time slots:
+morning and afternoon.
+Each lecture must be scheduled once.
+Only one lecture per room-time.
+Math and Physics may not happen in the same room.

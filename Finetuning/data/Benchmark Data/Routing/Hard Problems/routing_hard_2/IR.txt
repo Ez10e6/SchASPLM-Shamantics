@@ -1,0 +1,26 @@
+Nodes: LaunchPad, Tunnel1, Tunnel2, StationA, StationB, Tunnel3, CalibEdge, StationC.
+Directed Edges and Water Costs:
+    LaunchPad → Tunnel1 (2 liters)
+    LaunchPad → Tunnel2 (3 liters)
+    Tunnel1 → StationA (1 liter)
+    StationA → Tunnel3 (1 liter)
+    Tunnel3 → Tunnel2 (1 liter)
+    Tunnel2 → StationB (1 liter)
+    Tunnel2 → CalibEdge (2 liters)
+    CalibEdge → StationC (1 liter)
+    StationC → Tunnel1 (2 liters)
+The rover starts at LaunchPad at time 0.
+The maximum timeframe is 10 minutes.
+Movement is only possible along directed edges.
+Movement between adjacent nodes takes 1 minute.
+The rover has a water tank with 16 liter capacity.
+Mandatory sampling sites: StationA and StationB (exactly once each).
+Optional sampling site: StationC.
+StationA must be sampled by time 6.
+Taking a sample requires 1 minute and recovers 1 liter of water.
+The rover can refill 3 liters of water by spending 2 minutes at CalibEdge (at most once).
+The total number of events (moves, samples, refill) must not exceed 18.
+The rover cannot take consecutive samples at the same location.
+StationC must be sampled if and only if both mandatory sites are sampled by minute 8.
+Primary objective: maximize the number of samples taken.
+Secondary objective: minimize the latest time at which a mandatory sample is taken.

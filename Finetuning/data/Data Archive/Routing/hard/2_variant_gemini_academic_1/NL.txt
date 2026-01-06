@@ -1,0 +1,37 @@
+**Exercise: Constrained Path Optimization in a Resource-Limited State Space**
+
+**Problem Context**
+An autonomous agent (the "rover") is deployed within a subterranean directed graph $G = (V, E)$, representing a Martian tunnel network. The agent must execute a sequence of operations—comprising movement, resource acquisition, and site sampling—subject to strict temporal, resource, and logical constraints.
+
+**System Specifications**
+1.  **Graph Topology**: The vertex set $V$ consists of the following locations: $\{\text{LaunchPad (LP)}, \text{Tunnel1 (T1)}, \text{Tunnel2 (T2)}, \text{Tunnel3 (T3)}, \text{StationA (SA)}, \text{StationB (SB)}, \text{StationC (SC)}, \text{CalibEdge (CE)}\}$.
+2.  **Edge Definitions and Costs**: Transitions between vertices are directed and incur costs in time ($t$), events ($e$), and water ($w$). Every directed edge $(u, v)$ has a uniform time cost $\Delta t = 1$ and event cost $\Delta e = 1$. Water consumption $\Delta w$ for each transition is defined as follows:
+    *   $(LP, T1): 2L$
+    *   $(LP, T2): 3L$
+    *   $(T1, SA): 1L$
+    *   $(SA, T3): 1L$
+    *   $(T3, T2): 0L$
+    *   $(T2, SB): 1L$
+    *   $(T2, CE): 2L$
+    *   $(CE, SC): 1L$
+    *   $(SC, T1): 2L$
+
+**Operational Constraints**
+*   **Initial State**: At $t=0$, the agent is at $LP$ with $w = 16L$ and $e = 0$.
+*   **Global Limits**: The mission must terminate such that total elapsed time $T \le 10$ minutes and total accumulated events $E \le 18$. The water level $w$ must satisfy $0 \le w \le 16$ at all times.
+*   **Sampling Operations**: 
+    *   Sampling at a station $S_i \in \{SA, SB, SC\}$ requires $\Delta t = 1$ and $\Delta e = 1$.
+    *   Each sampling operation yields a resource recovery of $+1L$ water.
+    *   Station $SA$ and $SB$ must be sampled exactly once.
+    *   Sampling at $SA$ must occur at $t \le 6$.
+    *   **Conditional Constraint**: $SC$ must be sampled if and only if the sampling of both $SA$ and $SB$ is completed by $t \le 8$.
+    *   **Protocol Constraint**: Consecutive sampling operations at the same vertex are prohibited.
+*   **Replenishment Protocol**: At vertex $CE$, the agent may perform a "Refill" action. This action requires $\Delta t = 2$ (consecutive) and $\Delta e = 2$, resulting in a resource gain of $+3L$ water. This action is restricted to a single occurrence per mission.
+
+**Objective Function**
+Let $N$ be the total number of unique stations sampled. Let $T_{mandatory}$ be the time at which the sampling of both $SA$ and $SB$ is completed.
+1.  Maximize $N$.
+2.  Subject to the maximum of $N$, minimize $T_{mandatory}$.
+
+**Task**
+Formulate the optimal state-transition sequence that satisfies all aforementioned conditions. Provide the final water volume $w$, the total time $T$, and the event count $E$ upon mission completion. Explicitly state whether Station C was included in the optimal path based on the conditional requirement.

@@ -1,0 +1,21 @@
+You are tasked with solving the Asprilo warehouse logistics problem.
+The environment is a 2D grid containing robots, shelves, picking stations, and products.
+The input specifies the initial positions of all entities, the inventory of products on shelves, and the customer orders.
+
+The objective is to fulfill all orders within a specified time horizon.
+Robots must:
+1. Move through the grid to reach shelves.
+2. Pick up shelves that contain the required products.
+3. Transport the shelves to the designated picking stations.
+4. Deliver the required quantity of products at the station.
+5. Return the shelf to a storage location (or leave it at a valid spot).
+
+Constraints:
+1. Robots can move in the four cardinal directions (North, South, East, West).
+2. Robots cannot move through obstacles or other robots (vertex and edge collision constraints).
+3. A robot can carry at most one shelf at a time.
+4. A shelf can be carried by at most one robot at a time.
+5. Pickup and Putdown actions can only occur when a robot is at the same location as a shelf.
+6. Delivery actions can only occur when a robot carrying a shelf is at a picking station.
+
+The solution must output the sequence of actions (move, pickup, putdown, deliver) for each robot.

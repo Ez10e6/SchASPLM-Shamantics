@@ -1,0 +1,22 @@
+% There are 4 training sessions.
+session(1..4).
+
+% Sessions are on Networking or Security.
+topic("Networking"; "Security").
+1 { topicOf(S, T) : topic(T) } 1 :- session(S).
+
+% There are 2 rooms and 2 time slots: morning and afternoon, on one day.
+room(1..2).
+slot("morning"; "afternoon").
+
+% Each session must be scheduled.
+1 { scheduled(S, R, Sl) : room(R), slot(Sl) } :- session(S).
+
+% Only one session per room‑time.
+:- scheduled(S1, R, Sl), scheduled(S2, R, Sl), S1 != S2.
+
+% Security sessions must be in the afternoon.
+:- scheduled(S, _, Sl), topicOf(S, "Security"), Sl != "afternoon".
+
+% Networking sessions cannot be in room 1.
+:- scheduled(S, 1, _), topicOf(S, "Networking").

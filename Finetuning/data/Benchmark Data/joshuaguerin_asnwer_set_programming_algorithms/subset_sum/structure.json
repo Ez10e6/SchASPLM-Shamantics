@@ -1,0 +1,12 @@
+{
+  "instance_template": "value(1..10). target(15).",
+  "generator": "{ selected(V) : value(V) }.",
+  "hard_constraints": [
+    {
+      "description": "Alright, sanity check: we need the sum of our picked values to hit the target number exactly, or it's a no-go.",
+      "asp_rule": ":- S = #sum { V : selected(V) }, target(T), S != T."
+    }
+  ],
+  "soft_constraints": [],
+  "global_objective": ""
+}

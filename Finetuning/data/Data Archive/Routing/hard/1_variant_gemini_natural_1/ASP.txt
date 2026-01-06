@@ -1,0 +1,64 @@
+% Nodes: CommandCenter, PathA, PathB, TowerX, TowerY, MidRelay, TowerZ
+loc("CommandCenter"; "PathA"; "PathB"; "TowerX"; "TowerY"; "MidRelay"; "TowerZ").
+
+% Directed Edges and Movement Costs
+edge("CommandCenter","PathA",2).
+edge("CommandCenter","PathB",3).
+edge("PathA","TowerX",2).
+edge("PathB","TowerY",2).
+edge("PathB","PathA",1).
+edge("TowerX","PathB",2).
+edge("TowerY","MidRelay",3).
+edge("MidRelay","TowerZ",2).
+edge("TowerZ","TowerX",4).
+
+% The drone starts at CommandCenter at time 0.
+at("CommandCenter",0).
+time(0..10).
+
+% Movement is only possible along directed edges.
+% Movement between adjacent nodes takes 1 minute.
+1{ at(L, T): loc(L) }1 :- time(T).
+:- at(L1, T), at(L2, T+1), not edge(L1, L2, _), L1 != L2.
+
+% Scans take 2 full minutes.
+at(L,T) :- scan_at(L,T).
+at(L,T+1) :- scan_at(L,T), T < 10.
+at(L,T+2) :- scan_at(L,T), T < 9.
+
+% The drone must scan TowerX and TowerY at least once
+1{ scan_at("TowerX", T): time(T) }.
+1{ scan_at("TowerY", T): time(T) }.
+
+% TowerX must be scanned by time 5
+:- not scan_at("TowerX",T): time(T), T < 5.
+
+% TowerZ can be scanned optionally.
+{ scan_at("TowerZ", T): time(T) }.
+
+% The total number of location visits must not exceed 10.
+:- N = #count {L,T: at(L,T)}, N > 20.
+
+% The drone has a maximum battery capacity of 14 units.
+used_batt(T+1 ,B2) :- at(L1,T), at(L2,T+1), edge(L1,L2,Cost), used_batt(T,B1), B2 = B1 + Cost.
+used_batt(T+1, B) :- at(L,T), at(L,T+1), used_batt(T, B).
+used_batt(0, 0).
+:- used_batt(_, B), B > 14.
+
+% If the drone visits MidRelay, then it must be at TowerZ in the next timestep.
+:- at("MidRelay",T), not at("TowerZ",T+1), T < 10.
+
+% Maximise the number of scans performed
+#maximize { 1@2 : scan_at(L,T) }.
+
+% As a secondary priority minimize the time by which all sites are scanned at least once
+scanned_time(T) :- T = #min{T1: scan_at("TowerX", T2), scan_at("TowerY", T3), T1>=T2, T1>=T3, time(T1) }.
+#minimize { T@1 : scanned_time(T) }.
+
+% The drone cannot perform two consecutive scans at the same location.
+:- scan_at(L,T1), scan_at(L,T2), T2 = T1 + 3.
+
+% The drone can recharge 4 battery units by spending 2 minutes idle at MidRelay.
+recharge(T) :- at("MidRelay",T), at("MidRelay",T+1), at("MidRelay",T+2), T < 9.
+used_batt(T+1,Bnew) :- recharge(T), used_batt(T,B), Bnew = B-4.
+

@@ -1,0 +1,24 @@
+{
+  "instance_template": "#const n=7. item(wolf; goat; cabbage). side(left; right). opposite(left, right). opposite(right, left). time(0..n).",
+  "generator": "at(farmer, left, 0). at(I, left, 0) :- item(I). 0 { boat(I, T) : item(I), at(I, S, T) } 1 :- at(farmer, S, T), time(T), T < n. at(farmer, S2, T+1) :- at(farmer, S1, T), opposite(S1, S2), time(T), T < n. at(I, S2, T+1) :- boat(I, T), at(I, S1, T), opposite(S1, S2), time(T), T < n. at(I, S1, T+1) :- item(I), at(I, S1, T), not boat(I, T), time(T), T < n.",
+  "hard_constraints": [
+    {
+      "description": "The wolf and the goat are prohibited from occupying the same bank in the absence of the farmer's supervision.",
+      "asp_rule": ":- at(wolf, S, T), at(goat, S, T), not at(farmer, S, T)."
+    },
+    {
+      "description": "The goat and the cabbage are prohibited from occupying the same bank in the absence of the farmer's supervision.",
+      "asp_rule": ":- at(goat, S, T), at(cabbage, S, T), not at(farmer, S, T)."
+    },
+    {
+      "description": "The farmer is required to be positioned on the right bank at the terminal time step.",
+      "asp_rule": ":- not at(farmer, right, n)."
+    },
+    {
+      "description": "All transportable items are required to be positioned on the right bank at the terminal time step.",
+      "asp_rule": ":- item(I), not at(I, right, n)."
+    }
+  ],
+  "soft_constraints": [],
+  "global_objective": null
+}

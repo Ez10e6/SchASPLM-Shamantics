@@ -1,0 +1,8 @@
+% Generate a candidate subset of items to include in the knapsack.
+{ knapsack(V, W) } :- item(V, W).
+
+% Constraint: The sum of weights of the included items must not exceed the capacity n.
+:- #sum { W, V : knapsack(V, W) } > n.
+
+% Maximize the total value of the included items.
+#maximize { V, W : knapsack(V, W) }.

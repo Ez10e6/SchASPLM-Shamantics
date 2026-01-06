@@ -1,0 +1,58 @@
+% CPUs = {BoltX, HydraPro, LiteCore};
+cpu("BoltX"; "HydraPro"; "LiteCore").
+
+% Wattages: [BoltX: 85, HydraPro: 125, LiteCore: 60].
+watt("BoltX", 85; "HydraPro", 125; "LiteCore", 60).
+
+% Costs: [BoltX: 400, HydraPro: 550, LiteCore: 350].
+cost("BoltX", 400; "HydraPro", 550; "LiteCore", 350).
+
+% GPUs = {StormZ, Nebula9, VegaLite};
+gpu("StormZ"; "Nebula9"; "VegaLite").
+
+% Wattages: [StormZ: 180, Nebula9: 150, VegaLite: 95].
+watt("StormZ", 180; "Nebula9", 150; "VegaLite", 95).
+
+% Costs: [StormZ: 800, Nebula9: 650, VegaLite: 500].
+cost("StormZ", 800; "Nebula9", 650; "VegaLite", 500).
+
+% PSUs = {PowerMax750, Eco600, Titan900};
+psu("PowerMax750"; "Eco600"; "Titan900").
+
+% Capacities: [PowerMax750: 750, Eco600: 600, Titan900: 900].
+capacity("PowerMax750", 750; "Eco600", 600; "Titan900", 900).
+
+% Costs: [PowerMax750: 200, Eco600: 150, Titan900: 250].
+cost("PowerMax750", 200; "Eco600", 150; "Titan900", 250).
+
+% Select one CPU, one GPU, one PSU.
+1 { selected_cpu(C) : cpu(C) } 1.
+1 { selected_gpu(G) : gpu(G) } 1.
+1 { selected_psu(P) : psu(P) } 1.
+
+% Total CPU+GPU draw ≤ PSU capacity - 100.
+selected_total_draw(D) :- selected_cpu(C), selected_gpu(G), watt(C, WC), watt(G, WG), D = WC + WG.
+:- selected_psu(P), selected_total_draw(D), capacity(P, CP), D > CP - 100.
+
+% Most power-hungry part must also be most expensive
+selected(X) :- selected_cpu(X).
+selected(X) :- selected_gpu(X).
+selected(X) :- selected_psu(X).
+
+max_watt(X) :- watt(X, W), W = #max {W1 : selected(Y), watt(Y, W1)}.
+max_cost(X) :- cost(X, C), C = #max {C1 : selected(Y), cost(Y, C1)}.
+:- selected(X), max_watt(X), not max_cost(X).
+
+% Incompatible pairs: (HydraPro, VegaLite), (Eco600, StormZ).
+:- selected_cpu("HydraPro"), selected_gpu("VegaLite").
+:- selected_psu("Eco600"), selected_gpu("StormZ").
+
+% Do not select all three cheapest components
+cheapest_cpu(C) :- cpu(C), cost(C, V), V = #min {V1 : cpu(C1), cost(C1, V1)}.
+cheapest_gpu(G) :- gpu(G), cost(G, V), V = #min {V1 : gpu(G1), cost(G1, V1)}.
+cheapest_psu(P) :- psu(P), cost(P, V), V = #min {V1 : psu(P1), cost(P1, V1)}.
+:- selected_cpu(C), cheapest_cpu(C), selected_gpu(G), cheapest_gpu(G), selected_psu(P), cheapest_psu(P).
+
+% No two selected components can differ in cost by more than $400.
+:- selected(X), selected(Y), cost(X, CX), cost(Y, CY), CX - CY > 400.
+:- selected(X), selected(Y), cost(Y, CY), cost(X, CX), CY - CX > 400.

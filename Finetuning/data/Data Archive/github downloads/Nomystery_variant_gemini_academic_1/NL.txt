@@ -1,0 +1,43 @@
+**Exercise 4.12: The Nomystery Transport Planning Problem**
+
+**Problem Description**
+Formulate the *Nomystery* logistics problem as a deterministic, discrete-time state-space search problem. Given a set of transportation entities and spatial constraints, define the transition system and identify a valid plan to satisfy a specified goal configuration.
+
+**Formal Definition**
+Let the environment be defined by a tuple $\mathcal{E} = \langle L, R, w, T, P \rangle$, where:
+*   $L$ is a finite set of **locations**.
+*   $R \subseteq L \times L$ is a set of directed **routes** connecting locations.
+*   $w: R \to \mathbb{R}^+$ is a weight function assigning a non-negative **fuel cost** to each route.
+*   $T$ is a set of **trucks**, where each truck $t \in T$ possesses a current fuel level $f_t \in \mathbb{R}_{\geq 0}$.
+*   $P$ is a set of **packages**.
+
+**State Representation**
+A state $s$ is defined by the mapping of trucks and packages to their respective coordinates:
+1.  $\text{loc}(t, s) \in L$ denotes the location of truck $t$ in state $s$.
+2.  $\text{loc}(p, s) \in L \cup T$ denotes the location of package $p$, which may reside at a fixed location or within a specific truck.
+3.  $\text{fuel}(t, s)$ denotes the remaining fuel capacity of truck $t$.
+
+**Action Schema**
+At each discrete time step $t_i$, exactly one action $a \in A$ must be performed. The set of permissible actions $A$ is governed by the following preconditions and post-conditions:
+
+1.  **$\text{Load}(p, t, l)$**: The loading of package $p$ into truck $t$ at location $l$.
+    *   *Preconditions*: $\text{loc}(p, s) = l$ and $\text{loc}(t, s) = l$.
+    *   *Effect*: $\text{loc}(p, s') = t$.
+2.  **$\text{Unload}(p, t, l)$**: The extraction of package $p$ from truck $t$ at location $l$.
+    *   *Preconditions*: $\text{loc}(p, s) = t$ and $\text{loc}(t, s) = l$.
+    *   *Effect*: $\text{loc}(p, s') = l$.
+3.  **$\text{Drive}(t, l_i, l_j)$**: The transition of truck $t$ from origin $l_i$ to destination $l_j$.
+    *   *Preconditions*: $\text{loc}(t, s) = l_i$, $(l_i, l_j) \in R$, and $\text{fuel}(t, s) \geq w(l_i, l_j)$.
+    *   *Effect*: $\text{loc}(t, s') = l_j$ and $\text{fuel}(t, s') = \text{fuel}(t, s) - w(l_i, l_j)$.
+
+**Constraints and Objectives**
+Given an initial state $s_0$ and a goal specification $G$ (where $G$ defines a target location $l_p \in L$ for every package $p \in P$):
+
+1.  **Resource Constraint**: An action is invalid if the required fuel consumption exceeds the current fuel state of the respective truck.
+2.  **Sequential Execution**: The system transitions through states $s_0, s_1, \dots, s_n$ such that each state $s_{i+1}$ is the result of applying a single valid action to $s_i$.
+3.  **Task**: Derive an optimal sequence of actions $\pi = \langle a_1, a_2, \dots, a_n \rangle$ such that the terminal state $s_n$ satisfies all conditions in $G$.
+
+**Exercise Requirements**
+1.  **Formulation**: Express the state space complexity in terms of $|L|$, $|T|$, and $|P|$.
+2.  **Feasibility**: Prove that if the sum of $w(r)$ for any required path exceeds the initial fuel $\text{fuel}(t, s_0)$, no valid plan $\pi$ exists.
+3.  **Search**: Implement a search algorithm (e.g., A* or Breadth-First Search) to output the sequence $\pi$ for a given instance of the Nomystery problem.

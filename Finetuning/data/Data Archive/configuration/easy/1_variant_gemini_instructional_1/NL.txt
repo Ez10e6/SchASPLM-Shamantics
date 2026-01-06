@@ -1,0 +1,28 @@
+### **System Specification: PC Component Configuration**
+
+#### **1. Scope**
+This specification defines the structural and logical requirements for assembling a three-component personal computer system.
+
+#### **2. Component Domains**
+The system shall consist of three distinct component categories, each containing two mutually exclusive options:
+
+*   **CPUs ($C$):** {Ryzen5, i5}
+*   **GPUs ($G$):** {GTX1660, RX580}
+*   **Motherboards ($M$):** {B450, Z390}
+
+#### **3. System Composition**
+A valid system configuration ($S$) is defined as a set containing exactly one element from each domain:
+*   $|S \cap C| = 1$
+*   $|S \cap G| = 1$
+*   $|S \cap M| = 1$
+
+#### **4. Compatibility Constraints (Logical Invariants)**
+The selection of components must satisfy the following conditional dependencies:
+
+*   **C1 (CPU-Motherboard Linkage):** If the selected CPU is **Ryzen5**, the motherboard must be **B450**.
+*   **C2 (CPU-Motherboard Linkage):** If the selected CPU is **i5**, the motherboard must be **Z390**.
+*   **C3 (GPU-Motherboard Exclusion):** The GPU **RX580** is strictly incompatible with motherboard **Z390**. 
+    *   *Corollary:* If the selected GPU is **RX580**, the motherboard must be **B450**.
+
+#### **5. Objective**
+Identify and select a combination of components $(c, g, m)$ such that all conditions in Section 3 and Section 4 are satisfied simultaneously.

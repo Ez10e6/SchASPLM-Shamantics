@@ -1,0 +1,13 @@
+You are managing a Relay Race Event. You need to calculate the schedule metrics and optimize the assignments based on runner preferences.
+
+The input provides the `leg` definitions (start/end points), `distance` between points, and the `participant` list.
+The `assignment` of participants to legs is given (or generated). Your task is to:
+1. Define helper predicates to track who runs which leg index.
+2. Identify where each participant starts and ends their relay portion (exchanges).
+3. Calculate the duration of each leg based on the runner's pace.
+4. Calculate the total distance, ascent, and descent for each participant.
+5. Apply optimization objectives to:
+    - Minimize the difference between a runner's preferred distance and their actual distance.
+    - Minimize the total duration of the race.
+    - Minimize the number of runner exchanges (handoffs).
+    - Minimize the difference between actual pace and preferred pace.

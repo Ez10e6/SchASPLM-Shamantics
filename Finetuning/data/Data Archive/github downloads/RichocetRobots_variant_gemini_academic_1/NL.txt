@@ -1,0 +1,25 @@
+### Exercise: The Ricochet Robots Motion Planning Problem
+
+**1. Problem Domain and Environment**
+Let the environment be represented as a finite two-dimensional grid $\mathcal{G}$ of dimensions $M \times N$. The board state is defined by a set of static barriers $\mathcal{W}$ (internal and boundary walls) and a set of $k$ discrete entities $\mathcal{R} = \{r_1, r_2, \dots, r_k\}$, representing robots. Each robot $r_i$ occupies a unique coordinate $c_i \in \mathcal{G}$ at any discrete time step $t$.
+
+**2. State Representation**
+The global configuration at time $t$ is denoted by the state $S_t = \{p_1, p_2, \dots, p_k\}$, where $p_i = (x_i, y_i)$ is the coordinate of robot $r_i$. The state space is constrained such that no two robots may occupy the same coordinate: $\forall i, j : i \neq j \implies p_i \neq p_j$.
+
+**3. Transition Dynamics and Constraints**
+An action $a_t$ consists of a tuple $(r_i, \vec{d})$, where $r_i \in \mathcal{R}$ is the selected robot and $\vec{d} \in \{(0,1), (0,-1), (1,0), (-1,0)\}$ is a unit vector representing a cardinal direction (North, South, East, West). The transition function $f(S_t, a_t) \to S_{t+1}$ is governed by the following momentum-based sliding rules:
+
+1.  **Continuous Displacement:** Once an action is initiated, the robot $r_i$ undergoes a displacement in direction $\vec{d}$ until an obstruction is encountered.
+2.  **Obstruction Conditions:** An obstruction is defined as either:
+    *   A static barrier $w \in \mathcal{W}$ that prevents entry into the subsequent cell.
+    *   The current position $p_j$ of any other robot $r_j \in \mathcal{R} \setminus \{r_i\}$.
+3.  **Terminal Position:** The robot $r_i$ must come to rest at the coordinate $p'$ immediately preceding the obstruction. Let $p_{curr}$ be the robot's position; $p_{next} = p_{curr} + \vec{d}$. The robot moves to $p_{next}$ if and only if $p_{next}$ is within grid boundaries, no barrier $w \in \mathcal{W}$ exists between $p_{curr}$ and $p_{next}$, and $p_{next} \notin \{p_j\}_{j \neq i}$.
+4.  **Atomicity of Movement:** Intermediate positions are not valid terminal states. A robot may not terminate its movement until an obstruction condition is satisfied.
+
+**4. Objective and Constraints**
+Given an initial configuration $S_0$ and a target set of coordinates $\mathcal{T} = \{(r_g, p_g)\}$, where $r_g \in \mathcal{R}$ is a specific goal robot and $p_g \in \mathcal{G}$ is its designated destination, determine if there exists a sequence of actions $\mathcal{A} = \langle a_0, a_1, \dots, a_{n-1} \rangle$ such that:
+1.  The final state $S_n$ satisfies the target condition $p_g \in S_n$ for the specified robot $r_g$.
+2.  The total number of steps $n$ does not exceed a predefined maximum depth $K$ (i.e., $n \le K$).
+
+**Exercise Requirement:**
+Formulate an algorithm to compute the optimal (minimal $n$) sequence of move-tuples $(r, \vec{d}, t)$. Discuss the complexity of the state-space search given the dynamic nature of obstructions, where the positions of non-target robots act as mutable barriers necessary to facilitate the goal robot's path.

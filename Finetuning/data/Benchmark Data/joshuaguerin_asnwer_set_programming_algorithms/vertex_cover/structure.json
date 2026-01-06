@@ -1,0 +1,17 @@
+{
+  "instance_template": "node(1..4). edge(1,2). edge(2,3). edge(3,4). edge(4,1).",
+  "generator": "{ cover(X) : node(X) }. edge(U,V) :- edge(V,U).",
+  "hard_constraints": [
+    {
+      "description": "sanity check: we gotta make sure every edge has at least one node in the cover or it's a no-go.",
+      "asp_rule": ":- edge(X,Y), not cover(X), not cover(Y)."
+    }
+  ],
+  "soft_constraints": [
+    {
+      "description": "less is more: let's try to minimize the total number of nodes we pick for the cover so we don't bloat the solution.",
+      "asp_rule": "penalty(\"min_nodes\", X, 1) :- cover(X)."
+    }
+  ],
+  "global_objective": "#minimize { C,N,T : penalty(N,T,C) }."
+}

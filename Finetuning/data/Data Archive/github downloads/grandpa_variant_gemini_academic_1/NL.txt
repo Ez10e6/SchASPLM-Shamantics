@@ -1,0 +1,43 @@
+### Exercise: Formal Verification of Recursive Kinship Paradoxes
+
+**Objective:**
+To model a system of kinship relations using first-order logic and determine the satisfiability of a self-referential ancestral constraint, colloquially known as the "Grandfather Paradox."
+
+**Problem Description:**
+Let $\mathcal{I}$ denote a finite set of entities (individuals). We define the following primary predicates and relations over $\mathcal{I}$:
+*   $M(x, y)$: A symmetric relation denoting that $x$ is married to $y$.
+*   $P_B(x, y)$: A directed relation denoting that $x$ is the biological parent of $y$.
+*   $Gender(x) \in \{\text{Male, Female}\}$: A function assigning a gender attribute to each entity.
+
+**Formal Constraints and Definitions:**
+Based on the provided axioms, define the following derived relations:
+
+1.  **Symmetry of Matrimony:** 
+    $\forall x, y \in \mathcal{I}, M(x, y) \iff M(y, x)$.
+
+2.  **Extended Parenthood (including Stepparents):**
+    The effective parenthood relation $P(x, y)$ is defined such that $x$ is a parent of $y$ if $x$ is either the biological parent of $y$ or is married to a parent of $y$.
+    $P(x, y) \iff P_B(x, y) \lor \exists z \in \mathcal{I} : (M(x, z) \land P_B(z, y))$.
+
+3.  **Siblinghood:**
+    Two distinct entities $x$ and $y$ are siblings, denoted $S(x, y)$, if they share at least one common parent under the extended definition.
+    $S(x, y) \iff (x \neq y) \land \exists p \in \mathcal{I} : (P(p, x) \land P(p, y))$.
+
+4.  **Avuncular Relation (Uncle):**
+    An entity $x$ is the uncle of $y$, denoted $U(x, y)$, if $x$ is male and is the sibling of a parent of $y$.
+    $U(x, y) \iff (Gender(x) = \text{Male}) \land \exists p \in \mathcal{I} : (S(x, p) \land P(p, y))$.
+
+5.  **Grandparental Relation:**
+    An entity $x$ is the grandparent of $y$, denoted $GP(x, y)$, if there exists an intermediary $z$ such that $x$ is the parent of $z$ and $z$ is the parent of $y$.
+    $GP(x, y) \iff \exists z \in \mathcal{I} : (P(x, z) \land P(z, y))$.
+
+**Task:**
+An individual $x$ is defined as a "Grandpa-of-Self" if they satisfy the following composite condition:
+$$\text{IsGrandpa}(x) \iff (Gender(x) = \text{Male}) \land GP(x, x)$$
+
+Given a set of initial facts $\mathcal{F}$ (a collection of ground atoms for $M, P_B,$ and $Gender$), provide a formal proof or an algorithmic procedure to verify if the set of individuals $\mathcal{S} = \{x \in \mathcal{I} \mid \text{IsGrandpa}(x)\}$ is non-empty. 
+
+**Requirements:**
+1.  Express the extended parenthood and grandparental relations as a directed graph $G = (\mathcal{I}, E)$, where $E$ represents the relation $P$.
+2.  Analyze the logical consistency of the condition $GP(x, x)$, which implies a cycle of length 2 in the parenthood relation. 
+3.  Identify the specific marriage and parentage configurations required to satisfy $GP(x, x)$ without violating biological constraints (e.g., an individual cannot be their own biological parent).

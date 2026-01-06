@@ -1,0 +1,17 @@
+**Exercise 4.12: The One-Dimensional Bin Packing Problem**
+
+**Problem Statement:**
+Let $S = \{s_1, s_2, \dots, s_m\}$ denote a set of $m$ discrete entities, where each entity $s_i$ is characterized by a scalar weight $w_i \in \mathbb{R}^+$. Given a fixed bin capacity $C \in \mathbb{R}^+$, such that $\max(w_i) \leq C$, formulate an optimization model to partition the set $S$ into the minimum number of disjoint subsets.
+
+**Formal Specification:**
+Define an assignment of items to bins such that the following conditions are satisfied:
+
+1.  **Completeness:** Every entity $s_i \in S$ must be mapped to exactly one bin $B_j$.
+2.  **Capacity Constraint:** For each bin $B_j$, the aggregate weight of its constituent entities must not exceed the specified threshold $C$. Formally, if $B_j$ is the set of indices of items assigned to the $j$-th bin, then:
+    $$\sum_{i \in B_j} w_i \leq C, \quad \forall j \in \{1, \dots, k\}$$
+3.  **Objective Function:** The primary goal is to determine a feasible partition $\{B_1, B_2, \dots, B_k\}$ that minimizes the objective value $k$, representing the total cardinality of the set of utilized bins.
+
+**Tasks:**
+(a) Prove that this problem belongs to the class of NP-hard optimization problems.
+(b) Discuss the trade-offs between exact enumerative methods (e.g., Branch and Bound) and polynomial-time heuristic approximations (e.g., First-Fit Decreasing).
+(c) Derive a lower bound for $k$ based on the total weight of the entities in $S$.

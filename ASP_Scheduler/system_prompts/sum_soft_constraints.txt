@@ -15,19 +15,19 @@ Here are some arbitrary example inputs from different scheduling problems:
 The corresponding ASP rules would be:
 ```
 % 1 
-timesum(TimeSum, Student) :- student(Student, _), #sum{{Duration, Exam: student(Student, Exam), exam(Exam, _, Duration)}} = TimeSum.
+timesum(TimeSum, Student) :- student(Student, _), #sum{Duration, Exam: student(Student, Exam), exam(Exam, _, Duration)} = TimeSum.
 penalty("ExamTime", timesum(TimeSum, Student), (TimeSum - Timelimit)*1) :- timesum(TimeSum, Student), timelimit(TimeLimit), TimeSum > TimeLimit.
 
 % 2 
-expsum(ExpSum, Shift) :- shift(Shift, _, _), #sum{{Exp, Doctor: assigned(Doctor, Shift, _), doctor(Doctor, _, Exp, _)}} = ExpSum.
+expsum(ExpSum, Shift) :- shift(Shift, _, _), #sum{Exp, Doctor: assigned(Doctor, Shift, _), doctor(Doctor, _, Exp, _)} = ExpSum.
 penalty("LackOfExperience", expsum(ExpSum, Shift), (150 - ExpSum)*2) :- expsum(ExpSum, Shift), ExpSum < 150.
 
 % 3 
-hoursum(HoursSum, Week, Employee) :- employee(Employee, _, _), time(Week,_,_) #sum{{Hours, Day: assigned(Employee, Day, Hours), time(Week, Day, _)}} = HoursSum.
+hoursum(HoursSum, Week, Employee) :- employee(Employee, _, _), time(Week,_,_) #sum{Hours, Day: assigned(Employee, Day, Hours), time(Week, Day, _)} = HoursSum.
 penalty("ExcessHours", hoursum(HoursSum, Week, Employee), (HoursSum - 40)*3) :- hoursum(HoursSum, Group), HoursSum > 40.
 
 % 4 
-budgets(BudgetSum, Project) :- project(Project), #sum{{Amount, Task: assigned(Project, Task, Amount) }} = BudgetSum.
+budgets(BudgetSum, Project) :- project(Project), #sum{Amount, Task: assigned(Project, Task, Amount) } = BudgetSum.
 penalty("OverBudgetLimit", budgets(BudgetSum, Project), (BudgetSum - 100000) * 1) :- budgets(BudgetSum, Project), BudgetSum > 100000.
 penalty("UnderBudgetLimit", budgets(BudgetSum, Project), (100000 - BudgetSum) * 1) :- budgets(BudgetSum, Project), BudgetSum < 100000.
 ```

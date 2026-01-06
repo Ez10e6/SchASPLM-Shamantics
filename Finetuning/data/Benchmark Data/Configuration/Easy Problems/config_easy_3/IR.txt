@@ -1,0 +1,6 @@
+Select exactly one data plan from {BasicData, PremiumData}.
+Select exactly one phone model from {ModelX, ModelY}.
+Select exactly one accessory from {CaseA, CaseB}.
+BasicData is not compatible with ModelY.
+ModelX requires CaseA.
+PremiumData cannot be used with CaseA.

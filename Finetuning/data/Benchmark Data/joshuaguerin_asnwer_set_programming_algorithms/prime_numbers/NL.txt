@@ -1,0 +1,5 @@
+You are tasked with identifying perfect numbers within a given range.
+The input is a maximum integer 'n'.
+
+A number is defined as 'perfect' if the sum of its proper divisors (divisors less than the number itself) equals the number.
+Find all perfect numbers between 1 and 'n'.

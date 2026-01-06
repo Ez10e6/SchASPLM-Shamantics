@@ -1,0 +1,29 @@
+**Exercise: Formal Specification and State-Space Analysis of the Sokoban Transport Problem**
+
+**Problem Description:**
+Consider a finite, discrete environment represented as a two-dimensional orthogonal grid $\mathcal{G} \subset \mathbb{Z}^2$. The grid is partitioned into a set of static cells and populated by dynamic entities. Let $L$ be the set of all coordinates $(x, y) \in \mathcal{G}$. The environment is defined by the following disjoint and joint sets:
+*   $\mathcal{W} \subset L$: The set of **impassable cells** (walls).
+*   $\mathcal{F} = L \setminus \mathcal{W}$: The set of **navigable cells** (floor).
+*   $\mathcal{T} \subset \mathcal{F}$: A designated set of **target locations** (goals).
+
+The state of the system at any discrete time step $t$ is defined by the configuration $\sigma_t = (p_t, S_t)$, where:
+*   $p_t \in \mathcal{F}$ represents the position of a single **agent** (the pusher).
+*   $S_t \subset \mathcal{F}$ represents the set of positions of $k$ identical **movable entities** (stones), where $|S_t| = |\mathcal{T}| = k$.
+
+**Constraints and Transition Dynamics:**
+Given a state $\sigma_t = (p_t, S_t)$, the agent may attempt an action $a \in \{\text{North, South, East, West}\}$. Let $v(a)$ be the unit vector corresponding to the direction of $a$. The transition to state $\sigma_{t+1}$ is governed by the following conditional logic:
+
+1.  **Simple Displacement (Move):** If the adjacent cell $p' = p_t + v(a)$ satisfies $p' \in \mathcal{F} \setminus S_t$, the transition is valid. The new state is $\sigma_{t+1} = (p', S_t)$.
+2.  **Entity Displacement (Push):** If the adjacent cell $p' = p_t + v(a)$ satisfies $p' \in S_t$, a push is attempted. Let $p'' = p' + v(a)$ be the cell immediately behind the stone. The transition is valid **if and only if** $p'' \in \mathcal{F} \setminus S_t$. The resulting state is $\sigma_{t+1} = (p', S')$, where $S' = (S_t \setminus \{p'\}) \cup \{p''\}$.
+3.  **Invariants and Prohibitions:**
+    *   **Collision Avoidance:** A transition is undefined (null) if it results in the agent or a stone occupying a coordinate in $\mathcal{W}$.
+    *   **Rigidity:** The agent cannot push more than one stone simultaneously (i.e., if $p'' \in S_t$, the action is invalid).
+    *   **Irreversibility of Pulling:** There exists no action $a$ such that a stone’s position $s \in S_t$ is modified to $s' = s - v(a)$ relative to the agent’s movement.
+
+**Objective:**
+Given an initial configuration $\sigma_0 = (p_0, S_0)$, determine a finite sequence of actions $\pi = (a_1, a_2, \dots, a_n)$ that transforms the system into a **terminal state** $\sigma_n = (p_n, S_n)$ such that $S_n = \mathcal{T}$. 
+
+**Formal Requirements:**
+1.  Define the transition function $\delta: \Sigma \times A \to \Sigma$ that encapsulates the rules above.
+2.  Prove that the state space is finite.
+3.  Discuss the computational complexity of finding the optimal sequence $\pi$ (minimum $n$) given that Sokoban is known to be PSPACE-complete.

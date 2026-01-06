@@ -1,0 +1,40 @@
+{
+  "instance_template": "#const k=3.\n#const s=7.\ndisk(1..k).\npeg(1..3).\nsteps(s).\ntime(0..s).\non(0,D,1) :- disk(D).\nongoal(D,3) :- disk(D).",
+  "generator": "1 { move(T, D) : disk(D) } 1 :- time(T), T > 0.\n1 { where(T, B) : disk(B) } 1 :- time(T), T > 0.\non(T, D, B) :- move(T, D), where(T, B).\non(T, D, B) :- on(T-1, D, B), not move(T, D), time(T), T > 0.",
+  "hard_constraints": [
+    {
+      "description": "Business Requirements: Ensure that only the top disk in a stack is eligible for relocation.",
+      "asp_rule": ":- move(T, D), on(T-1, Above, D)."
+    },
+    {
+      "description": "Business Requirements: Enforce physical size compliance where a disk may only be placed on a larger physical disk or a peg; based on numbering, the top disk must have a higher ID than the base.",
+      "asp_rule": ":- on(T, D1, D2), D1 <= D2, disk(D1), disk(D2)."
+    },
+    {
+      "description": "Business Requirements: Prohibit placing a disk onto a stack that is not clear; the destination disk or peg must not have anything on top of it.",
+      "asp_rule": ":- where(T, Dest), on(T-1, Above, Dest)."
+    },
+    {
+      "description": "Business Requirements: Compliance check to ensure that fixed infrastructure, specifically pegs 1 through 4, are never moved.",
+      "asp_rule": ":- move(T, D), D <= 4."
+    },
+    {
+      "description": "Business Requirements: Prevent redundant or impossible actions where a disk is moved to its own current location.",
+      "asp_rule": ":- move(T, D), where(T, B), on(T-1, D, B)."
+    },
+    {
+      "description": "Business Requirements: Maintain a policy that no single disk can be moved in two consecutive time intervals.",
+      "asp_rule": ":- move(T, D), move(T-1, D), T > 1."
+    },
+    {
+      "description": "Business Requirements: Verify that the final configuration exactly matches the mandated goal state by the end of the specified time period.",
+      "asp_rule": ":- ongoal(D, B), not on(S, D, B), steps(S)."
+    },
+    {
+      "description": "Business Requirements: Ensure logical consistency where a movable disk must occupy exactly one location at any given time.",
+      "asp_rule": ":- #count { B : on(T, D, B) } != 1, disk(D), D > 4, time(T)."
+    }
+  ],
+  "soft_constraints": [],
+  "global_objective": "null"
+}

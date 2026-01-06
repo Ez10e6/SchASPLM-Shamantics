@@ -1,0 +1,11 @@
+You are configuring a simple home audio setup. The system requires one speaker,
+one amplifier, and one media player.
+The available components are:
+Speakers: Alpha, Beta
+Amplifiers: AmpX, AmpY
+Media Players: Streamer1, Streamer2
+However, some compatibility constraints apply:
+Speaker Alpha is only compatible with AmpX.
+AmpY is incompatible with Streamer1.
+Streamer2 can only be used with Speaker Beta.
+Select one component of each type to form a valid, compatible configuration.

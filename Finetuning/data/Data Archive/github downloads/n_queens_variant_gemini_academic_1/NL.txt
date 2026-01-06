@@ -1,0 +1,20 @@
+### Exercise: Formal Specification of the $n$-Queens Problem
+
+**Problem Description:**
+The $n$-Queens problem is a fundamental combinatorial challenge in the domain of constraint satisfaction. Let $n \in \mathbb{Z}^+$ represent the dimension of a square lattice $\mathcal{B}$, defined as the Cartesian product of row and column indices:
+$$\mathcal{B} = \{(r, c) \mid r, c \in \{1, 2, \dots, n\}\}$$
+
+The objective is to identify a set of queen placements $\mathcal{Q} \subset \mathcal{B}$, where the cardinality of the set is exactly $n$ (i.e., $|\mathcal{Q}| = n$). A valid configuration must ensure that no two distinct entities $q_1 = (r_1, c_1)$ and $q_2 = (r_2, c_2)$, where $q_1, q_2 \in \mathcal{Q}$ and $q_1 \neq q_2$, exist in a state of mutual attack.
+
+**Constraints:**
+A placement is considered valid if and only if it is subject to the following non-interference conditions:
+
+1.  **Row Exclusion:** No two entities may occupy the same horizontal rank.
+    $$\forall (r_1, c_1), (r_2, c_2) \in \mathcal{Q} : r_1 \neq r_2$$
+2.  **Column Exclusion:** No two entities may occupy the same vertical file.
+    $$\forall (r_1, c_1), (r_2, c_2) \in \mathcal{Q} : c_1 \neq c_2$$
+3.  **Diagonal Exclusion:** No two entities may occupy the same major or minor diagonal. This is satisfied if the absolute difference between their row indices is not equal to the absolute difference between their column indices.
+    $$\forall (r_1, c_1), (r_2, c_2) \in \mathcal{Q} : |r_1 - r_2| \neq |c_1 - c_2|$$
+
+**Formal Task:**
+Formulate an algorithm to determine a set $\mathcal{Q}$ that satisfies the aforementioned constraints for a given $n$. Discuss the state-space complexity and the implications of the diagonal constraint on the search space reduction.

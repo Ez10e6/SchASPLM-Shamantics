@@ -1,0 +1,27 @@
+You are an expert Clingo debugger and Answer Set Programming (ASP) specialist.
+The following ASP code snippet is syntactically invalid or logically incorrect.
+
+Your task is to REPAIR the code using ONLY the predicates and constants defined in the provided context.
+
+### Context (Available Predicates & Logic)
+{context}
+
+### Requirement to Implement
+{description}
+
+### Erroneous Code
+{code}
+
+### Clingo Compiler Error
+{error}
+
+### Repair Instructions
+1.  **Syntax Fixes:** Correct missing periods, unmatched brackets, incorrect aggregates, or invalid operators based on the Compiler Error provided.
+2.  **Logic Preservation:** Ensure the repaired rule enforces the constraint described.
+3.  **Formatting:** Return ONLY the raw Clingo code. No markdown, no explanations.
+4.  **Safety First:** Fix any "Unsafe Variable" errors by ensuring every variable is guarded by a positive atom from the Context.
+5.  **Consistency:** Do NOT invent new predicates. Use what is defined in the Context.
+6.  **Syntax:** Use single backslash `\` for modulo and `=` for equality.
+
+### Output
+[The corrected code]

@@ -1,0 +1,23 @@
+**Exercise: Formal Specification and Implementation of Prime Number Identification via Sieve Methodology**
+
+**1.1 Objective**
+Formulate and implement an efficient computational procedure, based on the principle of a sieve, to identify the subset of prime entities within a constrained integer domain.
+
+**1.2 Mathematical Preliminaries**
+Let $\mathbb{Z}^+$ denote the set of positive integers. Given an input parameter $n \in \mathbb{Z}^+$, we define the search space as the closed interval $S = [2, n] \subset \mathbb{Z}^+$.
+
+*   **Definition 1 (Compositeness):** An integer $x \in S$ is defined as *composite* if there exists an integer divisor $d$ such that $1 < d < x$.
+*   **Definition 2 (Primality):** An integer $p \in S$ is defined as *prime* if and only if it is not composite. Formally, $p$ is prime if its only positive divisors are $1$ and $p$.
+
+**1.3 Problem Statement**
+Let $P$ be the target set of all integers within the specified range that satisfy the predicate of primality. Your task is to design an algorithm that, given $n$, constructs the set $P$ such that:
+$$P = \{ x \in \mathbb{Z} \mid 2 \le x \le n \land \neg \exists d \in \mathbb{Z} : (1 < d < x \land d \mid x) \}$$
+
+**1.4 Constraints and Requirements**
+1.  **Input:** A single scalar $n$, where $n \ge 2$.
+2.  **Output:** The complete set $P$ of prime numbers, typically represented as an ordered sequence or a boolean mask of the domain $S$.
+3.  **Algorithmic Efficiency:** The implementation should utilize a "sieve" approach—systematically marking multiples of identified primes as composite—to optimize time complexity relative to naive trial division.
+4.  **Correctness:** The resulting set must be exhaustive (containing all primes $\le n$) and exclusive (containing no composite values).
+
+**1.5 Deliverables**
+Provide the algorithmic pseudocode or a formal implementation, ensuring that the logic adheres to the constraints of the Sieve of Eratosthenes or a related optimized sieve variant. Space and time complexity analyses should be considered in the context of the input size $n$.

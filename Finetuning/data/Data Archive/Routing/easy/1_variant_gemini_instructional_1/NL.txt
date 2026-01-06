@@ -1,0 +1,26 @@
+### System Specification: Autonomous Delivery Robot Navigation
+
+#### 1. System Topology
+Define the navigation environment as a graph $G = (V, E)$ where:
+*   **Vertices ($V$):** $\{A, B, C, D, E\}$ representing discrete locations.
+*   **Edges ($E$):** $\{(A, B), (A, C), (B, D), (C, E)\}$.
+*   **Connectivity:** All edges are bidirectional, allowing traversal between adjacent nodes.
+
+#### 2. Agent Initialization
+*   **Starting Position:** Set the robot's initial location to Node $A$.
+*   **Temporal State:** Initialize the mission clock at $T = 0$ minutes.
+
+#### 3. Operational Constraints
+*   **Movement Cost:** Assign a uniform temporal cost of 1 minute per edge traversal.
+*   **Temporal Limit:** Complete the mission within a maximum duration of $T \leq 6$ minutes.
+*   **Node Interaction:**
+    *   The robot must visit Node $D$ exactly once.
+    *   The robot must visit Node $E$ exactly once.
+    *   The sequence of delivery (visiting $D$ before $E$, or $E$ before $D$) is non-deterministic and left to the agent's discretion.
+
+#### 4. Mission Objective
+Identify and execute a valid path sequence $P = (v_0, v_1, \dots, v_n)$ such that:
+*   $v_0 = A$.
+*   The set of visited nodes $\{v_0, \dots, v_n\}$ includes both $D$ and $E$.
+*   The frequency of visits to $D$ and $E$ in $P$ is exactly 1 for each.
+*   The total path length $n$ (where $n$ is the number of moves) satisfies $n \leq 6$.

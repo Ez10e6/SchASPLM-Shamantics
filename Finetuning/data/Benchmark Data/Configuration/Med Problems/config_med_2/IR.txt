@@ -1,0 +1,11 @@
+CPUs: Ryzen9 (performance 95), i7 (performance 85), M1 (performance 70).
+GPUs: RTX3070 (performance 90), RX6700XT (performance 88), IrisXe (performance 65).
+Coolers: AirCool (performance 20), LiquidCool (performance 40), PassiveCool
+(performance 5).
+Each configuration selects one CPU, one GPU, one cooler.
+High-performance parts: Ryzen9, RTX3070.
+LiquidCool is required for high-performance parts.
+PassiveCool is not allowed with discrete GPUs.
+M1 is compatible with PassiveCool.
+RX6700XT is incompatible with M1.
+Maximize total performance.

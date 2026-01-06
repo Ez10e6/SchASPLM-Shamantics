@@ -1,0 +1,13 @@
+You are tasked with solving the Nomystery transport logistics problem.
+The environment consists of locations connected by routes with specific fuel costs.
+There are trucks (with limited fuel) and packages at initial locations.
+The goal is to transport specific packages to their target destinations.
+
+At each time step, exactly one action can occur:
+1. Load a package into a truck (if they are at the same location).
+2. Unload a package from a truck (if the truck is at the location).
+3. Drive a truck from one location to another (if there is a direct connection and the truck has enough fuel).
+
+Driving consumes fuel equal to the cost of the route.
+You cannot load or unload if the preconditions are not met.
+The solution must output the sequence of actions that achieves the goal state.

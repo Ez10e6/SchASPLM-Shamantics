@@ -1,0 +1,7 @@
+A delivery robot operates on a small grid. It begins at location A and must deliver
+packages to a few nearby sites. The robot can move from one location to an adjacent
+location if they are connected. There are five locations in total: A, B, C, D, and E.
+The map layout is as follows: A connects to B and C, B connects to D, and C connects to 
+E. The robot has 6 minutes to deliver the packages and each movement takes one minute. 
+The robot must deliver packages to D and E, visiting each only once. It can choose 
+the order.

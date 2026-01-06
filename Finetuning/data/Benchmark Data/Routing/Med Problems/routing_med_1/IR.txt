@@ -1,0 +1,10 @@
+Locations: Station1, Junction1, Junction2, SubstationA, SubstationB.
+Edges: (Station1–Junction1), (Station1–Junction2), (Junction1–SubstationA), 
+(Junction2–SubstationB), (Junction1–Junction2).
+Meximum power usage is 8 units.
+The drone starts at Station1.
+The drone can move between adjacent nodes with one power unit.
+The drone must inspect sites: SubstationA, SubstationB.
+Inspections require spending one power unit at inspection location.
+Minimize battery usage before both inspections complete.
+If drone visits Junction2 before SubstationA, it may not later visit Junction1.

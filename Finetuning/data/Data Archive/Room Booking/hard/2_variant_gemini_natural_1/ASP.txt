@@ -1,0 +1,81 @@
+% Workshops and Topics
+workshop(1..12).
+topic("AI"; "Physics"; "Math"; "Linguistics").
+1 { topicOf(W, T) : topic(T) } 1 :- workshop(W).
+
+% Time and Structure
+day(1..3).
+slot("morning"; "midday"; "evening").
+room(1..4).
+
+% Every workshop must be scheduled
+1 {scheduled(W, R, S, D) : room(R), slot(S), day(D)} :- workshop(W).
+
+% Only one workshop per room per time
+:- scheduled(W1, R, S, D), scheduled(W2, R, S, D), W1 != W2.
+
+% At most 2 sessions per room per day
+{scheduled(W, R, S, D) : workshop(W), slot(S)} 2 :- room(R), day(D).
+
+% No room can be used in adjacent time slots
+adjacent("morning", "midday").
+adjacent("midday", "evening").
+:- scheduled(_, R, S1, D), scheduled(_, R, S2, D), adjacent(S1, S2).
+
+% Room 2 cannot be used in the evening
+:- scheduled(_, 2, "evening", _).
+
+% Room 4 cannot host AI or Physics
+:- scheduled(W, 4, _, _), topicOf(W, "AI").
+:- scheduled(W, 4, _, _), topicOf(W, "Physics").
+
+% AI workshops must be in the morning
+:- scheduled(W, _, S, _), topicOf(W, "AI"), S != "morning".
+
+% Physics workshops must be held on the first or second day
+:- scheduled(W, _, _, D), topicOf(W, "Physics"), D = 3.
+
+% All Math workshops must be scheduled in Room 1 or Room 3
+:- scheduled(W, R, _, _), topicOf(W, "Math"), R != 1, R != 3.
+
+% Linguistics workshops must not overlap in time
+:- scheduled(W1, _, S, D), scheduled(W2, _, S, D), topicOf(W1, "Linguistics"),
+topicOf(W2, "Linguistics"), W1 != W2.
+
+% No room may host workshops from different topics on the same day
+:- scheduled(W1, R, _, D), scheduled(W2, R, _, D), topicOf(W1, T1),
+topicOf(W2, T2), T1 != T2.
+
+% At least one workshop per topic must occur each day
+:- day(D), topic(T), not scheduled(_, _, _, D) : topicOf(_, T).
+
+% Time encoding for total ordering
+slotOrder("morning", 1).
+slotOrder("midday", 2).
+slotOrder("evening", 3).
+
+% Compute time index
+timeIndex(D, S, I) :- day(D), slot(S), slotOrder(S, O), I = (D - 1) * 3 + O.
+
+% Assign each scheduled workshop its time index
+wTime(W, I) :- scheduled(W, _, S, D), timeIndex(D, S, I).
+
+% Find the minimum and maximum index among all scheduled workshops
+minTime(I) :- I = #min {J : wTime(_, J)}.
+maxTime(I) :- I = #max {J : wTime(_, J)}.
+
+% First workshop must be AI
+:- wTime(W, I), minTime(I), not topicOf(W, "AI").
+
+% Last workshop must be Linguistics
+:- wTime(W, I), maxTime(I), not topicOf(W, "Linguistics").
+
+% Maximize the number of rooms used in each time slot
+used(R, S, D) :- scheduled(_, R, S, D).
+roomsUsed(N, S, D) :- N = #count{R : used(R, S, D)}, slot(S), day(D).
+#maximize {N : roomsUsed(N, S, D)}.
+
+% Minimize idle slots
+idle(R, S, D) :- room(R), slot(S), day(D), not used(R, S, D).
+num_idle(N) :- N = #count{R, S, D: idle(R, S, D) }.
+#minimize { N: num_idle(N) }.

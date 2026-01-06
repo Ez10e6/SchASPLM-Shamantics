@@ -1,0 +1,17 @@
+**Exercise 4.2: Formal Verification of Hardware Configuration Constraints**
+
+**Problem Statement:**
+Consider a discrete configuration space $\mathcal{S}$ defined by the selection of exactly one entity from each of three disjoint sets representing hardware components: Central Processing Units ($C$), Graphics Processing Units ($G$), and Motherboards ($M$). The available elements within these sets are defined as follows:
+
+*   $C = \{ \text{Ryzen5, i5} \}$
+*   $G = \{ \text{GTX1660, RX580} \}$
+*   $M = \{ \text{B450, Z390} \}$
+
+A valid system configuration is represented as a 3-tuple $(c, g, m) \in C \times G \times M$. The set of permissible configurations is restricted by a set of compatibility constraints, $\mathcal{R}$, defined by the following logical predicates:
+
+1.  **CPU-Motherboard Dependency (AMD):** The selection of the 'Ryzen5' entity necessitates the selection of the 'B450' motherboard. Formally: $c = \text{Ryzen5} \implies m = \text{B450}$.
+2.  **CPU-Motherboard Dependency (Intel):** The selection of the 'i5' entity necessitates the selection of the 'Z390' motherboard. Formally: $c = \text{i5} \implies m = \text{Z390}$.
+3.  **GPU-Motherboard Exclusion:** The selection of the 'RX580' entity is mutually exclusive with the selection of the 'Z390' motherboard. Formally: $g = \text{RX580} \implies m \neq \text{Z390}$.
+
+**Required Task:**
+Formulate this problem as a Constraint Satisfaction Problem (CSP). Identify all satisfying assignments $(c, g, m)$ that exist within the configuration space $\mathcal{S}$ such that all conditions in $\mathcal{R}$ are met. Provide the solution set in roster notation.

@@ -1,0 +1,55 @@
+### Nomystery Transport Logistics Specification
+
+#### 1. System Entities and Attributes
+*   **Locations ($L$):** A finite set of discrete spatial coordinates.
+*   **Routes ($R$):** A set of directed edges $(l_i, l_j)$ connecting locations, where each edge has an associated non-negative integer **Fuel Cost** ($c_{i,j}$).
+*   **Trucks ($T$):** Mobile agents characterized by:
+    *   **Current Location:** $at(t, l) \in L$.
+    *   **Fuel Level:** $fuel(t) \in \mathbb{N}_{\ge 0}$.
+*   **Packages ($P$):** Transportable items characterized by:
+    *   **Status:** Either $at(p, l)$ (at a location) or $in(p, t)$ (loaded in a truck).
+
+#### 2. Initial State Definition
+*   Define the starting location for all trucks $T$ and packages $P$.
+*   Define the initial fuel level $fuel(t)$ for each truck.
+*   Define the complete topology of routes $R$ and their respective costs $c$.
+
+#### 3. Goal State Definition
+*   Achieve a state where a specified subset of packages $P_{goal}$ satisfies the predicate $at(p, l_{target})$ for their respective target locations.
+
+#### 4. Action Schema
+The system must execute exactly one of the following actions per discrete time step:
+
+**Action A: LOAD($p, t, l$)**
+*   **Preconditions:**
+    *   The package $p$ is at location $l$: $at(p, l)$.
+    *   The truck $t$ is at location $l$: $at(t, l)$.
+*   **Effects:**
+    *   $\neg at(p, l)$ (Package is no longer at the location).
+    *   $in(p, t)$ (Package is now inside the truck).
+
+**Action B: UNLOAD($p, t, l$)**
+*   **Preconditions:**
+    *   The package $p$ is inside truck $t$: $in(p, t)$.
+    *   The truck $t$ is at location $l$: $at(t, l)$.
+*   **Effects:**
+    *   $\neg in(p, t)$ (Package is no longer inside the truck).
+    *   $at(p, l)$ (Package is now at the location).
+
+**Action C: DRIVE($t, l_{origin}, l_{destination}$)**
+*   **Preconditions:**
+    *   The truck $t$ is at the origin: $at(t, l_{origin})$.
+    *   A direct route exists: $(l_{origin}, l_{destination}) \in R$.
+    *   The truck has sufficient fuel: $fuel(t) \ge c_{origin, destination}$.
+*   **Effects:**
+    *   $\neg at(t, l_{origin})$ and $at(t, l_{destination})$.
+    *   Update fuel: $fuel(t) \leftarrow fuel(t) - c_{origin, destination}$.
+
+#### 5. Operational Constraints
+*   **Sequential Execution:** Exactly one action must be performed per time step. Parallel actions are prohibited.
+*   **Fuel Integrity:** Fuel levels cannot be negative. If $fuel(t) < c_{i,j}$, the `DRIVE` action for that route is strictly prohibited.
+*   **Precondition Strictness:** No action shall be executed unless all specified preconditions are met in the state immediately preceding the action.
+
+#### 6. Output Requirements
+*   **Sequence Generation:** Produce an ordered list of actions $\{a_1, a_2, \dots, a_n\}$.
+*   **Validation:** The sequence must transform the system from the Initial State to the Goal State while adhering to all Action Schema and Operational Constraints.

@@ -1,0 +1,18 @@
+% Edges are symmetric (undirected).
+edge(Y, X) :- edge(X, Y).
+
+% Generate a candidate set of edges to form the clique.
+{ clique(X, Y) } :- edge(X, Y).
+
+% Derive the nodes involved in the clique based on the selected edges.
+clique(X) :- clique(X, Y).
+clique(Y) :- clique(X, Y).
+
+% Constraint: Every pair of distinct nodes in the clique must be connected by an edge within the clique.
+1 { clique(X, Y) ; clique(Y, X) } 1 :- clique(X), clique(Y), X != Y.
+
+% Constraint: Selected clique edges must be valid edges from the original graph.
+:- clique(X, Y), not edge(X, Y).
+
+% Maximize the count of nodes in the clique.
+#maximize { 1, X : clique(X) }.

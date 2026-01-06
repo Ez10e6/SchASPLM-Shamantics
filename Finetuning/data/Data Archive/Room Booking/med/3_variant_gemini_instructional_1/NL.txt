@@ -1,0 +1,32 @@
+### Workshop Scheduling System Specification
+
+#### 1. System Entities and Domains
+Define the following finite sets for the scheduling domain:
+*   **Workshops ($W$):** A set of six unique sessions $\{w_1, w_2, w_3, w_4, w_5, w_6\}$.
+*   **Topics ($T$):** {Data, DevOps, User Interface (UI)}.
+*   **Time Slots ($S$):** {Morning, Midday, Afternoon}.
+*   **Rooms ($R$):** {Room 1, Room 2, Room 3}.
+
+#### 2. Functional Requirements
+The system must generate a schedule that maps every workshop to a specific topic, time slot, and room.
+*   **Assignment:** Each workshop $w \in W$ must be assigned exactly one topic $t \in T$, one time slot $s \in S$, and one room $r \in R$.
+*   **Topic Coverage:** Every topic $t \in T$ must be assigned to at least one workshop $w \in W$.
+
+#### 3. Logistical Constraints
+*   **Spatial Uniqueness:** No two workshops may occupy the same $(s, r)$ pair. For any distinct $w_i, w_j \in W$, the assignment $(s_i, r_i)$ must not equal $(s_j, r_j)$.
+*   **Room Utilization Cap:** No room $r \in R$ may be assigned to more than two workshops across all time slots.
+
+#### 4. Topic-Specific Constraints
+*   **DevOps Temporal Restriction:** Any workshop $w$ assigned the **DevOps** topic must be scheduled in the **Midday** time slot.
+*   **Data Spatial Restriction:** Any workshop $w$ assigned the **Data** topic must not be assigned to **Room 3**.
+*   **UI-Data Mutual Exclusion:** Workshops assigned the **UI** topic and workshops assigned the **Data** topic are prohibited from occurring in the same time slot $s$, regardless of room assignment. 
+
+#### 5. Objective Function
+*   **Efficiency Maximization:** The schedule must be constructed to minimize the number of unused room-time slots. 
+    *   *Note: Given $|W| = 6$ and total available slots $|S \times R| = 9$, the system must prioritize a valid distribution that adheres to the Room Utilization Cap while ensuring all 6 workshops are allocated.*
+
+#### 6. Formal Verification Criteria
+A schedule is considered "Valid" if and only if:
+1.  All six workshops are assigned to valid $(s, r)$ coordinates.
+2.  The set of topics $\{Topic(w) \mid w \in W\}$ is equivalent to $T$.
+3.  All constraints defined in Sections 3 and 4 are satisfied with zero violations.

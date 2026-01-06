@@ -1,0 +1,18 @@
+**Exercise 4.2: Computational Identification of Perfect Numbers**
+
+**Definition 1.1 (Proper Divisors):** For any positive integer $k \in \mathbb{Z}^+$, let $\mathcal{D}_k$ denote the set of proper divisors of $k$, defined as the set of all positive integers $d$ such that $d$ divides $k$ without remainder and $d < k$. Formally:
+$$\mathcal{D}_k = \{d \in \mathbb{Z}^+ : d \mid k \wedge d < k\}$$
+
+**Definition 1.2 (Perfect Number):** A positive integer $k$ is classified as a *perfect number* if and only if it is equal to its aliquot sum—that is, the sum of its proper divisors. This condition is satisfied if:
+$$\sum_{d \in \mathcal{D}_k} d = k$$
+
+**Problem Statement:**
+Given a fixed positive integer $n$ representing the upper bound of a search space, identify the set $S$ of all entities that satisfy the condition of being a perfect number within the closed interval $[1, n]$. 
+
+Formally, derive the set $S$ such that:
+$$S = \{ x \in \mathbb{Z} : 1 \le x \le n \text{ and } x \text{ satisfies Definition 1.2} \}$$
+
+**Constraints and Requirements:**
+1. **Input:** A scalar $n \in \mathbb{Z}^+$.
+2. **Output:** An ordered collection of all integers $x \in [1, n]$ that are numerically equivalent to the summation of their proper divisors.
+3. **Complexity Note:** While a brute-force approach involves iterating through each $x$ and computing its divisors, consider the algorithmic efficiency of your divisor-summation function as $n$ increases.

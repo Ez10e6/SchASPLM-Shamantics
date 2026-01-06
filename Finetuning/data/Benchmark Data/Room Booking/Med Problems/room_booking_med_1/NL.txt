@@ -1,0 +1,22 @@
+You’re organizing a two-day event featuring a total of ten seminars, each
+focused on a topic in Artificial Intelligence (AI), Biology, or
+Mathematics. Each day is divided into three time slots — morning,
+midday, and afternoon — and there are four available rooms in which
+the seminars can be held.
+Every seminar needs a spot on the schedule, and no room can host more
+than one seminar during any given time slot.
+There are several constraints tied to the seminar topics and venue
+logistics. To start with, seminars on AI should only be scheduled
+in the morning or midday — these talks aren't suitable for the
+afternoon. For Biology, you’ll need to make sure that its seminars
+are spread out — they can't all take place in the same room; at
+least two different rooms must be used for them.
+Also note that Room 4 is off-limits at midday, regardless of the day
+ — that slot is unavailable for use in that room entirely.
+As for the Math seminars, you’ll need to ensure that no two of them
+are happening at the same time, even if they’re in different rooms.
+There are also a few seminar-specific instructions: Seminar 5 must be
+scheduled on the second day, but it can't be placed in the morning
+slot. Additionally, Seminar 6 and Seminar 7 should be assigned to
+the same room, but not on the same day — they need to be spaced 
+out across the two days.

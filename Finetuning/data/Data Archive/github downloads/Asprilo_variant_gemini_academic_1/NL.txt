@@ -1,0 +1,36 @@
+**Exercise: Formal Specification of the Automated Warehouse Logistics Problem (Asprilo)**
+
+**Problem Context:**
+Consider a discrete multi-agent coordination problem situated within a logistics environment, modeled as a two-dimensional grid graph $G = (V, E)$. The environment contains a set of heterogeneous entities including autonomous mobile robots $R$, mobile storage shelves $S$, picking stations $P$, and a set of product stock-keeping units (SKUs) $U$.
+
+**Input Specification:**
+An instance of the problem is defined by the tuple $\mathcal{I} = \langle \mathcal{E}, \sigma_0, \mathcal{I}nv, \mathcal{O}, T \rangle$, where:
+1.  **Entities ($\mathcal{E}$):** The sets $R, S, P,$ and $U$.
+2.  **Initial State ($\sigma_0$):** A mapping of robots, shelves, and stations to their initial coordinates $(x, y) \in V$.
+3.  **Inventory Mapping ($\mathcal{I}nv$):** A function $I: S \times U \to \mathbb{N}$ defining the quantity of each product $u \in U$ currently stored on shelf $s \in S$.
+4.  **Order Set ($\mathcal{O}$):** A set of delivery requirements, where each order $o \in \mathcal{O}$ specifies a triplet $\langle u, q, p \rangle$, indicating a required quantity $q$ of product $u$ at picking station $p$.
+5.  **Temporal Horizon ($T$):** A finite sequence of discrete time steps $t \in \{0, 1, \dots, T\}$.
+
+**Objective:**
+Construct a valid multi-agent plan $\pi$, consisting of a sequence of actions for each robot $r \in R$ over the horizon $T$, such that the cumulative quantity of products delivered to the designated picking stations satisfies all orders in $\mathcal{O}$.
+
+**Operational Constraints:**
+The plan $\pi$ must be subject to the following kinematic and logical constraints:
+
+1.  **Locomotion:** At each time step $t$, a robot may execute a move action to an adjacent vertex in the cardinal directions $\{\text{North, South, East, West}\}$ or perform a wait action.
+2.  **Collision Avoidance:**
+    *   **Vertex Collision:** No two robots may occupy the same vertex $v \in V$ at any time $t$.
+    *   **Edge Collision (Swapping):** No two robots $r_i$ and $r_j$ may traverse the same edge $e \in E$ in opposite directions simultaneously between $t$ and $t+1$.
+3.  **Shelf Interaction and Coupling:**
+    *   **Capacity Constraint:** A robot $r$ may be coupled with at most one shelf $s$ at any time $t$.
+    *   **Exclusivity Constraint:** A shelf $s$ may be transported by at most one robot $r$ at any time $t$.
+    *   **Interaction Preconditions:** The actions `pickup(s)` and `putdown(s)` are valid only if the robot $r$ and shelf $s$ occupy the same vertex $v$.
+4.  **Order Fulfillment (Delivery):**
+    *   A `deliver(o, s, q)` action is valid if and only if:
+        *   The robot $r$ is currently transporting shelf $s$.
+        *   The robot's current location $v$ corresponds to the picking station $p$ specified in order $o$.
+        *   The shelf $s$ contains a quantity $q' \geq q$ of the required product $u$.
+5.  **Environment Persistence:** Shelves not being transported by a robot must remain stationary at their last recorded vertex.
+
+**Output:**
+The solution must yield a schedule of atomic actions $A_{r,t}$ for every robot $r$ and every time step $t \in \{1, \dots, T\}$, where $A \in \{\text{move}(\text{dir}), \text{pickup}, \text{putdown}, \text{deliver}, \text{wait}\}$, such that the final state $\sigma_T$ reflects the successful fulfillment of all demand in $\mathcal{O}$.

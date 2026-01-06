@@ -1,0 +1,8 @@
+You are tasked with solving the Travelling Salesman Problem (TSP) on an undirected graph. 
+The graph consists of a set of nodes and weighted edges. 
+You are given a specific start node 's' and an end node 'e'. 
+The objective is to find a path from the start node to the end node such that:
+1. The path forms a Hamiltonian Path, meaning every node in the graph is visited exactly once.
+2. The total cost (sum of weights) of the edges in the path is minimized.
+
+The solution should output the selected edges that form this optimal path.

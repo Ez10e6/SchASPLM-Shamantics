@@ -1,0 +1,5 @@
+You are tasked with solving the Maximum Independent Set problem on a graph.
+The input consists of a set of nodes and edges connecting them.
+
+The objective is to select a subset of nodes such that no two selected nodes are connected by an edge.
+To find the optimal solution, you must maximize the total number of nodes in this subset.

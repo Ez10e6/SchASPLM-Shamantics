@@ -1,0 +1,25 @@
+### Formal Specification: Numerical 3-Dimensional Matching (N3DM)
+
+**1. System Overview**
+The system must solve the Numerical 3-Dimensional Matching problem by partitioning three equal-sized sets of integers into a collection of triples that satisfy a specific arithmetic invariant.
+
+**2. Input Definitions**
+*   **Sets:** Three multisets of integers, denoted as $X$, $Y$, and $Z$.
+*   **Cardinality:** A positive integer $k$, where $|X| = |Y| = |Z| = k$.
+*   **Target Sum:** An integer $n$, representing the required sum for each triple.
+
+**3. Output Specification**
+*   **Triple Set:** A set $T$ containing exactly $k$ triples of the form $(x, y, z)$.
+*   **Return Value:** The set $T$ if a valid matching exists; otherwise, indicate that no such matching satisfies the constraints.
+
+**4. Operational Constraints**
+The system must ensure that the output set $T$ adheres to the following formal requirements:
+
+*   **Type Constraint:** For every triple $(x_i, y_i, z_i) \in T$, the elements must satisfy $x_i \in X$, $y_i \in Y$, and $z_i \in Z$.
+*   **Exhaustive Uniqueness:** Every element in the input sets $X$, $Y$, and $Z$ must be utilized exactly once across the set of triples $T$.
+    *   Specifically, the projections of $T$ onto its first, second, and third coordinates must yield the original multisets $X$, $Y$, and $Z$ respectively.
+*   **Arithmetic Invariant:** For every triple $(x_i, y_i, z_i) \in T$, the sum of the constituent elements must equal the target sum $n$:
+    $$\forall (x_i, y_i, z_i) \in T : x_i + y_i + z_i = n$$
+
+**5. Objective**
+Construct the set $T = \{(x_1, y_1, z_1), (x_2, y_2, z_2), \dots, (x_k, y_k, z_k)\}$ such that all specified constraints are simultaneously satisfied.

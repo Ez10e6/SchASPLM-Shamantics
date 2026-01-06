@@ -1,0 +1,11 @@
+You are tasked with solving the Visit All problem.
+The environment consists of a set of locations (nodes) connected by edges.
+The input specifies the starting location of a robot and a set of target locations that must be visited.
+
+The objective is to find a path for the robot such that:
+1. The robot starts at the given initial position.
+2. At each time step, the robot moves to exactly one connected adjacent location.
+3. The robot must visit every location marked as a target at least once during the path.
+4. The path must be completed within the defined number of time steps.
+
+The solution should output the sequence of moves.

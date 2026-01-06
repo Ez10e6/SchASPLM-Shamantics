@@ -1,0 +1,12 @@
+You are tasked with defining family relationship rules to verify a specific logical paradox (becoming one's own grandfather).
+The input consists of facts about individuals, including their gender, parentage relationships, and marriage status.
+
+The objective is to infer extended family relationships based on the following rules:
+1. Marriage is a symmetric relationship; if X is married to Y, then Y is married to X.
+2. Siblings are defined as distinct individuals who share at least one parent.
+3. Stepparents are treated as parents: if someone is married to a child's parent, they are also considered a parent of that child.
+4. An uncle is defined as a male sibling of a parent.
+5. A grandparent is defined as a parent of a parent.
+6. A "grandpa" is specifically defined here as a male individual who is a grandparent of themselves.
+
+The goal is to determine if any individual satisfies the condition of being their own grandpa.

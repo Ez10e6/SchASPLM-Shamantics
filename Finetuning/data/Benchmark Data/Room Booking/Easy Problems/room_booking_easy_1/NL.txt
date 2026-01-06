@@ -1,0 +1,11 @@
+You are organizing a series of six seminars, and each one must be scheduled to take
+place in a specific room at a specific time. There are three time slots available
+throughout the day: morning, midday, and afternoon. The venue also offers three
+rooms where the seminars can be held.
+Each seminar needs to be held, and no two seminars are allowed to happen in
+the same room at the same time — that would cause a scheduling conflict.
+However, there's a restriction on Room 3: it cannot be used for any seminar
+scheduled in the afternoon.
+Additionally, Seminar 1 must be held in Room 1, regardless of when it’s scheduled.
+Finally, Seminar 2 and Seminar 3 must not take place during the same time slot,
+even if they are in different rooms.

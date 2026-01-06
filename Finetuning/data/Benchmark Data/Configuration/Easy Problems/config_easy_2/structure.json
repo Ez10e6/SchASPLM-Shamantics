@@ -1,0 +1,20 @@
+{
+  "instance_template": "speaker(\"Alpha\"). speaker(\"Beta\"). amplifier(\"AmpX\"). amplifier(\"AmpY\"). player(\"Streamer1\"). player(\"Streamer2\").",
+  "generator": "1 { selected_speaker(S) : speaker(S) } 1. 1 { selected_amplifier(A) : amplifier(A) } 1. 1 { selected_player(P) : player(P) } 1.",
+  "hard_constraints": [
+    {
+      "description": "It is required that if the speaker designated as \"Alpha\" is selected, the associated amplifier must be exclusively \"AmpX\".",
+      "asp_rule": ":- selected_speaker(\"Alpha\"), selected_amplifier(A), A != \"AmpX\"."
+    },
+    {
+      "description": "The simultaneous selection of amplifier \"AmpY\" and media player \"Streamer1\" is strictly prohibited.",
+      "asp_rule": ":- selected_amplifier(\"AmpY\"), selected_player(\"Streamer1\")."
+    },
+    {
+      "description": "It is required that if the media player designated as \"Streamer2\" is selected, the associated speaker must be exclusively \"Beta\".",
+      "asp_rule": ":- selected_player(\"Streamer2\"), selected_speaker(S), S != \"Beta\"."
+    }
+  ],
+  "soft_constraints": [],
+  "global_objective": null
+}

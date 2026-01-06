@@ -1,0 +1,24 @@
+{
+  "instance_template": "person(1..10). male(1..5). female(6..10). parent(1,2). married(1,6).",
+  "generator": "married(Y, X) :- married(X, Y), X != Y.\nsibling(C1, C2) :- parent(P, C1), parent(P, C2), C1 != C2.\nparent(S, C) :- parent(P, C), married(P, S), S != P.\nuncle(U, C) :- parent(P, C), sibling(P, U), male(U).\ngrandparent(GP, C) :- parent(GP, P), parent(P, C).\ngrandpa(P) :- grandparent(P, P), male(P).",
+  "hard_constraints": [
+    {
+      "description": "The marital relationship is defined as a symmetric relation between two distinct individuals; self-marriage is prohibited.",
+      "asp_rule": ":- married(X, X)."
+    },
+    {
+      "description": "Siblinghood is defined as a relationship between distinct individuals; an individual cannot be their own sibling.",
+      "asp_rule": ":- sibling(X, X)."
+    },
+    {
+      "description": "It is required that an individual's gender identification remains consistent such that they are not simultaneously assigned as male and female.",
+      "asp_rule": ":- male(X), female(X)."
+    },
+    {
+      "description": "A biological or legal parental relationship cannot be established where the parent and child are the same individual.",
+      "asp_rule": ":- parent(P, C), P == C."
+    }
+  ],
+  "soft_constraints": [],
+  "global_objective": null
+}

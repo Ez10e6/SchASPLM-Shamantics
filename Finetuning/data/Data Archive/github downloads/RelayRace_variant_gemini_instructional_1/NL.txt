@@ -1,0 +1,31 @@
+**System Specification: Relay Race Scheduling and Optimization**
+
+**1. Input Data Definitions**
+*   **Leg Set ($L$):** An ordered sequence of segments $l_1, l_2, \dots, l_n$, where each leg $l_i$ is defined by a start point, an end point, a distance $d_i$, a total ascent $a_i$, and a total descent $s_i$.
+*   **Participant Set ($P$):** A collection of runners where each participant $p \in P$ possesses a preferred distance $d^{pref}_p$ and a preferred pace $v^{pref}_p$.
+*   **Assignment Mapping ($M$):** A function $M: L \rightarrow P$ that assigns exactly one participant to each leg.
+
+**2. Derived Predicates and State Tracking**
+*   **Leg Indexing:** Implement a predicate `is_assigned(p, i)` that evaluates to true if participant $p$ is assigned to leg $l_i$ in the sequence.
+*   **Exchange Point Identification:**
+    *   Define a **Start Exchange** for participant $p$ as the start point of leg $l_i$ where $M(l_i) = p$ and $M(l_{i-1}) \neq p$ (or $i=1$).
+    *   Define an **End Exchange** for participant $p$ as the end point of leg $l_j$ where $M(l_j) = p$ and $M(l_{j+1}) \neq p$ (or $j=n$).
+*   **Temporal Calculation:** Calculate the duration $t_i$ for each leg $l_i$ such that $t_i = d_i \times v_p$, where $v_p$ is the actual pace of the assigned participant.
+
+**3. Metric Aggregation**
+For each participant $p \in P$, calculate the following aggregate values over the subset of legs $L_p = \{l_i \in L \mid M(l_i) = p\}$:
+*   **Total Distance ($D_p$):** $\sum_{l_i \in L_p} d_i$
+*   **Total Ascent ($A_p$):** $\sum_{l_i \in L_p} a_i$
+*   **Total Descent ($S_p$):** $\sum_{l_i \in L_p} s_i$
+
+**4. Constraints and Operational Logic**
+*   Every leg $l_i \in L$ must be assigned to exactly one participant $p \in P$.
+*   A participant may be assigned to multiple legs, provided they are contiguous or non-contiguous as per event-specific rules (default: allow non-contiguous assignments).
+*   The total race duration $T$ is defined as $\sum_{i=1}^{n} t_i$.
+
+**5. Optimization Objectives**
+The system must minimize the following objective functions:
+*   **Distance Deviation:** Minimize $\sum_{p \in P} |D_p - d^{pref}_p|$.
+*   **Total Latency:** Minimize the total race duration $T$.
+*   **Exchange Frequency:** Minimize the total number of handoffs, defined as the count of indices $i$ where $M(l_i) \neq M(l_{i+1})$.
+*   **Pace Deviation:** Minimize $\sum_{l_i \in L} |v_{M(l_i)} - v^{pref}_{M(l_i)}|$, representing the delta between actual leg pace and preferred runner pace.

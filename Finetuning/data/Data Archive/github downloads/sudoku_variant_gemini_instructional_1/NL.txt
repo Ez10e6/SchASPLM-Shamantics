@@ -1,0 +1,22 @@
+### System Specification: Sudoku Solver
+
+**1. Domain Definition**
+*   **Grid Structure:** Define a primary coordinate system $G$ as a $9 \times 9$ matrix.
+*   **Indexing:** Let $R$ (Rows) and $C$ (Columns) be sets of integers such that $R, C = \{1, 2, \dots, 9\}$.
+*   **Alphabet:** Let $\Sigma$ be the set of permissible symbols where $\Sigma = \{1, 2, \dots, 9\}$.
+*   **Subgrid Partitioning:** Divide $G$ into nine non-overlapping $3 \times 3$ subgrids $S_{m,n}$ where $m, n \in \{0, 1, 2\}$. A cell at $(r, c)$ belongs to subgrid $S_{m,n}$ if and only if:
+    *   $m = \lfloor (r-1)/3 \rfloor$
+    *   $n = \lfloor (c-1)/3 \rfloor$
+
+**2. Functional Requirements**
+*   **Cell Assignment:** Populate every coordinate $(r, c) \in G$ with exactly one value $v \in \Sigma$.
+*   **Row Invariant:** Ensure that for every row $r \in R$, the mapping $f: C \to \Sigma$ is a bijection. (Each symbol in $\Sigma$ must appear exactly once per row).
+*   **Column Invariant:** Ensure that for every column $c \in C$, the mapping $f: R \to \Sigma$ is a bijection. (Each symbol in $\Sigma$ must appear exactly once per column).
+*   **Subgrid Invariant:** Ensure that for every subgrid $S_{m,n}$, the set of contained values is equivalent to $\Sigma$. (Each symbol in $\Sigma$ must appear exactly once within each $3 \times 3$ block).
+
+**3. Constraint Validations**
+*   **Uniqueness:** Prohibit the duplication of any value $v$ within the same row, column, or defined $3 \times 3$ subgrid.
+*   **Completeness:** Maintain a total of 81 assignments such that no cell remains null or contains a value outside the defined alphabet $\Sigma$.
+
+**4. Output Specification**
+*   Return the completed $9 \times 9$ matrix $G$ satisfying all invariants defined in Section 2.

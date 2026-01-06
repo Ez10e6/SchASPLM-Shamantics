@@ -1,0 +1,5 @@
+We have a bit of a balancing act to perform with that new collection of integer values we just received. Our main goal is to take every single one of those numbers and sort them into two distinct groups, which we’re labeling as subset 'a' and subset 'b'. It sounds straightforward, but there are two very specific rules we have to follow to get this right.
+
+First, we need to ensure that every individual value from our original set is accounted for. This means each number must be placed into exactly one of the two subsets; we can’t leave any values behind, and we certainly can’t have the same value appearing in both groups at once. Second, and this is the tricky part, we have to distribute the numbers so that the total sum of everything in subset 'a' is perfectly equal to the total sum of everything in subset 'b'. 
+
+Once we’ve managed to find a way to split the values so that the two sides balance out to the same grand total, our final task is simply to report back with a clear breakdown of which specific values ended up in which group.

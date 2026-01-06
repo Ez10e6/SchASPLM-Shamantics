@@ -1,0 +1,11 @@
+% Edges are symmetric (undirected).
+edge(Y, X) :- edge(X, Y).
+
+% Generate a candidate subset of nodes.
+{ set(X) } :- node(X).
+
+% Constraint: No two nodes connected by an edge can both be in the set.
+:- edge(X, Y), set(X), set(Y).
+
+% Maximize the total number of nodes in the set.
+#maximize { 1, X : set(X) }.

@@ -1,0 +1,24 @@
+% Locations: A, B, C, D, E
+loc("A"; "B"; "C"; "D"; "E").
+
+% Adjacent nodes: (A–B), (A–D), (B–C), (D–E)
+edge("A", "B").
+edge("A", "D").
+edge("B", "C").
+edge("D", "E").
+
+% The robot can only move between adjacent nodes
+1 { at(L, T) : loc(L) } 1 :- time(T).
+:- at(L1, T), at(L2, T+1), not edge(L1, L2), not edge(L2, L1), time(T).
+
+% There are 6 timesteps
+time(0..6).
+
+% Robot starts at A
+at("A", 0).
+
+% Delivery destinations: C, E
+deliver_to("C"; "E").
+
+% Each delivery location must be visited exactly once
+1 { at(L, T) : time(T) } 1 :- deliver_to(L).

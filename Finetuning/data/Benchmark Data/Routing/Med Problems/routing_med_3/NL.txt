@@ -1,0 +1,11 @@
+A maintenance rover operates in a rugged terrain with several sensor outposts.
+It begins its route at BaseCamp and is required to inspect OutpostX and OutpostY
+exactly once. Additionally, the rover may choose to inspect RelayStation to gather
+bonus diagnostic data, but this is optional. Movement between adjacent locations
+takes 1 minute, and each inspection requires a full minute of stationary scanning.
+The terrain is energy-intensive: each movement consumes 1 unit of battery, and the
+rover starts with only 6 units. The inspection at RelayStation offers a diagnostic
+reward, but only if all mandatory inspections are completed with more than two battery
+units remaining. The map is as follows: BaseCamp connects to Fork1 and Fork2. Fork1
+connects to OutpostX and RelayStation. Fork2 connects to OutpostY and RelayStation. 
+The maximum time taken can not be more than 10 minutes.

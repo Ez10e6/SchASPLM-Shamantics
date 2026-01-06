@@ -1,0 +1,6 @@
+Select exactly one CPU from {Ryzen5, i5}.
+Select exactly one GPU from {GTX1660, RX580}.
+Select exactly one motherboard from {B450, Z390}.
+The Ryzen5 CPU requires the B450 motherboard.
+The i5 CPU requires the Z390 motherboard.
+The RX580 GPU is incompatible with the Z390 motherboard.

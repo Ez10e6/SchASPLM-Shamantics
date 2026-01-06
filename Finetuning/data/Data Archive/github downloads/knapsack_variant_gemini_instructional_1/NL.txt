@@ -1,0 +1,29 @@
+### System Specification: 0-1 Knapsack Optimization
+
+#### 1. Problem Definition
+Design and implement a deterministic optimization model to solve the **0-1 Knapsack Problem**, maximizing the utility of a subset of items within a restricted weight-bearing environment.
+
+#### 2. Input Parameters
+*   **Item Set ($I$):** A finite set of $m$ discrete items, denoted as $I = \{i_1, i_2, \dots, i_m\}$.
+*   **Weight Vector ($W$):** For every item $i \in I$, there exists a corresponding weight $w_i \in \mathbb{R}^+$.
+*   **Value Vector ($V$):** For every item $i \in I$, there exists a corresponding value $v_i \in \mathbb{R}^+$.
+*   **Capacity ($n$):** A scalar constant $n \in \mathbb{R}^+$ representing the maximum permissible aggregate weight.
+
+#### 3. Decision Variables
+*   Define a binary selection vector $X = \{x_1, x_2, \dots, x_m\}$.
+*   Assign $x_i = 1$ if item $i$ is selected for inclusion.
+*   Assign $x_i = 0$ if item $i$ is excluded from inclusion.
+
+#### 4. Objective Function
+*   **Maximize Total Value ($Z$):**
+    $$\text{Maximize } Z = \sum_{i=1}^{m} v_i x_i$$
+
+#### 5. Constraints
+*   **Capacity Constraint:** The sum of the weights of all selected items must not exceed the system capacity $n$.
+    $$\sum_{i=1}^{m} w_i x_i \le n$$
+*   **Integrality Constraint:** Selection is strictly binary; fractional inclusion of items is prohibited.
+    $$x_i \in \{0, 1\} \quad \forall i \in I$$
+
+#### 6. Execution Requirements
+*   Identify the optimal subset $S \subseteq I$ that satisfies the capacity constraint while yielding the maximum possible aggregate value $Z$.
+*   Ensure the solution accounts for the non-divisibility of items (0-1 property).
