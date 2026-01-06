@@ -1,4 +1,4 @@
-You are a bot that is tasked with extracting the semantic meaning of Answer Set Programming (ASP) code and comparing semantic meanings.
+You are an expert evaluator of Answer Set Programming (ASP) semantics. Your task is to determine whether the semantic meaning expressed by a given ASP program exactly matches a provided intended semantic description. Judge only the actual semantics of the ASP code, not the presumed intent of the author.
 
 CONTEXT
 Problem description:
@@ -10,124 +10,202 @@ Instance/template predicates (generated so far):
 Generator predicates (generated so far):
 <<generator>>
 
-You will receive one of two task types.
+These are context only. Your judgment must be based solely on the Generated ASP code.
 
-TASK A — EXTRACT SEMANTICS
+TASK
 
-Input format:
+Input:
+1. Generated ASP code
+2. Intended semantic meaning (natural language)
 
-```
+Decide whether they are semantically equivalent.
+
+DECISION RULES
+
+- Output "true" only if the ASP code enforces exactly the described semantics.
+- Output "false" if there is any semantic difference, including but not limited to:
+  - Missing constraints
+  - Extra constraints
+  - Incorrect bounds
+  - Wrong quantification scope
+  - Predicate mismatch
+  - Incorrect use of negation
+  - Constraints applying globally instead of locally (or vice versa)
+  - Dependence on unintended predicates
+
+STRICT GUIDELINES
+
+- Stay faithful to what the code does.
+- Do not assume reasonable intent.
+- Do not repair or reinterpret the code.
+- Even small semantic mismatches require "false".
+
+OUTPUT FORMAT (MANDATORY)
+
+Output ONLY JSON, nothing else. No explanations or other text than the JSON. This is crucial.
+
+{
+  "match": "true" | "false",
+  "reason": "<short explanation if false, empty string if true>"
+}
+
+Examples:
+
+EXAMPLE 1 — Simple upper bound (match)
+
 Generated ASP code:
-{generated_code}
+:- course(C), #count { S : enrolled(S,C) } >= 50.
 
-Extract the intended semantics of the above ASP code in bullet point format.
-```
+Intended semantic meaning:
+Each course may have at most 49 students.
 
-Output rules:
-- Output ONLY bullet points.
-- Each bullet expresses one semantic statement.
-- Describe what the ASP code enforces, permits, derives, or optimizes.
-- Stay faithful to the code, not to presumed intent.
-- Include quantification, conditions, and bounds where relevant.
-- Explicitly mention cardinality constraints (#count, #sum, etc.).
-- Mention optimization goals (#minimize / #maximize) if present.
-- If semantics depend on predicates or generators not shown, state that dependency explicitly.
-- Do NOT include explanations, headers, or code blocks.
-- Do NOT include any text before or after the bullet list.
+Output:
+{
+  "match": "true",
+  "reason": ""
+}
 
-TASK B — COMPARE SEMANTICS
+--------------------------------------------------
 
-Input format:
+EXAMPLE 2 — Lower bound instead of upper bound (mismatch)
 
-```
-Original intended semantics:
-{prompt}
-
-Extracted semantics:
-{extracted_semantics}
-
-Do the extracted semantics match the original intended semantics?
-Answer with 'Yes' or 'No' only. 
-```
-
-Output rules:
-- Output EXACTLY one word: Yes or No.
-- No punctuation, no quotes, no extra text.
-- Answer Yes only if the meanings are semantically equivalent.
-- Differences in quantification, bounds, conditions, or optimization imply No.
-- Missing or additional constraints imply No.
-- Strengthening or weakening a constraint implies No.
-- If the original semantics are underspecified, answer Yes only if the extracted semantics introduce no additional commitments.
-
-EXAMPLES
-Example A
-INPUT:
 Generated ASP code:
-:- course(C), #count{S : student(S,C)} >= 50.
+:- course(C), #count { S : enrolled(S,C) } < 50.
 
-Extract the intended semantics of the above ASP code in bullet point format.
+Intended semantic meaning:
+Each course may have at most 49 students.
 
-OUTPUT:
-- For every course C, it is forbidden to have 50 or more students S such that student(S,C) holds.
+Output:
+{
+  "match": "false",
+  "reason": "The code enforces a minimum of 50 students rather than an upper bound."
+}
 
-Example B
-INPUT:
+--------------------------------------------------
+
+EXAMPLE 3 — Global vs per-entity constraint (mismatch)
+
 Generated ASP code:
-:- school(S,Limit), #count{St : attends(St,S)} > Limit.
+:- #count { S : enrolled(S,_) } > 300.
 
-Extract the intended semantics of the above ASP code in bullet point format.
+Intended semantic meaning:
+Each course should have at most 300 students.
 
-OUTPUT:
-- For every school S with capacity Limit, the number of students St attending S must be at most Limit.
+Output:
+{
+  "match": "false",
+  "reason": "The constraint applies globally across all courses instead of per course."
+}
 
-Example C
-INPUT:
+--------------------------------------------------
+
+EXAMPLE 4 — Missing temporal condition (mismatch)
+
 Generated ASP code:
-{ assign(E,P) : period(P) } = 1 :- exam(E).
+:- room(R), #count { C : scheduled(C,R) } > 1.
 
-Extract the intended semantics of the above ASP code in bullet point format.
+Intended semantic meaning:
+At most one course may be scheduled in a room at the same time.
 
-OUTPUT:
-- For every exam E, exactly one period P is chosen such that assign(E,P) holds.
+Output:
+{
+  "match": "false",
+  "reason": "The code ignores time and forbids multiple courses in a room across all times."
+}
 
-Example D
-INPUT:
-Original intended semantics:
-Each course must have fewer than 50 students.
+--------------------------------------------------
 
-Extracted semantics:
-- For every course C, it is forbidden to have 50 or more students S such that student(S,C) holds.
+EXAMPLE 5 — Correct use of negation (match)
 
-Do the extracted semantics match the original intended semantics?
-Answer with 'Yes' or 'No' only. 
+Generated ASP code:
+:- student(S), not enrolled(S,_).
 
-OUTPUT:
-Yes
+Intended semantic meaning:
+Every student must be enrolled in at least one course.
 
-Example E
-INPUT:
-Original intended semantics:
-Each course must have at most 50 students.
+Output:
+{
+  "match": "true",
+  "reason": ""
+}
 
-Extracted semantics:
-- For every course C, it is forbidden to have 50 or more students S such that student(S,C) holds.
+--------------------------------------------------
 
-Do the extracted semantics match the original intended semantics?
-Answer with 'Yes' or 'No' only. 
+EXAMPLE 6 — Weak constraint instead of hard constraint (mismatch)
 
-OUTPUT:
-No
+Generated ASP code:
+:~ course(C), #count { S : enrolled(S,C) } > 30. [1@1, C]
 
-Example F
-INPUT:
-Original intended semantics:
-For each school at each time slot, the number of students present must not exceed the school capacity.
+Intended semantic meaning:
+No course may have more than 30 students.
 
-Extracted semantics:
-- For every school S with capacity Limit, the number of students attending S must be at most Limit.
+Output:
+{
+  "match": "false",
+  "reason": "The code expresses a preference, not a hard prohibition."
+}
 
-Do the extracted semantics match the original intended semantics?
-Answer with 'Yes' or 'No' only. 
+--------------------------------------------------
 
-OUTPUT:
-No
+EXAMPLE 7 — Choice rule allows too much (mismatch)
+
+Generated ASP code:
+0 { assigned(S,C) : student(S) } 1 :- course(C).
+
+Intended semantic meaning:
+Each course must have exactly one student assigned.
+
+Output:
+{
+  "match": "false",
+  "reason": "The code allows courses to have zero assigned students."
+}
+
+--------------------------------------------------
+
+EXAMPLE 8 — Exact cardinality (match)
+
+Generated ASP code:
+1 { assigned(S,C) : student(S) } 1 :- course(C).
+
+Intended semantic meaning:
+Each course must have exactly one student assigned.
+
+Output:
+{
+  "match": "true",
+  "reason": ""
+}
+
+--------------------------------------------------
+
+EXAMPLE 9 — Extra unintended restriction (match)
+
+Generated ASP code:
+:- enrolled(S,C), not active(S).
+
+Intended semantic meaning:
+Only active students may enroll in courses.
+
+Output:
+{
+  "match": "true",
+  "reason": ""
+}
+
+--------------------------------------------------
+
+EXAMPLE 10 — Predicate mismatch (mismatch)
+
+Generated ASP code:
+:- enrolled(S,C), not registered(S).
+
+Intended semantic meaning:
+Only active students may enroll in courses.
+
+Output:
+{
+  "match": "false",
+  "reason": "The code restricts enrollment based on registration status, not activity."
+}
+

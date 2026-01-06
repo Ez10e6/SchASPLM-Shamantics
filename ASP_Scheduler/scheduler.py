@@ -5,6 +5,7 @@ import os
 import re
 import utils.utils as utils
 from utils import logger
+import json
 
 BASE_DIR = os.path.dirname(__file__)
 
@@ -338,6 +339,12 @@ def check_and_repair_statement_blocks(generated_code, prompt, syntax_corrector_b
     total_errors = 0
 
     for idx, stmt in enumerate(statement_blocks):
+        # Check heuristically if the block is not written text (e.g., comments, explanations, LLM mumbo jumbo or empty lines)
+        # This is crucial to prevent a lot of LLM repair calls on non-ASP text (wasting tokens and time, as learned the hard way).
+        if not utils.check_if_ASP(stmt):
+            statement_blocks[idx] = ""  # Replace non-ASP blocks with empty string to avoid syntax errors
+            continue
+
         syntax_error = utils.check_syntax_of_one_string(stmt)
         retries = k  # Number of syntax repair retries left
 
@@ -409,31 +416,33 @@ def check_semantics(generated_code, prompt, semantics_bot, printer=False):
         printer (bool, optional): Whether to print debug information. Defaults to False.
 
     Returns:
-        tuple: (semantics_correct (bool), extracted_semantics (str))
+        tuple: (semantics_correct (bool), reason if incorrect (str))
     '''
     
     # First extract the semantics from the generated code
-    semantics_prompt = f"Generated ASP code:\n{generated_code}\n\nExtract the intended semantics of the above ASP code in bullet point format."
-    extracted_semantics = semantics_bot.prompt(semantics_prompt)
+    semantics_prompt = f"Generated ASP code:\n{generated_code}\n\nIntended semantics:{prompt}"
+    result = semantics_bot.prompt(semantics_prompt)
 
     if printer:
         print("================================================================================")
-        print(f'Extracted semantics:\n{extracted_semantics}\n')
-        print(f"Intended semantics from prompt:\n{prompt}\n")
+        print(f'Send prompt for semantic check:\n{semantics_prompt}\n')
+        print(f'Semantic check result:\n{result}\n')
         print("================================================================================")
 
-    # Now compare the extracted semantics with the original prompt
-    semantics_correct_prompt = f"Original intended semantics:\n{prompt}\n\nExtracted semantics:\n{extracted_semantics}\n\nDo the extracted semantics match the original intended semantics? Answer with 'Yes' or 'No' only."
-    semantics_correct_response = semantics_bot.prompt(semantics_correct_prompt)
-    semantics_correct = 'yes' in semantics_correct_response.lower()
-
-    if printer:
-        print("================================================================================")
-        print(f'Semantics correctness check response:\n{semantics_correct_response}\n')
-        print(f'Semantics correct: {semantics_correct}\n')
-        print("================================================================================")
-
-    return semantics_correct, extracted_semantics
+    # Deserialize the result (as it is expected to be JSON)
+    try:
+        semantics_correct_response = json.loads(result)
+    except json.JSONDecodeError:
+        if printer:
+            print("================================================================================")
+            print(f'Failed to parse JSON from semantic check result. Returning False.\n')
+            print("================================================================================")
+        return False, "Failed to parse JSON from semantic check result."
+    
+    # Covert 'match' to boolean
+    match = True if semantics_correct_response.get('match', "false").lower() == "true" else False
+    
+    return match, semantics_correct_response.get('reason', '')
 
 def repair_semantics(generated_code, prompt, semantics_bot, repair_bot, n, printer=False):
     ''' Attempt to repair the semantics of the generated code using the semantics_bot.
@@ -457,23 +466,30 @@ def repair_semantics(generated_code, prompt, semantics_bot, repair_bot, n, print
     while retries > 0:
         retries -= 1
 
-        # Extract semantics again
-        semantics_correct, extracted_semantics = check_semantics(
+        # Check semantics of the current code
+        semantics_correct, reason = check_semantics(
             generated_code=repaired_code,
             prompt=prompt,
             semantics_bot=semantics_bot,
             printer=printer
         )
 
+        # Exit if semantics are correct
         if semantics_correct:
             if printer:
                 print("================================================================================")
-                print("Semantics are now correct. Exiting semantic repair loop.\n")
+                print("Semantics are now correct according to LLM. Exiting semantic repair loop.\n")
                 print("================================================================================")
             break  # Exit the loop if semantics are correct
+        
+        # Semantics are incorrect, print the current code and index of the attempt
+        if printer:
+            print("--------------------------------------------------------------------------------")
+            print(f'Semantic repair attempt {n - retries}/{n}:\n{repaired_code}\n')
+            print("--------------------------------------------------------------------------------")
 
         # Repair the code using the repair bot
-        repair_prompt = f"Intended semantics:\n{prompt}\n\nExtracted semantics:\n{extracted_semantics}\n\nErroneous ASP code:\n{repaired_code}\n\nPlease provide a corrected version of the ASP code that matches the intended semantics."
+        repair_prompt = f"The ASP code below does not match the intended semantics.\n\nIntended semantics:\n{prompt}\n\nGenerated ASP code:\n{repaired_code}\n\nReason for mismatch:\n{reason}\n\nPlease provide a corrected version of the ASP code that matches the intended semantics."
         repaired_code = repair_bot.prompt(repair_prompt)
 
         # Check syntax of the repaired code
@@ -486,12 +502,6 @@ def repair_semantics(generated_code, prompt, semantics_bot, repair_bot, n, print
                 print("================================================================================")
             break  # Exit the loop if syntax error is found after repair as we need to go back to syntax repair first
 
-        if printer:
-            print("--------------------------------------------------------------------------------")
-            print(f'Semantic repair attempt {n - retries}:\n{repaired_code}\n')
-            print("--------------------------------------------------------------------------------")
-
-        
     return repaired_code, semantics_correct, syntax_correct, retries
 
 def get_partial_program(system_prompt_path, prompt, system_prompt_variables={}, pipe=None, semantic_validation_pipe=None, k=0, n=0, printer=False, temperature=None, top_p=None, seed=None, max_new_tokens=512):
@@ -619,7 +629,7 @@ def get_partial_program(system_prompt_path, prompt, system_prompt_variables={}, 
         if not semantics_correct and n > 0:
             if printer:
                 print("================================================================================")
-                print(f'Semantics are incorrect. Starting semantic repair attempts...')
+                print(f'Semantics are incorrect. Starting semantic repair attempts (n={n} left)...')
                 print("================================================================================")
             generated_code, semantics_correct, syntax_correct, n = repair_semantics(
                 generated_code=generated_code,
@@ -633,6 +643,11 @@ def get_partial_program(system_prompt_path, prompt, system_prompt_variables={}, 
             # If syntax became incorrect during semantic repair, we need to go back to syntax repair
             if not syntax_correct:
                 total_errors += 1  # Count as a syntax error for metrics
+
+                if printer:
+                    print("================================================================================")
+                    print(f'Syntax error found after semantic repair. Returning to syntax repair loop. Semantic repair has {n} attempts left.\n')
+                    print("================================================================================")
 
         logger.log(f"{gen_type} semantics", fix_attempt_count_semantics=initial_n - n, correct_semantics_val=int(semantics_correct), correct_syntax=syntax_correct)  # Log semantics correctness after repair
 
@@ -652,7 +667,7 @@ def get_partial_program(system_prompt_path, prompt, system_prompt_variables={}, 
             print("PROGRAM PART DID NOT NEED REPAIR!")
             print(f'RESPONSE:\n{generated_code}\n')
             print("####################################################################################")
-        
+
     return(generated_code)
 
 def full_ASP_program(problem, printer=False, pipe=None, semantic_validation_pipe=None, k=0, n=0, temperature=None, top_p=None, seed=None, max_new_tokens=512):

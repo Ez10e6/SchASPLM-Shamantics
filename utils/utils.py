@@ -339,6 +339,61 @@ def check_if_block_is_program_statement(block: str) -> bool:
 
     return False
 
+def check_if_ASP(code: str) -> bool:
+    """
+    Check if the given code string is ASP code or not based on some rules. Useful to filter out non-ASP text from LLM outputs. 
+    As it is heuristic, it may give false positives or negatives.
+
+    Args:
+        code (str): The presumed ASP code as a single string.
+
+    Returns:
+        bool: True if the code is probably an ASP statement, False otherwise.
+    """
+    _PRED_CALL_RE = re.compile(r"\b[a-z][a-zA-Z0-9_]*\s*\(")   # team(
+    _DIRECTIVE_RE = re.compile(r"^\s*#(const|show|minimize|maximize)\b", re.IGNORECASE)
+
+    if not code or not code.strip():
+        return False
+
+    # Remove pure comment/empty lines early
+    lines = []
+    for raw in code.splitlines():
+        s = raw.strip()
+        if not s or s.startswith('%'):
+            continue
+        lines.append(s)
+
+    if not lines:
+        return False
+
+    for s in lines:
+        # Strong ASP signals
+        if ":-" in s:
+            return True
+        if _DIRECTIVE_RE.match(s):
+            return True
+        if "#count" in s or "#sum" in s or "#minimize" in s or "#maximize" in s:
+            return True
+        if "{" in s or "}" in s:
+            return True
+        if any(op in s for op in ("!=", ">=", "<=", "=", ">", "<")):
+            # NL can contain '=' rarely; require some ASP punctuation too
+            if any(ch in s for ch in (".", "(", ")", ",", ":", "#", "{", "}")):
+                return True
+
+        # Predicate-like fact/rule line, e.g. team(T).  course(C,_,_).
+        # Require it ends with '.' (ASP statements) AND looks like a predicate call
+        if s.endswith(".") and _PRED_CALL_RE.search(s):
+            return True
+
+        # Also allow simple atoms without args: alive. edge.
+        # This is optional; add only if you actually use them.
+        if s.endswith(".") and re.match(r"^[a-z][a-zA-Z0-9_]*\.$", s):
+            return True
+
+    return False
+
 if __name__ == "__main__":
     # Test program
     with open("./testfile.lp", "r", encoding='utf-8') as f:
