@@ -4,7 +4,7 @@ Usage:
     from utils import logger
     logger.init_logger('path/to/log.csv', problem_ID='prob1', max_fix_attempts=3,
                        model='gpt-4', temperature=0.2, top_p=1.0, seed=42)
-    logger.log('generation_type', fix_attempt_count=1, correct_syntax=True)
+    logger.log('generation_type', fix_attempt_count=1, correct_syntax=True, correct_semantics=False)
 
 - filename is a path (directories will be created if needed).
 - init_logger resets an internal statement_block counter (starts at 1).
@@ -38,7 +38,7 @@ def _ensure_header():
     if _filepath is None:
         return
     
-    expected_header = ['datetimestamp', 'max_fix_attempts (k)', 'problem_ID', 'generation_type', 'model', 'temperature', 'top_p', 'seed', 'statement_block', 'fix_attempt_count', 'correct_syntax']
+    expected_header = ['datetimestamp', 'max_fix_attempts (k)', 'problem_ID', 'generation_type', 'syntax_model', 'semantics_model', 'temperature', 'top_p', 'seed', 'statement_block', 'fix_attempt_count_syntax', 'correct_syntax', 'fix_attempt_count_semantics', 'correct_semantics']
     if not os.path.exists(_filepath) or os.path.getsize(_filepath) == 0:
         parent = os.path.dirname(_filepath)
         if parent:
@@ -48,7 +48,7 @@ def _ensure_header():
             writer.writerow(expected_header)
 
 
-def init_logger(filename: str, problem_ID: str, max_fix_attempts: int = 0, *, model: str | None = None, temperature: float | None = None, top_p: float | None = None, seed: int | None = None) -> None:
+def init_logger(filename: str, problem_ID: str, max_fix_attempts: int = 0, *, model: str | None = None, semantics_model: str | None = None, temperature: float | None = None, top_p: float | None = None, seed: int | None = None) -> None:
     """Initialize module-level logger state.
 
     - filename: path to the CSV file (can include directories). Parent folder will be created automatically.
@@ -57,7 +57,7 @@ def init_logger(filename: str, problem_ID: str, max_fix_attempts: int = 0, *, mo
     """
     global _folder, _filename, _filepath, _problem_ID, _time_stamp, _max_fix_attempts, _statement_block
     # New optional module-level metadata
-    global _model, _temperature, _top_p, _seed
+    global _model, _semantics_model, _temperature, _top_p, _seed
 
     _filename = filename
     # compute absolute path for clarity
@@ -74,6 +74,7 @@ def init_logger(filename: str, problem_ID: str, max_fix_attempts: int = 0, *, mo
 
     # store optional metadata for inclusion in each row
     _model = str(model) if model is not None else None
+    _semantics_model = str(semantics_model) if semantics_model is not None else None
     try:
         _temperature = float(temperature) if temperature is not None else None
     except Exception:
@@ -94,7 +95,7 @@ def time_stamp() -> Optional[str]:
     return _time_stamp
 
 
-def log(generation_type: str, fix_attempt_count: int = 0, correct_syntax: bool = False) -> None:
+def log(generation_type: str, fix_attempt_count_syntax: int = 0, correct_syntax: bool = False, fix_attempt_count_semantics: int = 0, correct_semantics_val: int = -1) -> None:
     """Append a single CSV row using the module-level logger state.
 
     If the logger hasn't been initialized, prints a message and does nothing.
@@ -103,10 +104,11 @@ def log(generation_type: str, fix_attempt_count: int = 0, correct_syntax: bool =
     if _filepath is None or _problem_ID is None or _time_stamp is None:
         print("PLEASE FIRST CALL init_logger(folder, filename, problem_ID). The logger must be initialized before logging.")
         return
-
-    correct_val = 1 if correct_syntax else 0
+    
+    correct_syntax_val = 1 if correct_syntax else 0
     # Use stored metadata values; if None, write empty string for CSV cleanliness
     model_val = _model if '_model' in globals() and _model is not None else ''
+    semantics_model_val = _semantics_model if '_semantics_model' in globals() and _semantics_model is not None else ''
     temp_val = _temperature if '_temperature' in globals() and _temperature is not None else ''
     top_p_val = _top_p if '_top_p' in globals() and _top_p is not None else ''
     seed_val = _seed if '_seed' in globals() and _seed is not None else ''
@@ -114,11 +116,14 @@ def log(generation_type: str, fix_attempt_count: int = 0, correct_syntax: bool =
     gen_val = generation_type if generation_type is not None else ''
 
     # Ordering with generation_type after problem_ID (per request)
-    # datetimestamp, max_fix_attempts (k), problem_ID, generation_type, model, temperature, top_p, seed, statement_block, fix_attempt_count, correct_syntax
-    row = [_time_stamp, _max_fix_attempts, _problem_ID, gen_val, model_val, temp_val, top_p_val, seed_val, _statement_block, fix_attempt_count, correct_val]
+    row = [_time_stamp, _max_fix_attempts, _problem_ID, gen_val, model_val, semantics_model_val, temp_val, top_p_val, seed_val, _statement_block, fix_attempt_count_syntax, correct_syntax_val, fix_attempt_count_semantics, correct_semantics_val]
 
     with open(_filepath, 'a', newline='', encoding='utf-8') as fh:
         writer = csv.writer(fh)
         writer.writerow(row)
 
-    _statement_block += 1
+    if correct_semantics_val != -1: 
+        # Semantics are not checked on a statement block level, but after (possibly) syntax repairs. 
+        # It can therefore be seen as an additional log. A value of -1 indicates no semantics check 
+        # was performed, so we are not in the case of this "additional log" and can increment the statement block counter.
+        _statement_block += 1
