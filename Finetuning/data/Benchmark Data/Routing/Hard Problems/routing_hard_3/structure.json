@@ -1,44 +1,41 @@
 {
-  "instance_template": "loc(\"SubDock\"; \"CoralPass\"; \"VentStream\"; \"BeaconAlpha\"; \"DeepLoop\"; \"BeaconBeta\"; \"NodeX\"; \"BeaconGamma\").\nedge(\"SubDock\",\"CoralPass\",2). edge(\"SubDock\",\"VentStream\",4).\nedge(\"CoralPass\",\"BeaconAlpha\",1). edge(\"CoralPass\",\"DeepLoop\",1).\nedge(\"DeepLoop\",\"VentStream\",1). edge(\"VentStream\",\"BeaconBeta\",2).\nedge(\"VentStream\",\"NodeX\",1). edge(\"NodeX\",\"BeaconGamma\",3).\nedge(\"BeaconGamma\",\"BeaconAlpha\",4).",
-  "generator": "time(0..15).\n1{ at(L, T): loc(L) }1 :- time(T).\n1 { pulse_at(\"BeaconAlpha\",T) : time(T) }.\n1 { pulse_at(\"BeaconBeta\", T) : time(T) }.\n{ pulse_at(\"BeaconGamma\", T) : time(T) }.",
+  "instance_template": "loc(\"SubDock\"; \"CoralPass\"; \"VentStream\"; \"BeaconAlpha\"; \"DeepLoop\"; \"BeaconBeta\"; \"NodeX\"; \"BeaconGamma\"). beacon(\"BeaconAlpha\"; \"BeaconBeta\"; \"BeaconGamma\"; \"NodeX\"). edge(\"SubDock\",\"CoralPass\",2). edge(\"CoralPass\",\"SubDock\",2). edge(\"SubDock\",\"VentStream\",4). edge(\"VentStream\",\"SubDock\",4). edge(\"CoralPass\",\"BeaconAlpha\",1). edge(\"BeaconAlpha\",\"CoralPass\",1). edge(\"CoralPass\",\"DeepLoop\",1). edge(\"DeepLoop\",\"CoralPass\",1). edge(\"DeepLoop\",\"VentStream\",1). edge(\"VentStream\",\"DeepLoop\",1). edge(\"VentStream\",\"BeaconBeta\",2). edge(\"BeaconBeta\",\"VentStream\",2). edge(\"VentStream\",\"NodeX\",1). edge(\"NodeX\",\"VentStream\",1). edge(\"NodeX\",\"BeaconGamma\",3). edge(\"BeaconGamma\",\"NodeX\",3). edge(\"BeaconGamma\",\"BeaconAlpha\",4). edge(\"BeaconAlpha\",\"BeaconGamma\",4). step(0..15).",
+  "generator": "at(\"SubDock\", 0). time(0, 0). heat(0, 0). 1 { act(move(V2), S) : edge(V1, V2, C); act(pulse(V1), S) : beacon(V1); act(cool, S) : V1 = \"NodeX\"; act(done, S) } 1 :- at(V1, S), S < 16. at(V2, S+1) :- act(move(V2), S). at(V1, S+1) :- act(pulse(V1), S), at(V1, S). at(V1, S+1) :- act(cool, S), at(V1, S). at(V1, S+1) :- act(done, S), at(V1, S). time(S+1, T+1) :- act(move(V2), S), time(S, T). time(S+1, T+2) :- act(pulse(V), S), time(S, T). time(S+1, T+2) :- act(cool, S), time(S, T). time(S+1, T) :- act(done, S), time(S, T). heat(S+1, H+C) :- act(move(V2), S), at(V1, S), edge(V1, V2, C), heat(S, H). heat(S+1, H+1) :- act(pulse(V), S), heat(S, H). heat(S+1, 0) :- act(cool, S). heat(S+1, H) :- act(done, S), heat(S, H). act(done, S) :- act(done, S-1), S < 16.",
   "hard_constraints": [
     {
-      "description": "Sanity check: if we're moving, there better be a physical edge there. No teleporting.",
-      "asp_rule": ":- at(L1, T), at(L2, T+1), not edge(L1, L2, _), not edge(L2, L1, _), L1 != L2."
+      "description": "Heat levels must stay within drone tolerance.",
+      "asp_rule": ":- heat(S, H), H > 10."
     },
     {
-      "description": "Keep an eye on the thermals. If the drone hits 11 units of heat, it's toast.",
-      "asp_rule": "heat(0,0). :- heat(_, H), H > 10. heat(T+1,H2) :- at(L1,T), at(L2,T+1), edge(L1,L2,Cost), heat(T,H1), H2=H1+Cost."
+      "description": "Pulse at BeaconAlpha is mandatory.",
+      "asp_rule": ":- not act(pulse(\"BeaconAlpha\"), _)."
     },
     {
-      "description": "Scanning takes time and adds heat. If we pulse, we stay put for 2 ticks and add 1 heat unit.",
-      "asp_rule": "at(L,T) :- pulse_at(L,T). at(L,T+1) :- pulse_at(L,T), T < 15. heat(T+2,H+1) :- pulse_at(_,T), heat(T,H), T < 14."
+      "description": "Pulse at BeaconBeta is mandatory.",
+      "asp_rule": ":- not act(pulse(\"BeaconBeta\"), _)."
     },
     {
-      "description": "Deadline for Alpha. Boss wants that pulse done before T=5.",
-      "asp_rule": ":- not pulse_at(\"BeaconAlpha\",T): time(T), T<5."
+      "description": "BeaconAlpha pulse must start before minute 5.",
+      "asp_rule": ":- act(pulse(\"BeaconAlpha\"), S), time(S, T), T >= 5."
     },
     {
-      "description": "The logic for Gamma is a bit picky. Only hit it if Alpha and Beta are wrapped up by T=8.",
-      "asp_rule": "mand_done :- pulse_at(\"BeaconAlpha\",TA), pulse_at(\"BeaconBeta\",TB), TA <= 8, TB <= 8. :- pulse_at(\"BeaconGamma\",_), not mand_done. :- mand_done, not pulse_at(\"BeaconGamma\",_)."
+      "description": "Pulse BeaconGamma iff mandatory pulses finish by minute 8.",
+      "asp_rule": "mand_done_by_8 :- act(pulse(\"BeaconAlpha\"), S1), time(S1, T1), T1+2 <= 8, act(pulse(\"BeaconBeta\"), S2), time(S2, T2), T2+2 <= 8. :- act(pulse(\"BeaconGamma\"), _), not mand_done_by_8. :- mand_done_by_8, not act(pulse(\"BeaconGamma\"), _)."
     },
     {
-      "description": "NodeX is the chill zone. Spend 2 mins there to reset heat, otherwise you gotta pulse immediately.",
-      "asp_rule": "cooldown(T) :- at(\"NodeX\",T), at(\"NodeX\",T+1), T < 15. heat(T+2,0) :- cooldown(T), T < 14. :- at(\"NodeX\",T), T < 15, not cooldown(T), not pulse_at(_,T+1)."
+      "description": "If NodeX entered, next action must be pulse or cooldown.",
+      "asp_rule": "entered(S) :- at(\"NodeX\", S), act(move(\"NodeX\"), S-1). :- entered(S), not act(pulse(\"NodeX\"), S), not act(cool, S)."
     },
     {
-      "description": "Don't spam pulses. We need to swing back through VentStream to re-sync between every pulse.",
-      "asp_rule": "vent_between(L, H) :- at(\"VentStream\",T), L < T < H, time(L), time(H). :- pulse_at(_,T1), pulse_at(_,T2), not vent_between(T1, T2), T1 < T2."
-    },
-    {
-      "description": "Watch the action budget. If moves + pulses + cooldowns > 16, we're out of juice.",
-      "asp_rule": "action(T) :- at(L1, T), at(L2, T+1), L1 != L2. action(T) :- pulse_at(_,T). action(T) :- cooldown(T). :- #count {A : action(A)} > 16."
+      "description": "VentStream visit required between any two pulses.",
+      "asp_rule": "visited_vent(S1, S2) :- at(\"VentStream\", S), S1 < S, S < S2, step(S1), step(S2), step(S). :- act(pulse(_), S1), act(pulse(_), S2), S1 < S2, not visited_vent(S1, S2)."
     }
   ],
   "soft_constraints": [
     {
-      "description": "Lazy drone protocol: minimize any time step where we aren't actually pulsing.",
-      "asp_rule": "non_pulse(T) :- time(T), not pulse_at(_,T). non_pulses(N) :- N = #count{ T: non_pulse(T) }. #minimize { N: non_pulses(N) }."
+      "description": "Minimize time not spent performing acoustic pulses.",
+      "asp_rule": "is_pulsing(T) :- act(pulse(_), S), time(S, T_S), T_S <= T, T < T_S+2, T = 0..32. mission_end(T_End) :- time(16, T_End). penalty(\"Idle\", T, 1) :- mission_end(T_Max), T < T_Max, not is_pulsing(T), T = 0..32."
     }
-  ]
+  ],
+  "global_objective": "#minimize { C,T : penalty(N,T,C) }."
 }

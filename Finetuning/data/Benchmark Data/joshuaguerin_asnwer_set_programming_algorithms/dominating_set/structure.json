@@ -1,11 +1,12 @@
 {
-  "instance_template": "value(V).",
-  "generator": "1 { a(V) ; b(V) } 1 :- value(V).",
+  "instance_template": "value(1..10).",
+  "generator": "1 { in_subset(V, \"a\"); in_subset(V, \"b\") } 1 :- value(V).",
   "hard_constraints": [
     {
-      "description": "For any valid partition, the arithmetic summation of the elements contained within subset 'a' must be precisely equivalent to the arithmetic summation of the elements contained within subset 'b'.",
-      "asp_rule": "total(a, S) :- S = #sum{ A : a(A) }. total(b, S) :- S = #sum{ B : b(B) }. :- total(a, S1), total(b, S2), S1 != S2."
+      "description": "To satisfy the core requirement of the Equal Sum Partition problem, we must ensure that the total weight of subset 'a' is exactly the same as the total weight of subset 'b'. This rule calculates the sum for each subset and rejects any configuration where the two sums are not equal.",
+      "asp_rule": ":- S1 = #sum{ V : in_subset(V, \"a\") }, S2 = #sum{ V : in_subset(V, \"b\") }, S1 != S2."
     }
   ],
-  "soft_constraints": []
+  "soft_constraints": [],
+  "global_objective": null
 }

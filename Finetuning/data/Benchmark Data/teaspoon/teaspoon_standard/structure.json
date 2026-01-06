@@ -1,68 +1,65 @@
 {
-  "instance_template": "c(C) :- course(C,_,_,_,_,_). t(T) :- course(_,T,_,_,_,_). r(R) :- room(R,_,_). d(0..D-1) :- days(D). ppd(0..P-1) :- periods_per_day(P). cu(Cu) :- curricula(Cu,_).",
-  "generator": "N { assigned(C,D,P) : d(D), ppd(P) } N :- course(C,_,N,_,_,_). 1 { assigned(C,R,D,P) : r(R) } 1 :- assigned(C,D,P).",
+  "instance_template": "course(c01, t01, 4, 3, 30, 1). room(r01, 40, b01). curricula(cu01, c01). days(5). periods_per_day(6). unavailability_constraint(c01, 0, 0). soft_constraint(\"RoomCapacity\", 1, 1). min_max_daily_lectures(2, 5). room_constraint(c01, r01).",
+  "generator": "teacher(T) :- course(_,T,_,_,_,_). curriculum(Cu) :- curricula(Cu,_). day(D) :- days(L), D = 0..L-1. period(P) :- periods_per_day(L), P = 0..L-1. { assigned(C,D,P) : day(D), period(P) } = N :- course(C,_,N,_,_,_). { assigned(C,R,D,P) : room(R,_,_) } = 1 :- assigned(C,D,P).",
   "hard_constraints": [
     {
-      "description": "Compliance requires that the total number of lectures scheduled for each course matches the mandated curriculum count exactly.",
-      "asp_rule": "N { assigned(C,D,P) : d(D), ppd(P) } N :- course(C,_,N,_,_,_)."
+      "description": "It is required that no more than one lecture is assigned to a specific teacher within the same day and period.",
+      "asp_rule": ":- #count{ C : assigned(C,D,P), course(C,T,_,_,_,_) } > 1, teacher(T), day(D), period(P)."
     },
     {
-      "description": "Our policy dictates a strict prohibition on double-booking teachers; a teacher cannot be assigned to more than one lecture in any given period.",
-      "asp_rule": ":- not { assigned(C,D,P) : course(C,T,_,_,_,_) } 1, t(T), d(D), ppd(P)."
+      "description": "The system must ensure that no more than one lecture from a specific curriculum is scheduled within the same day and period.",
+      "asp_rule": ":- #count{ C : assigned(C,D,P), curricula(Cu,C) } > 1, curriculum(Cu), day(D), period(P)."
     },
     {
-      "description": "To maintain curriculum integrity, we must ensure that no single curriculum has overlapping lectures within the same time slot.",
-      "asp_rule": ":- not { assigned(C,D,P) : curricula(Cu,C) } 1, cu(Cu), d(D), ppd(P)."
+      "description": "Occupancy constraints necessitate that no more than one lecture is assigned to a specific room during any given period.",
+      "asp_rule": ":- #count{ C : assigned(C,R,D,P) } > 1, room(R,_,_), day(D), period(P)."
     },
     {
-      "description": "Facility management rules require that no two lectures occupy the same physical room during the same period.",
-      "asp_rule": ":- not { assigned(C,R,D,P) : c(C) } 1, r(R), d(D), ppd(P)."
-    },
-    {
-      "description": "All schedules must be in full compliance with staff availability; lectures must not be assigned to periods where the teacher is unavailable.",
+      "description": "Lectures are strictly prohibited from being scheduled during periods where the assigned teacher is designated as unavailable.",
       "asp_rule": ":- assigned(C,D,P), unavailability_constraint(C,D,P)."
     }
   ],
   "soft_constraints": [
     {
-      "description": "Room utilization policy: minimize instances where the student headcount exceeds the defined capacity of the assigned room.",
-      "asp_rule": "penalty(\"RoomCapacity\",assigned(C,R,D,P),(N-Cap)*W,Prior) :- assigned(C,R,D,P), course(C,_,_,_,N,_), room(R,Cap,_), N > Cap, soft_constraint(\"RoomCapacity\",W,Prior)."
+      "description": "A penalty is incurred for every student whose presence exceeds the maximum capacity of the assigned room.",
+      "asp_rule": "penalty(\"RoomCapacity\", (C,R,D,P), (S-Cap)*W, L) :- assigned(C,R,D,P), course(C,_,_,_,S,_), room(R,Cap,_), S > Cap, soft_constraint(\"RoomCapacity\",W,L)."
     },
     {
-      "description": "Academic distribution policy: ensure that course lectures are spread across the minimum required number of working days to optimize learning.",
-      "asp_rule": "working_day(C,D) :- assigned(C,D,P). penalty(\"MinWorkingDays\",course(C,MWD,N),(MWD-N)*W,Prior) :- course(C,_,_,MWD,_,_), N = { working_day(C,D) }, N < MWD, soft_constraint(\"MinWorkingDays\",W,Prior)."
+      "description": "The number of distinct days on which a course is scheduled should meet or exceed a predefined minimum threshold; otherwise, a penalty proportional to the deficit is applied.",
+      "asp_rule": "working_day(C,D) :- assigned(C,D,P). penalty(\"MinWorkingDays\", C, (MWD-Count)*W, L) :- course(C,_,_,MWD,_,_), Count = #count{ D : working_day(C,D) }, Count < MWD, soft_constraint(\"MinWorkingDays\",W,L)."
     },
     {
-      "description": "Student experience rule: lectures within a curriculum should be scheduled adjacently to avoid isolated sessions.",
-      "asp_rule": "scheduled_curricula(Cu,D,P) :- assigned(C,D,P), curricula(Cu,C). penalty(\"IsolatedLectures\",isolated_lectures(Cu,D,P),W,Prior) :- scheduled_curricula(Cu,D,P), not scheduled_curricula(Cu,D,P-1), not scheduled_curricula(Cu,D,P+1), soft_constraint(\"IsolatedLectures\",W,Prior)."
+      "description": "A penalty is applied to any lecture within a curriculum that is not adjacent to another lecture of the same curriculum on the same day.",
+      "asp_rule": "curr_day_period(Cu,D,P) :- assigned(C,D,P), curricula(Cu,C). penalty(\"IsolatedLectures\", (Cu,D,P), W, L) :- curr_day_period(Cu,D,P), not curr_day_period(Cu,D,P-1), not curr_day_period(Cu,D,P+1), soft_constraint(\"IsolatedLectures\",W,L)."
     },
     {
-      "description": "Time management policy: eliminate empty gaps or windows between lectures within a curriculum on the same day.",
-      "asp_rule": "penalty(\"Windows\",windows(Cu,D,P1,P2),(P2-P1-1)*W,Prior) :- scheduled_curricula(Cu,D,P1), scheduled_curricula(Cu,D,P2), P1 + 1 < P2, not scheduled_curricula(Cu,D,P) : P = P1+1..P2-1; soft_constraint(\"Windows\",W,Prior)."
+      "description": "An academic window, defined as an idle period occurring between two scheduled lectures of the same curriculum within a single day, results in a penalty.",
+      "asp_rule": "penalty(\"Windows\", (Cu,D,P), W, L) :- period(P), day(D), curriculum(Cu), not curr_day_period(Cu,D,P), curr_day_period(Cu,D,P1), P1 < P, curr_day_period(Cu,D,P2), P2 > P, soft_constraint(\"Windows\",W,L)."
     },
     {
-      "description": "Operational efficiency rule: minimize the movement of courses between different rooms to ensure room stability.",
-      "asp_rule": "using_room(C,R) :- assigned(C,R,D,P). penalty(\"RoomStability\",using_room(C,N),(N-1)*W,Prior) :- c(C), N = { using_room(C,R) }, N > 1, soft_constraint(\"RoomStability\",W,Prior)."
+      "description": "To maintain instructional stability, a penalty is assessed for every additional room used for a course beyond the first unique room assignment.",
+      "asp_rule": "used_room(C,R) :- assigned(C,R,D,P). penalty(\"RoomStability\", C, (Count-1)*W, L) :- course(C,_,_,_,_,_), Count = #count{ R : used_room(C,R) }, Count > 1, soft_constraint(\"RoomStability\",W,L)."
     },
     {
-      "description": "Workload compliance: maintain the daily lecture load for each curriculum within the specified minimum and maximum thresholds.",
-      "asp_rule": "penalty(\"StudentMinMaxLoad\",student_min_max_load(Cu,D,N,many),(N-Max)*W,Prior) :- cu(Cu), d(D), N = { scheduled_curricula(Cu,D,P) }, min_max_daily_lectures(Min,Max), N > Max, soft_constraint(\"StudentMinMaxLoad\",W,Prior). penalty(\"StudentMinMaxLoad\",student_min_max_load(Cu,D,N,few),(Min-N)*W,Prior) :- cu(Cu), d(D), N = { scheduled_curricula(Cu,D,P) }, min_max_daily_lectures(Min,Max), 0 < N, N < Min, soft_constraint(\"StudentMinMaxLoad\",W,Prior)."
+      "description": "The daily student workload for a curriculum must not exceed a specified maximum number of lectures.",
+      "asp_rule": "penalty(\"StudentMaxLoad\", (Cu,D), (N-Max)*W, L) :- curriculum(Cu), day(D), N = #count{ P : curr_day_period(Cu,D,P) }, min_max_daily_lectures(_,Max), N > Max, soft_constraint(\"StudentMinMaxLoad\",W,L)."
     },
     {
-      "description": "Logistics policy: consecutive lectures in a curriculum must not require students to change buildings.",
-      "asp_rule": "penalty(\"TravelDistance\",instantaneous_move(Cu,C1,C2,D,P,P+1),W,Prior) :- curricula(Cu,C1), curricula(Cu,C2), assigned(C1,R1,D,P), assigned(C2,R2,D,P+1), room(R1,_,BLG1), room(R2,_,BLG2), BLG1 != BLG2, soft_constraint(\"TravelDistance\",W,Prior)."
+      "description": "The daily student workload for a curriculum should not fall below a specified minimum number of lectures, unless zero lectures are scheduled on that day.",
+      "asp_rule": "penalty(\"StudentMinLoad\", (Cu,D), (Min-N)*W, L) :- curriculum(Cu), day(D), N = #count{ P : curr_day_period(Cu,D,P) }, 0 < N, min_max_daily_lectures(Min,_), N < Min, soft_constraint(\"StudentMinMaxLoad\",W,L)."
     },
     {
-      "description": "Resource alignment rule: ensure courses are assigned to rooms that are specifically suited for their requirements.",
-      "asp_rule": "penalty(\"RoomSuitability\",assigned(C,R,D,P),W,Prior) :- assigned(C,R,D,P), room_constraint(C,R), soft_constraint(\"RoomSuitability\",W,Prior)."
+      "description": "A travel penalty is assigned when a curriculum requires students to move between different buildings in consecutive time periods.",
+      "asp_rule": "penalty(\"TravelDistance\", (Cu,D,P), W, L) :- curricula(Cu,C1), curricula(Cu,C2), assigned(C1,R1,D,P), assigned(C2,R2,D,P+1), room(R1,_,B1), room(R2,_,B2), B1 != B2, soft_constraint(\"TravelDistance\",W,L)."
     },
     {
-      "description": "Curriculum scheduling policy: courses requiring double lectures must have them scheduled as a single, contiguous block.",
-      "asp_rule": "penalty(\"DoubleLectures\",non_grouped_lecture(C,R,D,P),W,Prior) :- course(C,_,_,_,_,1), d(D), 2 { assigned(C,D,PPD) }, assigned(C,R,D,P), not assigned(C,R,D,P-1), not assigned(C,R,D,P+1), soft_constraint(\"DoubleLectures\",W,Prior)."
+      "description": "A penalty is generated if a course is assigned to a room that has been explicitly designated as unsuitable through specific constraints.",
+      "asp_rule": "penalty(\"RoomSuitability\", (C,R,D,P), W, L) :- assigned(C,R,D,P), room_constraint(C,R), soft_constraint(\"RoomSuitability\",W,L)."
     },
     {
-      "description": "Optimization Goal: Minimize the total weighted penalty across all soft policy violations to achieve the most compliant schedule.",
-      "asp_rule": "#minimize { P@L,C,S : penalty(S,C,P,L) }."
+      "description": "For courses requiring grouped lectures, an isolation penalty is applied to any lecture that is not scheduled in an adjacent time period to another lecture of the same course on the same day.",
+      "asp_rule": "penalty(\"DoubleLectures\", (C,D,P), W, L) :- course(C,_,_,_,_,1), assigned(C,D,P), #count{ P1 : assigned(C,D,P1) } >= 2, not assigned(C,D,P-1), not assigned(C,D,P+1), soft_constraint(\"DoubleLectures\",W,L)."
     }
-  ]
+  ],
+  "global_objective": "#minimize { Cost@Priority,Name,Tuple : penalty(Name,Tuple,Cost,Priority) }."
 }

@@ -1,27 +1,21 @@
 {
-  "instance_template": "field(X, Y). \ngoal_on(X, Y). \ninit_on(X, Y). \nconnect(X, Y, Direction). \nmax_steps(N). \ndir(D). \ninverse(D1, D2).",
-  "generator": "step(S) :- max_steps(S), 0 < S.\nstep(T) :- step(S), T = S-1, 1 < S.\n\n{ occurs(some_action, T) } :- step(T).\n\n{ rrpush(T); ccpush(T) } = 1 :- neg_goal(S), S = T-1, occurs(some_action, T).\n\n{ rpush(X, T) : row(X) } = 1 :- rrpush(T).\n{ cpush(Y, T) : col(Y) } = 1 :- ccpush(T).\n\n{ push(X, e, T); push(X, w, T) } = 1 :- rpush(X, T).\n{ push(Y, n, T); push(Y, s, T) } = 1 :- cpush(Y, T).",
+  "instance_template": "field(1,1). init_on(1,1). goal_on(3,3). connect(1,1,e). max_steps(10).",
+  "generator": "dir(n;s;e;w). inverse(n,s). inverse(s,n). inverse(e,w). inverse(w,e).\nstep(1..M) :- max_steps(M).\nrow(X) :- field(X,Y).\ncol(Y) :- field(X,Y).\nnum_rows(N) :- N = #max{ R : row(R) }.\nnum_cols(M) :- M = #max{ C : col(C) }.\nadj(n,X,Y,X-1,Y) :- field(X,Y), field(X-1,Y).\nadj(s,X,Y,X+1,Y) :- field(X,Y), field(X+1,Y).\nadj(w,X,Y,X,Y-1) :- field(X,Y), field(X,Y-1).\nadj(e,X,Y,X,Y+1) :- field(X,Y), field(X,Y+1).\nneighbor(D,X,Y,NX,NY) :- adj(D,X,Y,NX,NY).\nneighbor(n,1,Y,N,Y) :- field(1,Y), num_rows(N).\nneighbor(s,N,Y,1,Y) :- field(N,Y), num_rows(N).\nneighbor(w,X,1,X,M) :- field(X,1), num_cols(M).\nneighbor(e,X,M,X,1) :- field(X,M), num_cols(M).\ngoal_reached(T) :- goal(X,Y,T), reach(X,Y,T).\n{ push(row,R,D,T) : row(R), D = (e;w); push(col,C,D,T) : col(C), D = (n;s) } = 1 :- step(T), not goal_reached(T-1).\nrow_pushed(R,T) :- push(row,R,D,T).\ncol_pushed(C,T) :- push(col,C,D,T).\nshift(X,Y,NX,NY,T) :- push(row,X,e,T), neighbor(e,X,Y,NX,NY).\nshift(X,Y,NX,NY,T) :- push(row,X,w,T), neighbor(w,X,Y,NX,NY).\nshift(X,Y,NX,NY,T) :- push(col,Y,n,T), neighbor(n,X,Y,NX,NY).\nshift(X,Y,NX,NY,T) :- push(col,Y,s,T), neighbor(s,X,Y,NX,NY).\nshift(X,Y,X,Y,T) :- field(X,Y), step(T), not row_pushed(X,T), not col_pushed(Y,T).\nconn(X,Y,D,0) :- connect(X,Y,D).\nconn(NX,NY,D,T) :- conn(X,Y,D,T-1), shift(X,Y,NX,NY,T).\ngoal(X,Y,0) :- goal_on(X,Y).\ngoal(NX,NY,T) :- goal(X,Y,T-1), shift(X,Y,NX,NY,T).\nreach(X,Y,0) :- init_on(X,Y).\nreach(NX,NY,T) :- reach(X,Y,T-1), shift(X,Y,NX,NY,T).\nreach(X,Y,T) :- reach(XX,YY,T), adj(D,XX,YY,X,Y), conn(XX,YY,D,T), conn(X,Y,E,T), inverse(D,E).",
   "hard_constraints": [
     {
-      "description": "Now class, we must track how fields move! If a row or column is pushed, we calculate the new position of every field. If it isn't pushed, it simply stays where it is in the next time step.",
-      "asp_rule": "shift(XX,YY,X,Y,T) :- neighbor(e,XX,YY,X,Y), push(XX,e,T).\nshift(XX,YY,X,Y,T) :- neighbor(w,XX,YY,X,Y), push(XX,w,T).\nshift(XX,YY,X,Y,T) :- neighbor(n,XX,YY,X,Y), push(YY,n,T).\nshift(XX,YY,X,Y,T) :- neighbor(s,XX,YY,X,Y), push(YY,s,T).\nshift( X, Y,X,Y,T) :- step(T), field(X,Y), not push(X,e,T), not push(X,w,T), not push(Y,n,T), not push(Y,s,T)."
+      "description": "To successfully solve the puzzle, the target field must be marked as reachable by the final time step.",
+      "asp_rule": ":- max_steps(M), not goal_reached(M)."
     },
     {
-      "description": "Pay close attention: the physical properties of our tiles\u2014the connections and the goal marker\u2014must move whenever the field they are on is shifted to a new coordinate!",
-      "asp_rule": "conn(X,Y,D,T) :- conn(XX,YY,D,S), S = T-1, dir(D), shift(XX,YY,X,Y,T).\ngoal(X,Y,T) :- goal(XX,YY,S), S = T-1, shift(XX,YY,X,Y,T)."
-    },
-    {
-      "description": "Imagine water flowing through a pipe! Reachability spreads from a tile to its neighbor if, and only if, both tiles have matching connections that face each other.",
-      "asp_rule": "reach(X,Y,T) :- reach(XX,YY,S), S = T-1, shift(XX,YY,X,Y,T).\nreach(X,Y,T) :- reach(XX,YY,T), dneighbor(D,XX,YY,X,Y), conn(XX,YY,D,T), conn(X,Y,E,T), inverse(D,E)."
-    },
-    {
-      "description": "Remember our ultimate objective! We must define a failure state where the goal field is not reached. We then use a constraint to forbid any scenario where the goal remains unreached at the final time step.",
-      "asp_rule": "neg_goal(T) :- goal(X,Y,T), not reach(X,Y,T).\n:- neg_goal(T), step(T), not step(T+1)."
-    },
-    {
-      "description": "To correctly model the movement, we must define how neighbors work on our grid, including the 'wrap-around' logic where pushing something off the right edge makes it appear on the left!",
-      "asp_rule": "neighbor(D,X,Y,XX,YY) :- dneighbor(D,X,Y,XX,YY).\nneighbor(n,X,Y, 1, Y) :- field(X,Y), num_rows(X).\nneighbor(s,1,Y, X, Y) :- field(X,Y), num_rows(X).\nneighbor(e,X,Y, X, 1) :- field(X,Y), num_cols(Y).\nneighbor(w,X,1, X, Y) :- field(X,Y), num_cols(Y)."
+      "description": "An action must be performed at every time step until the goal is achieved to ensure continuous progress.",
+      "asp_rule": ":- step(T), not goal_reached(T-1), not row_pushed(_,T), not col_pushed(_,T)."
     }
   ],
-  "soft_constraints": []
+  "soft_constraints": [
+    {
+      "description": "We should aim to find the most efficient solution by minimizing the total number of push actions taken.",
+      "asp_rule": "penalty(\"step_cost\", T, 1) :- push(_,_,_,T)."
+    }
+  ],
+  "global_objective": "#minimize { C,T : penalty(N,T,C) }."
 }

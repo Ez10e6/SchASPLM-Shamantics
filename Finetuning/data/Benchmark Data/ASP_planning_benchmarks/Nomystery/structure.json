@@ -1,47 +1,40 @@
 {
-  "instance_template": "step(S). action(A). truck(T). package(P). location(L). fuelcost(C, L1, L2). goal(P, L). fuel(T, Level, 0). at(O, L, 0).",
-  "generator": "{ occurs(A,S) : action(A) } <= 1 :- step(S).",
+  "instance_template": "location(l1). location(l2). truck(t1). package(p1). fuelcost(5,l1,l2). at(t1,l1,0). at(p1,l1,0). fuel(t1,10,0). goal(p1,l2). step(1..10).",
+  "generator": "{ occurs(load(P,T,L),S) : package(P), truck(T), location(L); occurs(unload(P,T,L),S) : package(P), truck(T), location(L); occurs(drive(T,L1,L2),S) : truck(T), location(L1), location(L2), fuelcost(_,L1,L2) } <= 1 :- step(S).\nat(P,L,S) :- occurs(unload(P,T,L),S).\nat(T,L2,S) :- occurs(drive(T,L1,L2),S).\nin(P,T,S) :- occurs(load(P,T,L),S).\nfuel(T,F2,S) :- occurs(drive(T,L1,L2),S), fuel(T,F1,S-1), fuelcost(D,L1,L2), F2 = F1 - D.\nat(O,L,S) :- at(O,L,S-1), not moved(O,S), step(S).\nmoved(P,S) :- occurs(load(P,_,_),S).\nmoved(P,S) :- occurs(unload(P,_,_),S).\nmoved(T,S) :- occurs(drive(T,_,_),S).\nin(P,T,S) :- in(P,T,S-1), not moved(P,S), step(S).\nfuel(T,F,S) :- fuel(T,F,S-1), not fuel_consumed(T,S), step(S).\nfuel_consumed(T,S) :- occurs(drive(T,_,_),S).",
   "hard_constraints": [
     {
-      "description": "Sanity check: make sure the plan doesn't have any weird gaps between actions.",
-      "asp_rule": "done(S) :- occurs(A,S), step(S). :- done(S), not done(S-1), 1 < S, step(S)."
+      "description": "Actions must occur sequentially.",
+      "asp_rule": ":- occurs(_,S), not occurs(_,S-1), S > 1, step(S)."
     },
     {
-      "description": "Mapping the high-level action occurrence to specific predicates so the logic stays clean.",
-      "asp_rule": "unload( P,T,L,S )  :- occurs(unload(P,T,L),S), step(S). load( P,T,L,S )    :- occurs(load(P,T,L),S), step(S). drive( T,L1,L2,S ) :- occurs(drive(T,L1,L2),S), step(S)."
+      "description": "Load requires package at location.",
+      "asp_rule": ":- occurs(load(P,T,L),S), not at(P,L,S-1)."
     },
     {
-      "description": "If we unload a package, it's now at the location and gone from the truck. Standard state update stuff.",
-      "asp_rule": "at( P,L,S ) :- unload( P,T,L,S ), step(S). del( in( P,T ),S ) :- unload( P,T,L,S ), step(S)."
+      "description": "Load requires truck at location.",
+      "asp_rule": ":- occurs(load(P,T,L),S), not at(T,L,S-1)."
     },
     {
-      "description": "When we load a package, it's inside the truck now. Delete the 'at location' flag so it's not in two places at once.",
-      "asp_rule": "del( at( P,L ),S ) :- load( P,T,L,S ), step(S). in( P,T,S ) :- load( P,T,L,S ), step(S)."
+      "description": "Unload requires truck at location.",
+      "asp_rule": ":- occurs(unload(P,T,L),S), not at(T,L,S-1)."
     },
     {
-      "description": "Driving logic: Move the truck and burn some fuel. Make sure we actually have the gas before we commit.",
-      "asp_rule": "del( at( T,L1 ), S ) :- drive( T,L1,L2,S ), step(S). at( T,L2,S ) :- drive( T,L1,L2,S), step(S). del( fuel( T,Fuelpre ),S ) :- drive( T,L1,L2,S ), fuel(T, Fuelpre,S-1), step(S). fuel( T,Fuelpre - Fueldelta,S ) :- drive( T,L1,L2,S ), fuelcost(Fueldelta,L1,L2), fuel(T,Fuelpre,S-1), Fuelpre >= Fueldelta, step(S)."
+      "description": "Unload requires package in truck.",
+      "asp_rule": ":- occurs(unload(P,T,L),S), not in(P,T,S-1)."
     },
     {
-      "description": "Inertia rules so things don't just vanish. If we didn't touch it, it stays exactly where it was last step.",
-      "asp_rule": "at( O,L,S ) :- at( O,L,S-1 ), not del( at( O,L ),S  ), step(S). in( P,T,S ) :- in( P,T,S-1 ), not del( in( P,T ),S  ), step(S). fuel( T,Level,S ) :- fuel( T,Level,S-1 ), not del( fuel( T,Level) ,S ), truck( T ), step(S)."
+      "description": "Drive requires truck at start location.",
+      "asp_rule": ":- occurs(drive(T,L1,L2),S), not at(T,L1,S-1)."
     },
     {
-      "description": "Safety check: you can't unload a package if the truck isn't there or doesn't have the cargo.",
-      "asp_rule": "preconditions_u( P,T,L,S ) :- step(S), at( T,L,S-1 ), in( P,T,S-1 ), package( P ), truck( T ). :- unload( P,T,L,S ), not preconditions_u( P,T,L,S ), step(S)."
+      "description": "Drive requires sufficient fuel.",
+      "asp_rule": ":- occurs(drive(T,L1,L2),S), fuel(T,F,S-1), fuelcost(D,L1,L2), F < D."
     },
     {
-      "description": "Validation: can't load the truck if the truck and the package aren't hanging out at the same spot.",
-      "asp_rule": "preconditions_l( P,T,L,S ) :- step(S), at( T,L,S-1 ), at( P,L,S-1 ). :- load( P,T,L,S ), not preconditions_l( P,T,L,S ), step(S)."
-    },
-    {
-      "description": "Fuel sanity check: don't let the truck drive if it's running on empty or the path is too expensive.",
-      "asp_rule": "preconditions_d( T,L1,L2,S ) :- step(S), at( T,L1,S-1 ), fuel( T, Fuelpre, S-1), fuelcost(Fueldelta,L1,L2), Fuelpre >= Fueldelta. :- drive( T,L1,L2,S ), not preconditions_d( T,L1,L2,S ), step(S)."
-    },
-    {
-      "description": "The bottom line: if the packages aren't at their target destinations by the final step, the whole plan is a bust.",
+      "description": "All goals must be satisfied at final step.",
       "asp_rule": ":- goal(P,L), not at(P,L,S), step(S), not step(S+1)."
     }
   ],
-  "soft_constraints": []
+  "soft_constraints": [],
+  "global_objective": null
 }

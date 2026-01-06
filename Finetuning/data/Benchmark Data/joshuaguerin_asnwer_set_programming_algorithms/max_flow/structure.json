@@ -1,20 +1,12 @@
 {
-  "instance_template": "flow_vals(0..T) :- T = #max{C : edge(X, Y, C)}.",
-  "generator": "1 { flow(S, E, V) : flow_vals(V) } 1 :- edge(S, E, _).",
+  "instance_template": "node(1..4). edge(1,2,10). edge(1,3,5). edge(2,4,10). edge(3,4,5). start(1). terminal(4).",
+  "generator": "{ flow(U,V,F) : F = 0..C } = 1 :- edge(U,V,C).",
   "hard_constraints": [
     {
-      "description": "Now students, remember that a pipe can only hold so much! This rule ensures that the amount of flow we assign to a specific edge never exceeds the maximum capacity defined for that edge in our graph data.",
-      "asp_rule": ":- flow(S, E, V), edge(S, E, C), C < V."
-    },
-    {
-      "description": "Think of every node (except the start and the end) as a transit station. For these internal nodes, we must ensure that no flow is 'lost' or 'created' out of thin air; therefore, the sum of all incoming flow must exactly equal the sum of all outgoing flow.",
-      "asp_rule": "incoming(V, I) :- I = #sum{C : flow(S, V, C)}, node(V). outgoing(V, O) :- O = #sum{C : flow(V, E, C)}, node(V). :- node(V), not start(V), not terminal(V), incoming(V, I), outgoing(V, O), I!=O."
+      "description": "Internal nodes flow conservation.",
+      "asp_rule": ":- node(V), not start(V), not terminal(V), In = #sum{F,U : flow(U,V,F)}, Out = #sum{F,W : flow(V,W,F)}, In != Out."
     }
   ],
-  "soft_constraints": [
-    {
-      "description": "Our final objective is to be as ambitious as possible! We use this optimization statement to instruct the solver to find the specific flow configuration that results in the highest possible total volume of flow arriving at the terminal node.",
-      "asp_rule": "#maximize{I : incoming(T, I), terminal(T)}."
-    }
-  ]
+  "soft_constraints": [],
+  "global_objective": "#maximize { F,U,V : flow(U,V,F), terminal(V) }."
 }

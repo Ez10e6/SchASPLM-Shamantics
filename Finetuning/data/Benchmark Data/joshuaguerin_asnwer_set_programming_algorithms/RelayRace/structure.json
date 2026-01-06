@@ -1,60 +1,45 @@
 {
-  "instance_template": "leg(T, Start, End). legDist(T, Distance). legAscent(T, Climb). legTime(T). participant(P). preferredDistance(P, Distance). preferredPace(P, Pace). preferredAscent(P, Ascent). objective(Priority, Name).",
-  "generator": "{ assignment(P, leg(T, S, E)) : participant(P) } = 1 :- leg(T, S, E).",
+  "instance_template": "leg(1, \"PointA\", \"PointB\").\nlegTime(1).\nlegDist(1, 5).\nlegAscent(1, 100).\nlegDescent(1, 20).\nparticipant(\"Alice\").\npreferredDistance(\"Alice\", 10).\npreferredPace(\"Alice\", 5).\nobjective(1, \"dist-pref\").\nobjective(2, \"duration\").\nobjective(3, \"pace-pref\").\nobjective(4, \"exchange-count\").",
+  "generator": "{ assignment(P, leg(T, S, E)) : participant(P) } >= 1 :- leg(T, S, E).\nrun(P, T) :- assignment(P, leg(T, S, E)).",
   "hard_constraints": [
     {
-      "description": "Link participant to leg index.",
-      "asp_rule": "run(P,T) :- assignment(P, leg(T,_,_))."
-    },
-    {
-      "description": "Identify last exchange point for runner.",
-      "asp_rule": "endExchange(P, Exchange) :- leg(T1, _, Exchange), T1=#max{T:run(P, T), legTime(T)}, participant(P)."
-    },
-    {
-      "description": "Identify first exchange point for runner.",
-      "asp_rule": "startExchange(P, Exchange) :- leg(T1, Exchange, _), T1=#min{T:run(P, T), legTime(T)}, participant(P)."
-    },
-    {
-      "description": "Define time indices adjacent to legs.",
-      "asp_rule": "exchangeTime(T1) :- T1 = T + 1, legTime(T). exchangeTime(T1) :- T1 = T - 1, legTime(T)."
-    },
-    {
-      "description": "Detect handoff events for participants.",
-      "asp_rule": "exchange(P, T - 1) :- not run(P, T - 1), run(P, T), participant(P), legTime(T). exchange(P, T + 1) :- run(P, T), not run(P, T + 1), participant(P), legTime(T)."
-    },
-    {
-      "description": "Determine leg pace via runner preference.",
-      "asp_rule": "legPace(T, Max) :- Max > 0, Max = #max{Pace:run(P, T), preferredPace(P,Pace), participant(P)}, legTime(T)."
-    },
-    {
-      "description": "Calculate duration from distance and pace.",
-      "asp_rule": "legDuration(T, Duration) :- Duration = Distance * M, legDist(T,Distance), legPace(T, M), legTime(T)."
-    },
-    {
-      "description": "Total distance run per participant.",
-      "asp_rule": "participantDist(P, Total) :- Total = #sum{Distance: legDist(T,Distance), run(P,T), legTime(T)}, participant(P)."
-    },
-    {
-      "description": "Total ascent climbed per participant.",
-      "asp_rule": "participantAscent(P, Total) :- Total = #sum{Climb: legAscent(T,Climb), run(P,T), legTime(T)}, preferredAscent(P, _), participant(P)."
+      "description": "Quick sanity check: every leg in the race needs at least one runner assigned to it.",
+      "asp_rule": ":- leg(T, S, E), not assignment(_, leg(T, S, E))."
     }
   ],
   "soft_constraints": [
     {
-      "description": "Minimize distance preference deviation.",
-      "asp_rule": "#minimize {|Actual - Preferred| @ Priority, P: participantDist(P, Actual), preferredDistance(P, Preferred), participant(P), objective(Priority, \"dist-pref\")}. "
+      "description": "Total up the distance for each runner so we can see how much ground they're covering.",
+      "asp_rule": "participantDist(P, Total) :- participant(P), Total = #sum{ D, T : run(P, T), legDist(T, D) }."
     },
     {
-      "description": "Minimize total race duration.",
-      "asp_rule": "#minimize {Duration @ Priority, T: legDuration(T, Duration), legTime(T), objective(Priority, \"duration\")}. "
+      "description": "Hit those distance goals. We punish any deviation from the runner's preferred mileage.",
+      "asp_rule": "penalty(\"dist-pref\", P, Act - Pref, Pri) :- participantDist(P, Act), preferredDistance(P, Pref), Act >= Pref, objective(Pri, \"dist-pref\").\npenalty(\"dist-pref\", P, Pref - Act, Pri) :- participantDist(P, Act), preferredDistance(P, Pref), Pref > Act, objective(Pri, \"dist-pref\")."
     },
     {
-      "description": "Minimize pace preference deviation.",
-      "asp_rule": "#minimize {|Actual - Preferred| @ Priority, P, T: legPace(T, Actual), run(P, T), preferredPace(P, Preferred), objective(Priority, \"pace-pref\")}. "
+      "description": "Determine the leg pace based on the slowest runner (the one with the highest pace value) in that leg.",
+      "asp_rule": "legPace(T, MaxPace) :- legTime(T), MaxPace = #max{ P : run(R, T), preferredPace(R, P) }."
     },
     {
-      "description": "Minimize total runner handoffs.",
-      "asp_rule": "#minimize{1 @ Priority, P, T: exchange(P,T), exchangeTime(T), participant(P), objective(Priority, \"exchange-count\")}. "
+      "description": "Calculate how long the leg takes based on distance and the calculated pace.",
+      "asp_rule": "legDuration(T, Duration) :- legDist(T, Dist), legPace(T, Pace), Duration = Dist * Pace."
+    },
+    {
+      "description": "Minimize the total time on the clock for the whole race by penalizing leg durations.",
+      "asp_rule": "penalty(\"duration\", T, Dur, Pri) :- legDuration(T, Dur), objective(Pri, \"duration\")."
+    },
+    {
+      "description": "Keep everyone happy with the speed. If the leg pace is slower than their preference, they get a penalty.",
+      "asp_rule": "penalty(\"pace-pref\", (P, T), Act - Pref, Pri) :- run(P, T), preferredPace(P, Pref), legPace(T, Act), Act > Pref, objective(Pri, \"pace-pref\")."
+    },
+    {
+      "description": "Mark every time a runner starts or stops a stint. Too many handoffs make the logistics messy.",
+      "asp_rule": "exchange(P, T) :- run(P, T), not run(P, T-1), legTime(T).\nexchange(P, T) :- run(P, T), not run(P, T+1), legTime(T).\npenalty(\"exchange-count\", (P, T), 1, Pri) :- exchange(P, T), objective(Pri, \"exchange-count\")."
+    },
+    {
+      "description": "Calculate the total vertical climb for each runner for the record books.",
+      "asp_rule": "participantAscent(P, Total) :- participant(P), Total = #sum{ A, T : run(P, T), legAscent(T, A) }."
     }
-  ]
+  ],
+  "global_objective": "#minimize { Cost@Priority, Name, Id : penalty(Name, Id, Cost, Priority) }."
 }

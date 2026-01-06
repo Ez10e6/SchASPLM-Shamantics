@@ -1,19 +1,20 @@
 {
-  "instance_template": "plan(\"BasicData\"; \"PremiumData\").\nphone(\"ModelX\"; \"ModelY\").\naccessory(\"CaseA\"; \"CaseB\").",
-  "generator": "1 { selected_plan(P) : plan(P) } 1.\n1 { selected_phone(M) : phone(M) } 1.\n1 { selected_accessory(A) : accessory(A) } 1.",
+  "instance_template": "plan(\"BasicData\"). plan(\"PremiumData\"). phone(\"ModelX\"). phone(\"ModelY\"). accessory(\"CaseA\"). accessory(\"CaseB\").",
+  "generator": "1 { selected_plan(P) : plan(P) } 1. 1 { selected_phone(M) : phone(M) } 1. 1 { selected_accessory(A) : accessory(A) } 1.",
   "hard_constraints": [
     {
-      "description": "It is required that the conjunction of the 'BasicData' plan selection and the 'ModelY' phone selection evaluates to false; thus, their simultaneous assignment is prohibited.",
+      "description": "BasicData and ModelY just don't vibe together, sanity check this combo out of existence.",
       "asp_rule": ":- selected_plan(\"BasicData\"), selected_phone(\"ModelY\")."
     },
     {
-      "description": "For any model selection where the element is 'ModelX', the existence of a selected accessory $A$ such that $A$ is not 'CaseA' is strictly disallowed.",
-      "asp_rule": ":- selected_phone(\"ModelX\"), selected_accessory(A), A != \"CaseA\"."
+      "description": "ModelX is super picky and won't roll without CaseA.",
+      "asp_rule": ":- selected_phone(\"ModelX\"), not selected_accessory(\"CaseA\")."
     },
     {
-      "description": "The set of valid configurations must exclude the intersection of the 'PremiumData' plan selection and the 'CaseA' accessory selection.",
+      "description": "PremiumData and CaseA are a no-go, don't let them pair up.",
       "asp_rule": ":- selected_plan(\"PremiumData\"), selected_accessory(\"CaseA\")."
     }
   ],
-  "soft_constraints": []
+  "soft_constraints": [],
+  "global_objective": ""
 }

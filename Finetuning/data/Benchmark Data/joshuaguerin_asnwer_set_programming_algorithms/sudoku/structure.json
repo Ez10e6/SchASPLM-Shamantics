@@ -1,19 +1,20 @@
 {
   "instance_template": "value(1..9).",
-  "generator": "1 { sudoku(R, C, V) : value(V) } 1 :- value(R), value(C).",
+  "generator": "1 { sudoku(R,C,V) : value(V) } 1 :- value(R), value(C).",
   "hard_constraints": [
     {
-      "description": "For every row R and every value V within the defined domain, there must exist exactly one column C such that the predicate sudoku(R, C, V) is satisfied.",
-      "asp_rule": "1 { sudoku(R, C, V) : value(C) } 1 :- value(R), value(V)."
+      "description": "Sanity check: every single row has to have all numbers from 1 to 9 with no repeats.",
+      "asp_rule": ":- sudoku(R,C1,V), sudoku(R,C2,V), C1 != C2."
     },
     {
-      "description": "For every column C and every value V within the defined domain, there must exist exactly one row R such that the predicate sudoku(R, C, V) is satisfied.",
-      "asp_rule": "1 { sudoku(R, C, V) : value(R) } 1 :- value(C), value(V)."
+      "description": "Gotta keep the columns clean too; no duplicate digits allowed in any vertical line.",
+      "asp_rule": ":- sudoku(R1,C,V), sudoku(R2,C,V), R1 != R2."
     },
     {
-      "description": "It is required that no two distinct coordinate pairs (R, C) and (S, D) mapped to the same value V are elements of the same 3x3 subgrid, where subgrid membership is determined by the floor division of coordinates by three.",
-      "asp_rule": ":- sudoku(R, C, V), sudoku(S, D, V), (R,C) != (S,D), (R-1)/3 == (S-1)/3, (C-1)/3 == (D-1)/3."
+      "description": "The 3x3 boxes are the real deal. We need a full set of numbers in every subgrid, no double-dipping.",
+      "asp_rule": ":- sudoku(R1,C1,V), sudoku(R2,C2,V), (R1,C1) != (R2,C2), (R1-1)/3 == (R2-1)/3, (C1-1)/3 == (C2-1)/3."
     }
   ],
-  "soft_constraints": []
+  "soft_constraints": [],
+  "global_objective": null
 }

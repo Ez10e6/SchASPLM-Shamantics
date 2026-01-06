@@ -1,36 +1,49 @@
 {
-  "instance_template": "cpu(\"Ryzen7\", 300; \"i9\", 400; \"Xeon\", 500).\ngpu(\"RTX4060\", 350; \"RTX3090\", 700; \"Quadro\", 800).\nmobo(\"X670\", 180; \"Z690\", 200; \"C621\", 250).\npsu(\"Bronze\", 80; \"Gold\", 120; \"Platinum\", 160).\nhigh_power(\"RTX3090\"; \"Quadro\").",
-  "generator": "1 { selected_cpu(C) : cpu(C, _) } 1.\n1 { selected_gpu(G) : gpu(G, _) } 1.\n1 { selected_mobo(M) : mobo(M, _) } 1.\n1 { selected_psu(P) : psu(P, _) } 1.",
+  "instance_template": "cpu(\"Ryzen7\", 300). cpu(\"i9\", 400). cpu(\"Xeon\", 500). gpu(\"RTX4060\", 350). gpu(\"RTX3090\", 700). gpu(\"Quadro\", 800). mobo(\"X670\", 180). mobo(\"Z690\", 200). mobo(\"C621\", 250). psu(\"Bronze\", 80). psu(\"Gold\", 120). psu(\"Platinum\", 160). high_power(\"RTX3090\"). high_power(\"Quadro\").",
+  "generator": "1 { selected_cpu(C) : cpu(C, Cost) } 1. 1 { selected_gpu(G) : gpu(G, Cost) } 1. 1 { selected_mobo(M) : mobo(M, Cost) } 1. 1 { selected_psu(P) : psu(P, Cost) } 1.",
   "hard_constraints": [
     {
-      "description": "Notice how high-performance graphics cards have heavy energy requirements. We must ensure that if a high-power GPU is chosen, it is never paired with a low-efficiency Bronze PSU.",
+      "description": "The utilization of a high-power graphics processing unit is prohibited in conjunction with a Bronze-rated power supply unit.",
       "asp_rule": ":- selected_gpu(G), high_power(G), selected_psu(\"Bronze\")."
     },
     {
-      "description": "Class, it is important to remember that the Xeon is a specialized processor. It strictly requires the workstation-grade C621 motherboard to function.",
+      "description": "The selection of a Xeon processor necessitates the selection of a C621 architectural motherboard.",
       "asp_rule": ":- selected_cpu(\"Xeon\"), selected_mobo(M), M != \"C621\"."
     },
     {
-      "description": "To maintain system stability, we must ensure the Ryzen7 processor is only ever used with the X670 motherboard; no other board is acceptable for this CPU.",
+      "description": "An AMD Ryzen 7 processor must be paired exclusively with an X670 chipset motherboard.",
       "asp_rule": ":- selected_cpu(\"Ryzen7\"), selected_mobo(M), M != \"X670\"."
     },
     {
-      "description": "Pay close attention to hardware incompatibilities: the i9 processor simply cannot be installed on an X670 motherboard, so we must forbid that combination.",
+      "description": "The concurrent selection of an Intel i9 processor and an X670 motherboard is logically excluded.",
       "asp_rule": ":- selected_cpu(\"i9\"), selected_mobo(\"X670\")."
     },
     {
-      "description": "For high-end workstation tasks, the Quadro card is only supported when paired with a Xeon CPU. Any other processor choice is invalid for this GPU.",
+      "description": "Provision of a Quadro graphics card implies the mandatory inclusion of a Xeon central processing unit.",
       "asp_rule": ":- selected_gpu(\"Quadro\"), selected_cpu(C), C != \"Xeon\"."
     },
     {
-      "description": "The Quadro card also has motherboard limitations; specifically, it is not compatible with the Z690 board, so we must filter out that configuration.",
+      "description": "A Quadro graphics card is incompatible with the Z690 motherboard configuration.",
       "asp_rule": ":- selected_gpu(\"Quadro\"), selected_mobo(\"Z690\")."
     }
   ],
   "soft_constraints": [
     {
-      "description": "Finally, students, we want to find the most cost-effective build. We calculate the sum of the costs of our selected components and instruct the solver to minimize that total value.",
-      "asp_rule": "total_cost(Cost) :- selected_cpu(C), cpu(C, CCost), selected_gpu(G), gpu(G, GCost), selected_mobo(M), mobo(M, MCost), selected_psu(P), psu(P, PCost), Cost = CCost + GCost + MCost + PCost. #minimize { C : total_cost(C) }."
+      "description": "A penalty is incurred equivalent to the financial cost of the selected central processing unit.",
+      "asp_rule": "penalty(\"cpu_cost\", C, Cost) :- selected_cpu(C), cpu(C, Cost)."
+    },
+    {
+      "description": "A penalty is incurred equivalent to the financial cost of the selected graphics processing unit.",
+      "asp_rule": "penalty(\"gpu_cost\", G, Cost) :- selected_gpu(G), gpu(G, Cost)."
+    },
+    {
+      "description": "A penalty is incurred equivalent to the financial cost of the selected motherboard component.",
+      "asp_rule": "penalty(\"mobo_cost\", M, Cost) :- selected_mobo(M), mobo(M, Cost)."
+    },
+    {
+      "description": "A penalty is incurred equivalent to the financial cost of the selected power supply unit.",
+      "asp_rule": "penalty(\"psu_cost\", P, Cost) :- selected_psu(P), psu(P, Cost)."
     }
-  ]
+  ],
+  "global_objective": "#minimize { Cost, Type, Item : penalty(Type, Item, Cost) }."
 }

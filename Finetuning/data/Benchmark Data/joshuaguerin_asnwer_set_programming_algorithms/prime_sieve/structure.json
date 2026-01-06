@@ -1,15 +1,16 @@
 {
-  "instance_template": "num(2..n).",
-  "generator": "{ p(X) : q(X) }.",
+  "instance_template": "#const n=100. num(2..n).",
+  "generator": "{ prime(X) : num(X) }. composite(X) :- num(X), num(Y), Y < X, X \\ Y = 0.",
   "hard_constraints": [
     {
-      "description": "To identify numbers that aren't prime, we first define what a composite number is. Think of it like this: a number X is composite if there exists another number Y in our set that can divide X perfectly without leaving a remainder, as long as Y is not the same as X.",
-      "asp_rule": "composite(X) :- num(X), num(Y), X \\ Y == 0, X != Y."
+      "description": "We must ensure that any number identified as prime truly meets the criteria: it must not have any divisors other than one and itself, meaning it cannot be a composite number.",
+      "asp_rule": ":- prime(X), composite(X)."
     },
     {
-      "description": "Now that we know which numbers are composite, finding primes is a simple process of elimination. We define a number N as prime if it is part of our starting set and has not been flagged as a composite number by our previous rule.",
-      "asp_rule": "prime(N) :- num(N), not composite(N)."
+      "description": "Conversely, we must ensure that no prime numbers are missed; if a number in our domain has no divisors and is therefore not composite, it must be included in our set of primes.",
+      "asp_rule": ":- num(X), not prime(X), not composite(X)."
     }
   ],
-  "soft_constraints": []
+  "soft_constraints": [],
+  "global_objective": ""
 }

@@ -1,16 +1,17 @@
 {
-  "instance_template": "max_colors(N) :- N = #count{ X : node(X) }. color(1..N) :- max_colors(N). edge(Y, X) :- edge(X, Y).",
-  "generator": "1 { assign(N, C) : color(C) } 1 :- node(N).",
+  "instance_template": "node(1..3). edge(1,2). edge(2,3).",
+  "generator": "color(1..N) :- N = #count { X : node(X) }. edge(V,U) :- edge(U,V). { assign(N,C) : color(C) } = 1 :- node(N).",
   "hard_constraints": [
     {
-      "description": "Adjacent nodes. No shared color.",
-      "asp_rule": ":- edge(X, Y), assign(X, C), assign(Y, C)."
+      "description": "Sanity check to make sure adjacent nodes don't end up with the same color.",
+      "asp_rule": ":- edge(U,V), assign(U,C), assign(V,C)."
     }
   ],
   "soft_constraints": [
     {
-      "description": "Minimize unique colors used.",
-      "asp_rule": "chromatic_number(N) :- N = #count{ C : assign(X, C) }. #minimize { N : chromatic_number(N) }."
+      "description": "We need to track which colors are actually being used so we can minimize that count.",
+      "asp_rule": "used(C) :- assign(_,C). penalty(\"color_used\", C, 1) :- used(C)."
     }
-  ]
+  ],
+  "global_objective": "#minimize { Cost, Tag, ID : penalty(Tag, ID, Cost) }."
 }

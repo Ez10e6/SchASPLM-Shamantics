@@ -1,11 +1,16 @@
 {
-  "instance_template": "value(V).",
-  "generator": "1 { a(V); b(V) } 1 :- value(V).",
+  "instance_template": "value(1..10).",
+  "generator": "subset(\"a\"). subset(\"b\"). { partition(V, S) : subset(S) } :- value(V).",
   "hard_constraints": [
     {
-      "description": "For any valid partition, it is required that the arithmetic summation of elements assigned to the first subset is mathematically equivalent to the arithmetic summation of elements assigned to the second subset.",
-      "asp_rule": "total(a, S) :- S = #sum{ A : a(A) }. total(b, S) :- S = #sum{ B : b(B) }. :- total(a, S1), total(b, S2), S1 != S2."
+      "description": "Class, it is fundamental that every single number from our input set is assigned to a group. You must ensure that each value belongs to exactly one subset\u2014either 'a' or 'b'\u2014meaning no number is left unassigned and no number is included in both groups simultaneously.",
+      "asp_rule": ":- value(V), #count{ S : partition(V, S) } != 1."
+    },
+    {
+      "description": "Now, we must achieve a perfect balance between the two groups. This means the total sum of all integers assigned to subset 'a' must be precisely equal to the total sum of those in subset 'b'. We use aggregate functions to calculate these sums and discard any partition where they do not match.",
+      "asp_rule": ":- S1 = #sum{ V : partition(V, \"a\") }, S2 = #sum{ V : partition(V, \"b\") }, S1 != S2."
     }
   ],
-  "soft_constraints": []
+  "soft_constraints": [],
+  "global_objective": null
 }

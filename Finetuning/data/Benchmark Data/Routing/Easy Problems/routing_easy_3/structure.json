@@ -1,19 +1,20 @@
 {
-  "instance_template": "loc(\"A\"; \"B\"; \"C\"; \"D\"; \"E\"). edge(\"A\", \"B\"). edge(\"A\", \"D\"). edge(\"B\", \"C\"). edge(\"D\", \"E\"). time(0..6). deliver_to(\"C\"; \"E\").",
+  "instance_template": "loc(\"A\";\"B\";\"C\";\"D\";\"E\"). deliver_to(\"C\";\"E\"). edge(\"A\",\"B\"). edge(\"A\",\"D\"). edge(\"B\",\"C\"). edge(\"D\",\"E\"). time(0..6).",
   "generator": "1 { at(L, T) : loc(L) } 1 :- time(T).",
   "hard_constraints": [
     {
-      "description": "Sanity check: gotta make sure the bot actually spawns at station A at the start.",
-      "asp_rule": "at(\"A\", 0)."
+      "description": "Every journey must start from the beginning; therefore, we require the bot to be at station A at the initial time step 0.",
+      "asp_rule": ":- not at(\"A\", 0)."
     },
     {
-      "description": "No teleporting hacks. The bot can only move between spots if there's a legit path connecting them.",
-      "asp_rule": ":- at(L1, T), at(L2, T+1), not edge(L1, L2), not edge(L2, L1), time(T)."
+      "description": "To ensure valid movement, the robot is only allowed to transition between two stations if they are connected by a marked path. We forbid any move between non-adjacent stations.",
+      "asp_rule": ":- at(L1, T), at(L2, T+1), not edge(L1, L2), not edge(L2, L1), time(T), time(T+1)."
     },
     {
-      "description": "We need to hit every delivery target exactly once; can't just skip the drop-offs.",
-      "asp_rule": "1 { at(L, T) : time(T) } 1 :- deliver_to(L)."
+      "description": "The mission objectives are specific: the robot must visit each of the delivery stations, such as C and E, exactly one time during its entire operation.",
+      "asp_rule": ":- deliver_to(L), N = #count { T : at(L, T) }, N != 1."
     }
   ],
-  "soft_constraints": []
+  "soft_constraints": [],
+  "global_objective": null
 }

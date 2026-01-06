@@ -75,3 +75,7 @@ def get_model_path(model_type="llama"):
 def get_output_dir(model_type, framework):
     root = get_project_root()
     return os.path.join(root, 'local_models', f"ft_{model_type}_{framework}")
+
+def get_prompts_path():
+    """Returns path to: Finetuning/prompts"""
+    return os.path.join(get_finetuning_root(), "prompts")

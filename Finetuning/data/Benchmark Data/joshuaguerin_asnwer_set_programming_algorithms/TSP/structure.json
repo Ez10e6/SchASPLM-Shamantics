@@ -1,32 +1,41 @@
 {
-  "instance_template": "node(X). edge(X, Y, C). start(S). end(E). edge(Y, X, C) :- edge(X, Y, C).",
-  "generator": "{ path(X, Y, C) } :- edge(X, Y, C).",
+  "instance_template": "node(1..5). edge(1,2,10). edge(1,3,15). edge(2,3,5). edge(2,4,20). edge(3,4,10). edge(4,5,5). start(1). end(5).",
+  "generator": "edge(V,U,C) :- edge(U,V,C). { path(U,V,C) : edge(U,V,C) }. reachable(S) :- start(S). reachable(V) :- reachable(U), path(U,V,C).",
   "hard_constraints": [
     {
-      "description": "Compliance rule: Every node in the network must have at most one incoming edge to maintain a singular trajectory.",
-      "asp_rule": "{ path(X, Y, C) : edge(X, Y, C) } 1 :- node(Y)."
+      "description": "Business Requirements: The designated start node must have exactly one outgoing edge to begin the sequence.",
+      "asp_rule": ":- start(S), #count{ V,C : path(S,V,C) } != 1."
     },
     {
-      "description": "Policy requirement: To ensure path continuity, every node must have at most one outgoing edge.",
-      "asp_rule": "{ path(X, Y, C) : edge(X, Y, C) } 1 :- node(X)."
+      "description": "Business Requirements: For compliance with path logic, the start node is prohibited from having any incoming edges.",
+      "asp_rule": ":- start(S), path(U,S,C)."
     },
     {
-      "description": "Operational rule: The designated start node is prohibited from having any incoming connections to ensure it is the absolute origin.",
-      "asp_rule": ":- start(S), path(X, S, C)."
+      "description": "Business Requirements: The designated end node must have exactly one incoming edge to terminate the sequence.",
+      "asp_rule": ":- end(E), #count{ U,C : path(U,E,C) } != 1."
     },
     {
-      "description": "Security policy: The designated end node must terminate the path and is strictly forbidden from having outgoing connections.",
-      "asp_rule": ":- end(E), path(E, Y, C)."
+      "description": "Business Requirements: To ensure a proper termination, the end node is prohibited from having any outgoing edges.",
+      "asp_rule": ":- end(E), path(E,V,C)."
     },
     {
-      "description": "Infrastructure compliance: All nodes must be reachable from the start node, and the end node must be reachable to ensure a valid Hamiltonian path.",
-      "asp_rule": "reachable(S) :- start(S). reachable(Y) :- reachable(X), path(X, Y, C). :- end(E), not reachable(E). :- node(X), not reachable(X)."
+      "description": "Business Requirements: Every intermediate node must have exactly one outgoing edge to maintain the path flow.",
+      "asp_rule": ":- node(N), not start(N), not end(N), #count{ V,C : path(N,V,C) } != 1."
+    },
+    {
+      "description": "Business Requirements: Every intermediate node must have exactly one incoming edge to ensure it is part of the sequence.",
+      "asp_rule": ":- node(N), not start(N), not end(N), #count{ U,C : path(U,N,C) } != 1."
+    },
+    {
+      "description": "Business Requirements: Every node in the network must be reachable from the start node to satisfy the Hamiltonian property.",
+      "asp_rule": ":- node(N), not reachable(N)."
     }
   ],
   "soft_constraints": [
     {
-      "description": "Financial efficiency policy: The total cost of the path must be minimized to meet corporate expenditure targets.",
-      "asp_rule": "#minimize{C, X, Y : path(X, Y, C)}."
+      "description": "Business Requirements: The policy is to account for the weight of every selected edge to determine the total route expenditure.",
+      "asp_rule": "penalty(\"edge_cost\", (U,V), C) :- path(U,V,C)."
     }
-  ]
+  ],
+  "global_objective": "#minimize { Cost,Tag,ID : penalty(Tag,ID,Cost) }."
 }

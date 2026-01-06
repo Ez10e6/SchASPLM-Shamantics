@@ -1,19 +1,20 @@
 {
-  "instance_template": "cpu(\"Ryzen5\"; \"i5\").\ngpu(\"GTX1660\"; \"RX580\").\nmobo(\"B450\"; \"Z390\").",
-  "generator": "1 { selected_cpu(C) : cpu(C) } 1.\n1 { selected_gpu(G) : gpu(G) } 1.\n1 { selected_mobo(M) : mobo(M) } 1.",
+  "instance_template": "cpu(\"Ryzen5\"). cpu(\"i5\"). gpu(\"GTX1660\"). gpu(\"RX580\"). mobo(\"B450\"). mobo(\"Z390\").",
+  "generator": "1 { selected_cpu(C) : cpu(C) } 1. 1 { selected_gpu(G) : gpu(G) } 1. 1 { selected_mobo(M) : mobo(M) } 1.",
   "hard_constraints": [
     {
-      "description": "For any instance where the Ryzen5 processor is selected, it is strictly required that the associated motherboard is the B450 model; the selection of any motherboard M such that M is not equal to 'B450' is prohibited.",
+      "description": "It is required that the selection of a Ryzen5 central processing unit implies the exclusive compatibility with a B450 motherboard; any configuration where a Ryzen5 is paired with an alternative motherboard is prohibited.",
       "asp_rule": ":- selected_cpu(\"Ryzen5\"), selected_mobo(M), M != \"B450\"."
     },
     {
-      "description": "It is mandated that the selection of the i5 processor implies the exclusive assignment of the Z390 motherboard; all configurations containing the i5 CPU and a motherboard M such that M is not 'Z390' are excluded from the solution space.",
+      "description": "It is mandated that the selection of an i5 central processing unit necessitates the selection of a Z390 motherboard; selections involving the i5 and motherboards other than the Z390 model are invalid.",
       "asp_rule": ":- selected_cpu(\"i5\"), selected_mobo(M), M != \"Z390\"."
     },
     {
-      "description": "A mutual exclusivity constraint is imposed upon the RX580 graphics processing unit and the Z390 motherboard; the conjunction of these two components within a single configuration is disallowed.",
+      "description": "The logical conjunction of a selected RX580 graphics processing unit and a Z390 motherboard is strictly forbidden due to hardware incompatibility.",
       "asp_rule": ":- selected_gpu(\"RX580\"), selected_mobo(\"Z390\")."
     }
   ],
-  "soft_constraints": []
+  "soft_constraints": [],
+  "global_objective": null
 }

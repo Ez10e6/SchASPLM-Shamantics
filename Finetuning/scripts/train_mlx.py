@@ -6,7 +6,7 @@ import shutil
 import tempfile
 from utils_ft import to_relative, get_project_root
 
-def run_mlx_training(model_path, data_folder, adapter_path, iters=2000, num_layers=16):
+def run_mlx_training(model_path, data_folder, adapter_path, iters=1000, num_layers=16):
     """
     Runs MLX LoRA training via CLI.
     """

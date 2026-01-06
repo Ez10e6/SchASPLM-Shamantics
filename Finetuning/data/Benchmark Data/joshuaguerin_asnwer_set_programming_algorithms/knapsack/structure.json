@@ -1,16 +1,17 @@
 {
-  "instance_template": "item(Value, Weight).",
-  "generator": "{ knapsack(V, W) } :- item(V, W).",
+  "instance_template": "item(10,2). item(20,5). item(30,10). capacity(15).",
+  "generator": "{ selected(V,W) : item(V,W) }.",
   "hard_constraints": [
     {
-      "description": "Do a sanity check on the bag's weight. If the total heft of our picked items blows past the capacity limit 'n', the whole thing is a bust.",
-      "asp_rule": ":- #sum { W, V : knapsack(V, W) } > n."
+      "description": "Total weight must not exceed capacity.",
+      "asp_rule": ":- TotalWeight = #sum { W,V : selected(V,W) }, capacity(MaxWeight), TotalWeight > MaxWeight."
     }
   ],
   "soft_constraints": [
     {
-      "description": "We're trying to get rich here, so maximize the total value. Crank that sum as high as the constraints allow so we get the best loot.",
-      "asp_rule": "#maximize { V, W : knapsack(V, W) }."
+      "description": "Maximize total value of selected items.",
+      "asp_rule": "penalty(\"ValueGain\", (V,W), -V) :- selected(V,W)."
     }
-  ]
+  ],
+  "global_objective": "#minimize { Weight,Tuple,Name : penalty(Name,Tuple,Weight) }."
 }

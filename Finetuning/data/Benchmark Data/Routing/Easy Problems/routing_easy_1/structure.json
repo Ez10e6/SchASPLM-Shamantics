@@ -1,19 +1,24 @@
 {
-  "instance_template": "loc(\"A\"; \"B\"; \"C\"; \"D\"; \"E\"). edge(\"A\", \"B\"). edge(\"A\", \"C\"). edge(\"B\", \"D\"). edge(\"C\", \"E\"). deliver_to(\"D\"; \"E\"). time(0..6).",
-  "generator": "1 { at(L, T) : loc(L) } 1 :- time(T).",
+  "instance_template": "loc(\"A\"). loc(\"B\"). loc(\"C\"). loc(\"D\"). loc(\"E\"). edge(\"A\", \"B\"). edge(\"A\", \"C\"). edge(\"B\", \"D\"). edge(\"C\", \"E\"). deliver_to(\"D\"). deliver_to(\"E\"). time(0..6).",
+  "generator": "{ at(L, T) : loc(L) } = 1 :- time(T).",
   "hard_constraints": [
     {
-      "description": "Sanity check to make sure the bot doesn't teleport; it can only move between spots that are actually connected.",
-      "asp_rule": ":- at(L1, T), at(L2, T+1), not edge(L1, L2), not edge(L2, L1), time(T)."
+      "description": "To properly initialize the mission, we must ensure that the robot is physically located at site A at the very first timestep.",
+      "asp_rule": ":- not at(\"A\", 0)."
     },
     {
-      "description": "Hardcode the start point so the bot doesn't just spawn wherever it wants at T=0.",
-      "asp_rule": "at(\"A\", 0)."
+      "description": "Movement between any two locations is only permitted if there is a direct physical link defined in our map; the robot cannot jump between disconnected sites.",
+      "asp_rule": ":- at(L1, T), at(L2, T+1), not edge(L1, L2), not edge(L2, L1), time(T), time(T+1), L1 != L2."
     },
     {
-      "description": "The bot's gotta hit every delivery site exactly once. No skipping and no camping at the destination.",
-      "asp_rule": "1 { at(L, T) : time(T) } 1 :- deliver_to(L)."
+      "description": "Each designated delivery location must be visited by the robot exactly once during the 6-minute window to satisfy the delivery requirements.",
+      "asp_rule": ":- deliver_to(L), #count { T : at(L, T) } != 1."
+    },
+    {
+      "description": "The robot must move to a new location every minute; it is not permitted to remain stationary at its current location between timesteps.",
+      "asp_rule": ":- at(L, T), at(L, T+1), time(T), time(T+1)."
     }
   ],
-  "soft_constraints": []
+  "soft_constraints": [],
+  "global_objective": ""
 }

@@ -1,32 +1,49 @@
 {
-  "instance_template": "loc(\"HubWest\"; \"NodeA\"; \"NodeB\"; \"Sensor1\"; \"Sensor2\").\nedge(\"HubWest\", \"NodeA\").\nedge(\"HubWest\", \"NodeB\").\nedge(\"NodeA\", \"Sensor1\").\nedge(\"NodeB\", \"Sensor2\").\nedge(\"NodeA\", \"NodeB\").\ntime(0..9).\nat(\"HubWest\", 0).\ninspect(\"Sensor1\"; \"Sensor2\").",
-  "generator": "1 { at(L, T) : loc(L) } 1 :- time(T).\n1 { inspect_at(L, T) : time(T) } 1 :- inspect(L).",
+  "instance_template": "location(\"launchPad\"; \"tunnel1\"; \"tunnel2\"; \"tunnel3\"; \"stationA\"; \"stationB\"; \"stationC\"; \"calibEdge\").\nedge(\"launchPad\", \"tunnel1\", 2).\nedge(\"launchPad\", \"tunnel2\", 3).\nedge(\"tunnel1\", \"stationA\", 1).\nedge(\"stationA\", \"tunnel3\", 1).\nedge(\"tunnel3\", \"tunnel2\", 0).\nedge(\"tunnel2\", \"stationB\", 1).\nedge(\"tunnel2\", \"calibEdge\", 2).\nedge(\"calibEdge\", \"stationC\", 1).\nedge(\"stationC\", \"tunnel1\", 2).\nmandatory(\"stationA\"; \"stationB\").\noptional(\"stationC\").\ntime(0..10).\nmax_tank(16).",
+  "generator": "at(\"launchPad\", 0).\ntank(16, 0).\naction_blocked(T) :- refill(T-1).\n1 { move(U, V, T) : edge(U, V, C); sample(U, T); refill(T); idle(T) } 1 :- at(U, T), T < 10, not action_blocked(T).\nat(V, T+1) :- move(U, V, T).\nat(U, T+1) :- sample(U, T).\nat(U, T+1) :- idle(T), at(U, T).\nat(U, T+1) :- refill(T), at(U, T).\nat(U, T+2) :- refill(T), at(U, T).\ntank(V-C, T+1) :- tank(V, T), move(U, W, T), edge(U, W, C).\ntank(V-1, T+1) :- tank(V, T), sample(S, T).\ntank(V, T+1) :- tank(V, T), idle(T).\ntank(V, T+1) :- tank(V, T), refill(T).\ntank(V_next, T+2) :- tank(V, T), refill(T), V+3 <= 16, V_next = V+3.\ntank(16, T+2) :- tank(V, T), refill(T), V+3 > 16.",
   "hard_constraints": [
     {
-      "description": "Listen carefully, class: the drone cannot teleport! For the drone to move between two different locations in consecutive minutes, there must be a defined edge connecting them in our map.",
-      "asp_rule": ":- at(L1, T), at(L2, T+1), not edge(L1, L2), not edge(L2, L1), L1 != L2."
+      "description": "The drone's tank volume must never drop below zero, nor exceed its maximum 16-liter capacity.",
+      "asp_rule": ":- tank(V, T), V < 0.\n:- tank(V, T), V > 16."
     },
     {
-      "description": "It is important to remember that you cannot inspect a sensor if you aren't actually there. We must ensure the drone's location matches the sensor's location at the time of inspection.",
-      "asp_rule": "at(L, T) :- inspect_at(L, T)."
+      "description": "Refilling the tank is a specialized procedure that can only be performed at the calibration shaft.",
+      "asp_rule": ":- refill(T), at(U, T), U != \"calibEdge\"."
     },
     {
-      "description": "Now, keep in mind that sampling takes time. If the drone starts an inspection at a specific minute, it must remain at that same location for the following minute to finish the task.",
-      "asp_rule": "at(L, T+1) :- inspect_at(L, T), T < 9."
+      "description": "The drone is limited to a single refill operation for the entire duration of its mission.",
+      "asp_rule": ":- #count { T : refill(T) } > 1."
     },
     {
-      "description": "To prevent sensor interference, we must leave a gap. Make sure that any two inspection events are separated by at least three minutes.",
-      "asp_rule": ":- inspect_at(_, T1), inspect_at(_, T2), 0 < T1 - T2 < 3."
+      "description": "The drone must successfully collect water samples from both Station A and Station B to complete its primary mission.",
+      "asp_rule": "sampled(S) :- sample(S, T).\n:- mandatory(S), not sampled(S)."
     },
     {
-      "description": "Here is a specific logical pathing rule: if the drone visits NodeB and then moves to Sensor1, it is strictly forbidden from visiting NodeA at any point after that.",
-      "asp_rule": ":- at(\"NodeB\", T1), at(\"Sensor1\", T2), at(\"NodeA\", T3), T1 < T2 < T3."
+      "description": "The sampling at Station A is time-critical and must be finished no later than the 6-minute mark.",
+      "asp_rule": ":- sample(\"stationA\", T), T > 5."
+    },
+    {
+      "description": "To prevent cross-contamination, the drone is forbidden from taking two consecutive samples at the same station.",
+      "asp_rule": ":- sample(S, T), sample(S, T+1)."
+    },
+    {
+      "description": "The optional sampling at Station C is strictly contingent upon finishing mandatory samples within the first 8 minutes.",
+      "asp_rule": "mandatory_finish(TF) :- TF = #max { T+1 : sample(S, T), mandatory(S) }.\n:- sample(\"stationC\", _), mandatory_finish(TF), TF > 8.\n:- not sampled(\"stationC\"), mandatory_finish(TF), TF <= 8."
+    },
+    {
+      "description": "The total volume of activity, including all moves, samples, and refills, cannot exceed a limit of 18 specific events.",
+      "asp_rule": ":- #count { T,move : move(U,V,T); T,sample : sample(S,T); T,refill : refill(T) } > 18."
     }
   ],
   "soft_constraints": [
     {
-      "description": "Our ultimate goal is speed! We want to find the specific schedule where the very last inspection is completed as early as possible in our timeline.",
-      "asp_rule": "latest_inspect(T) :- T = #max { T1 : inspect_at(_, T1) }.\n#minimize { T : latest_inspect(T) }."
+      "description": "We prefer to collect as many water samples as possible, including optional ones, to maximize our data yield.",
+      "asp_rule": "penalty(\"MissingSample\", S, 100) :- optional(S), not sampled(S)."
+    },
+    {
+      "description": "Whenever possible, we want to finish our mandatory sampling obligations as early as we can.",
+      "asp_rule": "penalty(\"MandatoryTime\", \"finish\", TF) :- mandatory_finish(TF)."
     }
-  ]
+  ],
+  "global_objective": "#minimize { P,Name,Arg : penalty(Name, Arg, P) }."
 }

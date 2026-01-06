@@ -1,28 +1,29 @@
 {
-  "instance_template": "cpu(\"Ryzen9\", 95; \"i7\", 85; \"M1\", 70).\ngpu(\"RTX3070\", 90; \"RX6700XT\", 88; \"IrisXe\", 65).\ncooler(\"AirCool\", 20; \"LiquidCool\", 40; \"PassiveCool\", 5).\nhigh_perf(\"Ryzen9\").\nhigh_perf(\"RTX3070\").\ndiscrete_gpu(\"RTX3070\"; \"RX6700XT\").",
-  "generator": "1 { selected_cpu(C) : cpu(C, _) } 1.\n1 { selected_gpu(G) : gpu(G, _) } 1.\n1 { selected_cooler(C) : cooler(C, _) } 1.",
+  "instance_template": "cpu(\"Ryzen9\", 95). cpu(\"i7\", 85). cpu(\"M1\", 70). gpu(\"RTX3070\", 90). gpu(\"RX6700XT\", 88). gpu(\"IrisXe\", 65). cooler(\"AirCool\", 20). cooler(\"LiquidCool\", 40). cooler(\"PassiveCool\", 5). high_perf(\"Ryzen9\"). high_perf(\"RTX3070\"). discrete_gpu(\"RTX3070\"). discrete_gpu(\"RX6700XT\").",
+  "generator": "1 { selected_cpu(C) : cpu(C, P) } 1. 1 { selected_gpu(G) : gpu(G, P) } 1. 1 { selected_cooler(K) : cooler(K, P) } 1.",
   "hard_constraints": [
     {
-      "description": "Sanity check: if we're running a beast CPU, we gotta use liquid cooling or the whole thing's gonna melt.",
-      "asp_rule": ":- selected_cpu(C), high_perf(C), selected_cooler(K), K != \"LiquidCool\"."
+      "description": "A central processing unit designated as a high-performance component necessitates the integration of a liquid cooling system.",
+      "asp_rule": ":- selected_cpu(C), high_perf(C), not selected_cooler(\"LiquidCool\")."
     },
     {
-      "description": "Same deal for the GPU; don't try to skimp on cooling if you've got a high-end card in the slot.",
-      "asp_rule": ":- selected_gpu(G), high_perf(G), selected_cooler(K), K != \"LiquidCool\"."
+      "description": "A graphical processing unit designated as a high-performance component necessitates the integration of a liquid cooling system.",
+      "asp_rule": ":- selected_gpu(G), high_perf(G), not selected_cooler(\"LiquidCool\")."
     },
     {
-      "description": "Passive cooling is a total joke for discrete GPUs. Don't even try it.",
+      "description": "The utilization of passive cooling systems is strictly prohibited when a discrete graphical processing unit is selected.",
       "asp_rule": ":- selected_gpu(G), discrete_gpu(G), selected_cooler(\"PassiveCool\")."
     },
     {
-      "description": "Hardware mismatch alert! The M1 and that RX6700XT just don't play nice together.",
+      "description": "The RX6700XT graphical processing unit is incompatible with systems utilizing the M1 central processing unit.",
       "asp_rule": ":- selected_gpu(\"RX6700XT\"), selected_cpu(\"M1\")."
     }
   ],
   "soft_constraints": [
     {
-      "description": "We want the beefiest specs possible, so let's max out that total performance score across the board.",
-      "asp_rule": "total_perf(P) :- selected_cpu(C), cpu(C, P1), selected_gpu(G), gpu(G, P2), selected_cooler(K), cooler(K, P3), P = P1 + P2 + P3.\n#maximize { P : total_perf(P) }."
+      "description": "The system configuration should be optimized to maximize the cumulative performance rating of the selected components.",
+      "asp_rule": "penalty(\"TotalPerformance\", (C,G,K), S) :- selected_cpu(C), cpu(C,P1), selected_gpu(G), gpu(G,P2), selected_cooler(K), cooler(K,P3), S = P1 + P2 + P3."
     }
-  ]
+  ],
+  "global_objective": "#maximize { S,C,G,K : penalty(\"TotalPerformance\", (C,G,K), S) }."
 }

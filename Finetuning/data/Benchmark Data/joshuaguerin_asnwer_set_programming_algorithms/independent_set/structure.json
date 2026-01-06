@@ -1,16 +1,17 @@
 {
-  "instance_template": "node(X). edge(X, Y). edge(Y, X) :- edge(X, Y).",
-  "generator": "{ set(X) } :- node(X).",
+  "instance_template": "node(1..5). edge(1,2). edge(2,3). edge(3,4). edge(4,5). edge(5,1).",
+  "generator": "{ set(X) } :- node(X). edge(X,Y) :- edge(Y,X).",
   "hard_constraints": [
     {
-      "description": "Adjacent nodes prohibited in set.",
-      "asp_rule": ":- edge(X, Y), set(X), set(Y)."
+      "description": "Business policy dictates that no two nodes sharing an edge may be concurrently selected for the independent set to ensure independence compliance.",
+      "asp_rule": ":- set(X), set(Y), edge(X,Y)."
     }
   ],
   "soft_constraints": [
     {
-      "description": "Maximize set cardinality.",
-      "asp_rule": "#maximize { 1, X : set(X) }."
+      "description": "To maximize resource utilization, project management requires the inclusion of as many nodes as possible; excluding a node from the set incurs a penalty.",
+      "asp_rule": "penalty(\"node_exclusion\", X, 1) :- node(X), not set(X)."
     }
-  ]
+  ],
+  "global_objective": "#minimize { Cost, Name, X : penalty(Name, X, Cost) }."
 }

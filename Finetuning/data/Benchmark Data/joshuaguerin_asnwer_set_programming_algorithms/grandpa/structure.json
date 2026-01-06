@@ -1,31 +1,24 @@
 {
-  "instance_template": "person(X). male(X). female(X). parent(X, Y). married(X, Y).",
-  "generator": "{ p(X) : d(X) }.",
+  "instance_template": "person(1..10). male(1..5). female(6..10). parent(1,2). married(1,6).",
+  "generator": "married(Y, X) :- married(X, Y), X != Y.\nsibling(C1, C2) :- parent(P, C1), parent(P, C2), C1 != C2.\nparent(S, C) :- parent(P, C), married(P, S), S != P.\nuncle(U, C) :- parent(P, C), sibling(P, U), male(U).\ngrandparent(GP, C) :- parent(GP, P), parent(P, C).\ngrandpa(P) :- grandparent(P, P), male(P).",
   "hard_constraints": [
     {
-      "description": "Marriage is a two-way street. If A is married to B, B is married to A. Standard sanity check for relationships.",
-      "asp_rule": "married(Bride, Groom) :- married(Groom, Bride), Bride != Groom."
+      "description": "The marital relationship is defined as a symmetric relation between two distinct individuals; self-marriage is prohibited.",
+      "asp_rule": ":- married(X, X)."
     },
     {
-      "description": "Siblings are just kids with the same parent. But they gotta be different people, obviously.",
-      "asp_rule": "sibling(Child1, Child2) :- parent(Parent, Child1), parent(Parent, Child2), Child1 != Child2."
+      "description": "Siblinghood is defined as a relationship between distinct individuals; an individual cannot be their own sibling.",
+      "asp_rule": ":- sibling(X, X)."
     },
     {
-      "description": "The 'spouse becomes parent' rule. If you're married to a parent, you're officially a parent too. No escaping the kids.",
-      "asp_rule": "parent(Stepparent, Child) :- parent(Parent, Child), married(Parent, Stepparent)."
+      "description": "It is required that an individual's gender identification remains consistent such that they are not simultaneously assigned as male and female.",
+      "asp_rule": ":- male(X), female(X)."
     },
     {
-      "description": "Uncles are just your parent's brothers. Male sibling logic, pretty straightforward.",
-      "asp_rule": "uncle(Uncle, Child) :- sibling(Parent, Uncle), parent(Parent, Child), male(Uncle)."
-    },
-    {
-      "description": "Grandparents are the parents of parents. Standard recursive jump.",
-      "asp_rule": "grandparent(Grandparent, Child) :- parent(Grandparent, Parent), parent(Parent, Child)."
-    },
-    {
-      "description": "The 'I'm my own grandpa' detector. If a guy is his own grandparent, we've hit the paradox.",
-      "asp_rule": "grandpa(Person) :- grandparent(Person, Person), male(Person)."
+      "description": "A biological or legal parental relationship cannot be established where the parent and child are the same individual.",
+      "asp_rule": ":- parent(P, C), P == C."
     }
   ],
-  "soft_constraints": []
+  "soft_constraints": [],
+  "global_objective": null
 }
