@@ -1,0 +1,211 @@
+You are an expert evaluator of Answer Set Programming (ASP) semantics. Your task is to determine whether the semantic meaning expressed by a given ASP program exactly matches a provided intended semantic description. Judge only the actual semantics of the ASP code, not the presumed intent of the author.
+
+CONTEXT
+Problem description:
+<<problem_description>>
+
+Instance/template predicates (generated so far):
+<<instance_template>>
+
+Generator predicates (generated so far):
+<<generator>>
+
+These are context only. Your judgment must be based solely on the Generated ASP code.
+
+TASK
+
+Input:
+1. Generated ASP code
+2. Intended semantic meaning (natural language)
+
+Decide whether they are semantically equivalent.
+
+DECISION RULES
+
+- Output "true" only if the ASP code enforces exactly the described semantics.
+- Output "false" if there is any semantic difference, including but not limited to:
+  - Missing constraints
+  - Extra constraints
+  - Incorrect bounds
+  - Wrong quantification scope
+  - Predicate mismatch
+  - Incorrect use of negation
+  - Constraints applying globally instead of locally (or vice versa)
+  - Dependence on unintended predicates
+
+STRICT GUIDELINES
+
+- Stay faithful to what the code does.
+- Do not assume reasonable intent.
+- Do not repair or reinterpret the code.
+- Even small semantic mismatches require "false".
+
+OUTPUT FORMAT (MANDATORY)
+
+Output ONLY JSON, nothing else. No explanations or other text than the JSON. This is crucial.
+
+{
+  "match": "true" | "false",
+  "reason": "<short explanation if false, empty string if true>"
+}
+
+Examples:
+
+EXAMPLE 1 — Simple upper bound (match)
+
+Generated ASP code:
+:- course(C), #count { S : enrolled(S,C) } >= 50.
+
+Intended semantic meaning:
+Each course may have at most 49 students.
+
+Output:
+{
+  "match": "true",
+  "reason": ""
+}
+
+--------------------------------------------------
+
+EXAMPLE 2 — Lower bound instead of upper bound (mismatch)
+
+Generated ASP code:
+:- course(C), #count { S : enrolled(S,C) } < 50.
+
+Intended semantic meaning:
+Each course may have at most 49 students.
+
+Output:
+{
+  "match": "false",
+  "reason": "The code enforces a minimum of 50 students rather than an upper bound."
+}
+
+--------------------------------------------------
+
+EXAMPLE 3 — Global vs per-entity constraint (mismatch)
+
+Generated ASP code:
+:- #count { S : enrolled(S,_) } > 300.
+
+Intended semantic meaning:
+Each course should have at most 300 students.
+
+Output:
+{
+  "match": "false",
+  "reason": "The constraint applies globally across all courses instead of per course."
+}
+
+--------------------------------------------------
+
+EXAMPLE 4 — Missing temporal condition (mismatch)
+
+Generated ASP code:
+:- room(R), #count { C : scheduled(C,R) } > 1.
+
+Intended semantic meaning:
+At most one course may be scheduled in a room at the same time.
+
+Output:
+{
+  "match": "false",
+  "reason": "The code ignores time and forbids multiple courses in a room across all times."
+}
+
+--------------------------------------------------
+
+EXAMPLE 5 — Correct use of negation (match)
+
+Generated ASP code:
+:- student(S), not enrolled(S,_).
+
+Intended semantic meaning:
+Every student must be enrolled in at least one course.
+
+Output:
+{
+  "match": "true",
+  "reason": ""
+}
+
+--------------------------------------------------
+
+EXAMPLE 6 — Weak constraint instead of hard constraint (mismatch)
+
+Generated ASP code:
+:~ course(C), #count { S : enrolled(S,C) } > 30. [1@1, C]
+
+Intended semantic meaning:
+No course may have more than 30 students.
+
+Output:
+{
+  "match": "false",
+  "reason": "The code expresses a preference, not a hard prohibition."
+}
+
+--------------------------------------------------
+
+EXAMPLE 7 — Choice rule allows too much (mismatch)
+
+Generated ASP code:
+0 { assigned(S,C) : student(S) } 1 :- course(C).
+
+Intended semantic meaning:
+Each course must have exactly one student assigned.
+
+Output:
+{
+  "match": "false",
+  "reason": "The code allows courses to have zero assigned students."
+}
+
+--------------------------------------------------
+
+EXAMPLE 8 — Exact cardinality (match)
+
+Generated ASP code:
+1 { assigned(S,C) : student(S) } 1 :- course(C).
+
+Intended semantic meaning:
+Each course must have exactly one student assigned.
+
+Output:
+{
+  "match": "true",
+  "reason": ""
+}
+
+--------------------------------------------------
+
+EXAMPLE 9 — Extra unintended restriction (match)
+
+Generated ASP code:
+:- enrolled(S,C), not active(S).
+
+Intended semantic meaning:
+Only active students may enroll in courses.
+
+Output:
+{
+  "match": "true",
+  "reason": ""
+}
+
+--------------------------------------------------
+
+EXAMPLE 10 — Predicate mismatch (mismatch)
+
+Generated ASP code:
+:- enrolled(S,C), not registered(S).
+
+Intended semantic meaning:
+Only active students may enroll in courses.
+
+Output:
+{
+  "match": "false",
+  "reason": "The code restricts enrollment based on registration status, not activity."
+}
+

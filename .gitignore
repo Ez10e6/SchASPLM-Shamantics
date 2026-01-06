@@ -6,3 +6,4 @@ venv/
 programs/
 metrics/
 .github/
+local_models/
