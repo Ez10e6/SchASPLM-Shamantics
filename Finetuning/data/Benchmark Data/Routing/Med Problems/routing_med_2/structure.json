@@ -1,49 +1,49 @@
 {
-  "instance_template": "location(\"launchPad\"; \"tunnel1\"; \"tunnel2\"; \"tunnel3\"; \"stationA\"; \"stationB\"; \"stationC\"; \"calibEdge\").\nedge(\"launchPad\", \"tunnel1\", 2).\nedge(\"launchPad\", \"tunnel2\", 3).\nedge(\"tunnel1\", \"stationA\", 1).\nedge(\"stationA\", \"tunnel3\", 1).\nedge(\"tunnel3\", \"tunnel2\", 0).\nedge(\"tunnel2\", \"stationB\", 1).\nedge(\"tunnel2\", \"calibEdge\", 2).\nedge(\"calibEdge\", \"stationC\", 1).\nedge(\"stationC\", \"tunnel1\", 2).\nmandatory(\"stationA\"; \"stationB\").\noptional(\"stationC\").\ntime(0..10).\nmax_tank(16).",
-  "generator": "at(\"launchPad\", 0).\ntank(16, 0).\naction_blocked(T) :- refill(T-1).\n1 { move(U, V, T) : edge(U, V, C); sample(U, T); refill(T); idle(T) } 1 :- at(U, T), T < 10, not action_blocked(T).\nat(V, T+1) :- move(U, V, T).\nat(U, T+1) :- sample(U, T).\nat(U, T+1) :- idle(T), at(U, T).\nat(U, T+1) :- refill(T), at(U, T).\nat(U, T+2) :- refill(T), at(U, T).\ntank(V-C, T+1) :- tank(V, T), move(U, W, T), edge(U, W, C).\ntank(V-1, T+1) :- tank(V, T), sample(S, T).\ntank(V, T+1) :- tank(V, T), idle(T).\ntank(V, T+1) :- tank(V, T), refill(T).\ntank(V_next, T+2) :- tank(V, T), refill(T), V+3 <= 16, V_next = V+3.\ntank(16, T+2) :- tank(V, T), refill(T), V+3 > 16.",
+  "instance_template": "loc(\"LaunchPad\"; \"StationA\"; \"StationB\"; \"StationC\"; \"Tunnel1\"; \"Tunnel2\"; \"Tunnel3\"; \"CalibEdge\").\nstation(\"StationA\"; \"StationB\"; \"StationC\").\nmandatory(\"StationA\"; \"StationB\").\nedge(\"LaunchPad\", \"Tunnel1\", 2).\nedge(\"LaunchPad\", \"Tunnel2\", 3).\nedge(\"Tunnel1\", \"StationA\", 1).\nedge(\"StationA\", \"Tunnel3\", 1).\nedge(\"Tunnel3\", \"Tunnel2\", 3).\nedge(\"Tunnel2\", \"StationB\", 1).\nedge(\"Tunnel2\", \"CalibEdge\", 2).\nedge(\"CalibEdge\", \"StationC\", 1).\nedge(\"StationC\", \"Tunnel1\", 2).",
+  "generator": "at(0, \"LaunchPad\").\ntime(0, 0).\nfuel(0, 16).\n{ action(S, move, L2) : edge(L1, L2, C); action(S, sample, L1) : station(L1); action(S, refill, L1) : L1 == \"CalibEdge\" } 1 :- at(S-1, L1), S = 1..18, T_prev < 10, time(S-1, T_prev).\nat(S, L) :- action(S, move, L).\nat(S, L) :- action(S, sample, L).\nat(S, L) :- action(S, refill, L).\ntime(S, T+1) :- action(S, move, L), time(S-1, T).\ntime(S, T+1) :- action(S, sample, L), time(S-1, T).\ntime(S, T+2) :- action(S, refill, L), time(S-1, T).\nfuel(S, V-C) :- action(S, move, L2), at(S-1, L1), edge(L1, L2, C), fuel(S-1, V).\nfuel(S, V-1) :- action(S, sample, L), fuel(S-1, V).\nfuel(S, 16) :- action(S, refill, L), fuel(S-1, V), V2 = V+3, V2 >= 16.\nfuel(S, V2) :- action(S, refill, L), fuel(S-1, V), V2 = V+3, V2 < 16.",
   "hard_constraints": [
     {
-      "description": "The drone's tank volume must never drop below zero, nor exceed its maximum 16-liter capacity.",
-      "asp_rule": ":- tank(V, T), V < 0.\n:- tank(V, T), V > 16."
+      "description": "sanity check for the tank capacity, don't run dry or overflow.",
+      "asp_rule": ":- fuel(S, V), V < 0.\n:- fuel(S, V), V > 16."
     },
     {
-      "description": "Refilling the tank is a specialized procedure that can only be performed at the calibration shaft.",
-      "asp_rule": ":- refill(T), at(U, T), U != \"calibEdge\"."
+      "description": "must hit all the mandatory stations or the mission is a bust.",
+      "asp_rule": "sampled(L) :- action(S, sample, L).\n:- mandatory(L), not sampled(L)."
     },
     {
-      "description": "The drone is limited to a single refill operation for the entire duration of its mission.",
-      "asp_rule": ":- #count { T : refill(T) } > 1."
+      "description": "StationA has a hard deadline at minute 6.",
+      "asp_rule": "sampled_at(L, T) :- action(S, sample, L), time(S, T).\n:- sampled_at(\"StationA\", T), T > 6."
     },
     {
-      "description": "The drone must successfully collect water samples from both Station A and Station B to complete its primary mission.",
-      "asp_rule": "sampled(S) :- sample(S, T).\n:- mandatory(S), not sampled(S)."
+      "description": "StationC's strict entry requirement: you only sample it if the main jobs finish by minute 8.",
+      "asp_rule": "mandatory_finish(T) :- T = #max { Ts : sampled_at(L, Ts), mandatory(L) }.\n:- sampled(\"StationC\"), mandatory_finish(T), T > 8.\n:- not sampled(\"StationC\"), mandatory_finish(T), T <= 8."
     },
     {
-      "description": "The sampling at Station A is time-critical and must be finished no later than the 6-minute mark.",
-      "asp_rule": ":- sample(\"stationA\", T), T > 5."
+      "description": "no double-dipping at the same station in a row, avoid that cross-contamination.",
+      "asp_rule": ":- action(S, sample, L), action(S-1, sample, L)."
     },
     {
-      "description": "To prevent cross-contamination, the drone is forbidden from taking two consecutive samples at the same station.",
-      "asp_rule": ":- sample(S, T), sample(S, T+1)."
+      "description": "mission must wrap up within 10 minutes total.",
+      "asp_rule": ":- time(S, T), T > 10."
     },
     {
-      "description": "The optional sampling at Station C is strictly contingent upon finishing mandatory samples within the first 8 minutes.",
-      "asp_rule": "mandatory_finish(TF) :- TF = #max { T+1 : sample(S, T), mandatory(S) }.\n:- sample(\"stationC\", _), mandatory_finish(TF), TF > 8.\n:- not sampled(\"stationC\"), mandatory_finish(TF), TF <= 8."
+      "description": "limit on the total number of events because we don't have all day.",
+      "asp_rule": "total_events(V) :- V = #count { S : action(S, _, _) }.\n:- total_events(V), V > 18."
     },
     {
-      "description": "The total volume of activity, including all moves, samples, and refills, cannot exceed a limit of 18 specific events.",
-      "asp_rule": ":- #count { T,move : move(U,V,T); T,sample : sample(S,T); T,refill : refill(T) } > 18."
+      "description": "refill logic says only once for that sweet 3L boost.",
+      "asp_rule": "refills(V) :- V = #count { S : action(S, refill, _) }.\n:- refills(V), V > 1."
     }
   ],
   "soft_constraints": [
     {
-      "description": "We prefer to collect as many water samples as possible, including optional ones, to maximize our data yield.",
-      "asp_rule": "penalty(\"MissingSample\", S, 100) :- optional(S), not sampled(S)."
+      "description": "more samples is better, let's aim high.",
+      "asp_rule": "penalty(\"samples\", (), -Count) :- Count = #count { L : sampled(L) }."
     },
     {
-      "description": "Whenever possible, we want to finish our mandatory sampling obligations as early as we can.",
-      "asp_rule": "penalty(\"MandatoryTime\", \"finish\", TF) :- mandatory_finish(TF)."
+      "description": "get the mandatory stuff done ASAP.",
+      "asp_rule": "penalty(\"finish_time\", (), T) :- mandatory_finish(T)."
     }
   ],
-  "global_objective": "#minimize { P,Name,Arg : penalty(Name, Arg, P) }."
+  "global_objective": "#minimize { C@2,Name : penalty(Name, (), C), Name == \"samples\" }.\n#minimize { C@1,Name : penalty(Name, (), C), Name == \"finish_time\" }."
 }

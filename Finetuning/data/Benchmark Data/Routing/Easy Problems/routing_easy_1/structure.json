@@ -1,24 +1,20 @@
 {
-  "instance_template": "loc(\"A\"). loc(\"B\"). loc(\"C\"). loc(\"D\"). loc(\"E\"). edge(\"A\", \"B\"). edge(\"A\", \"C\"). edge(\"B\", \"D\"). edge(\"C\", \"E\"). deliver_to(\"D\"). deliver_to(\"E\"). time(0..6).",
-  "generator": "{ at(L, T) : loc(L) } = 1 :- time(T).",
+  "instance_template": "loc(\"A\"). loc(\"B\"). loc(\"C\"). loc(\"D\"). loc(\"E\"). edge(\"A\", \"B\"). edge(\"A\", \"C\"). edge(\"B\", \"D\"). edge(\"C\", \"E\"). time(0..6). deliver_to(\"D\"). deliver_to(\"E\").",
+  "generator": "1 { at(L, T) : loc(L) } 1 :- time(T).",
   "hard_constraints": [
     {
-      "description": "To properly initialize the mission, we must ensure that the robot is physically located at site A at the very first timestep.",
+      "description": "Initial State Policy: The robot is strictly required to begin its operation at Location A at the zero-minute mark.",
       "asp_rule": ":- not at(\"A\", 0)."
     },
     {
-      "description": "Movement between any two locations is only permitted if there is a direct physical link defined in our map; the robot cannot jump between disconnected sites.",
-      "asp_rule": ":- at(L1, T), at(L2, T+1), not edge(L1, L2), not edge(L2, L1), time(T), time(T+1), L1 != L2."
+      "description": "Connectivity Compliance: To ensure safe navigation, the robot must only transition between locations that are explicitly connected in the facility map.",
+      "asp_rule": ":- at(L1, T), at(L2, T+1), not edge(L1, L2), not edge(L2, L1), time(T), time(T+1)."
     },
     {
-      "description": "Each designated delivery location must be visited by the robot exactly once during the 6-minute window to satisfy the delivery requirements.",
-      "asp_rule": ":- deliver_to(L), #count { T : at(L, T) } != 1."
-    },
-    {
-      "description": "The robot must move to a new location every minute; it is not permitted to remain stationary at its current location between timesteps.",
-      "asp_rule": ":- at(L, T), at(L, T+1), time(T), time(T+1)."
+      "description": "Delivery Quota Regulation: Every designated delivery site must be visited exactly once to satisfy fulfillment requirements.",
+      "asp_rule": ":- deliver_to(L), N = #count { T : at(L, T) }, N != 1."
     }
   ],
   "soft_constraints": [],
-  "global_objective": ""
+  "global_objective": null
 }

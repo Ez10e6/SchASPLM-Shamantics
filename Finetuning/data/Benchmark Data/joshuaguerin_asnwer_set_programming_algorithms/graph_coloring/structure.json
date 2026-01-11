@@ -1,17 +1,17 @@
 {
-  "instance_template": "node(1..3). edge(1,2). edge(2,3).",
-  "generator": "color(1..N) :- N = #count { X : node(X) }. edge(V,U) :- edge(U,V). { assign(N,C) : color(C) } = 1 :- node(N).",
+  "instance_template": "node(1..4). edge(1,2). edge(2,3). edge(3,4). edge(4,1). edge(1,3).",
+  "generator": "color(1..N) :- N = #count { X : node(X) }. edge(V,U) :- edge(U,V). { assign(N, C) : color(C) } = 1 :- node(N).",
   "hard_constraints": [
     {
-      "description": "Sanity check to make sure adjacent nodes don't end up with the same color.",
-      "asp_rule": ":- edge(U,V), assign(U,C), assign(V,C)."
+      "description": "Imagine each node as a person and an edge as a friendship; this rule ensures that no two friends are ever assigned the exact same color, maintaining distinctness across all connections.",
+      "asp_rule": ":- edge(U, V), assign(U, C), assign(V, C)."
     }
   ],
   "soft_constraints": [
     {
-      "description": "We need to track which colors are actually being used so we can minimize that count.",
-      "asp_rule": "used(C) :- assign(_,C). penalty(\"color_used\", C, 1) :- used(C)."
+      "description": "To achieve the most efficient graph coloring, we want to minimize the variety of colors used. We identify every unique color that has been assigned to at least one node and apply a penalty for each one to encourage the solver to find a solution with fewer distinct colors.",
+      "asp_rule": "used_color(C) :- assign(_, C). penalty(\"DistinctColor\", C, 1) :- used_color(C)."
     }
   ],
-  "global_objective": "#minimize { Cost, Tag, ID : penalty(Tag, ID, Cost) }."
+  "global_objective": "#minimize { Weight, Name, ID : penalty(Name, ID, Weight) }."
 }

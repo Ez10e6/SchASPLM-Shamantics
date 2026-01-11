@@ -541,6 +541,7 @@ def get_partial_program(system_prompt_path, prompt, system_prompt_variables={}, 
     asp_generator_bot = bots.load_bot(system_prompt, pipe, max_new_tokens=max_new_tokens, temperature=temperature, top_p=top_p, seed=seed)
     generated_code = asp_generator_bot.prompt(prompt)
     generated_code = utils.remove_backtick_lines(generated_code)    
+    generated_code = utils.sanitize_asp_code(generated_code)
     initial_generated_code = generated_code  # Keep a copy of the initial response for printing later
 
     # Create a repair prompt if k > 0

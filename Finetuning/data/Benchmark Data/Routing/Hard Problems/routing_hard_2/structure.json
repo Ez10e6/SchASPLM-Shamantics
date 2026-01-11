@@ -1,61 +1,57 @@
 {
-  "instance_template": "loc(\"LaunchPad\"). loc(\"Tunnel1\"). loc(\"Tunnel2\"). loc(\"StationA\"). loc(\"StationB\"). loc(\"Tunnel3\"). loc(\"CalibEdge\"). loc(\"StationC\"). edge(\"LaunchPad\",\"Tunnel1\",2). edge(\"LaunchPad\",\"Tunnel2\",3). edge(\"Tunnel1\",\"StationA\",1). edge(\"StationA\",\"Tunnel3\",1). edge(\"Tunnel3\",\"Tunnel2\",1). edge(\"Tunnel2\",\"StationB\",1). edge(\"Tunnel2\",\"CalibEdge\",2). edge(\"CalibEdge\",\"StationC\",1). edge(\"StationC\",\"Tunnel1\",2). is_mandatory(\"StationA\"). is_mandatory(\"StationB\"). time(0..10). max_capacity(16).",
-  "generator": "1 { at(L, T) : loc(L) } 1 :- time(T). { sampled(L, T) : loc(L), time(T) }. { refill(T) : time(T), T <= 8 }. action(move(L1, L2), T) :- at(L1, T), at(L2, T+1), L1 != L2. action(sample(L), T) :- sampled(L, T). action(refill, T) :- refill(T).",
+  "instance_template": "loc(\"LaunchPad\"; \"Tunnel1\"; \"Tunnel2\"; \"StationA\"; \"StationB\"; \"Tunnel3\"; \"CalibEdge\"; \"StationC\").\nedge(\"LaunchPad\",\"Tunnel1\",2).\nedge(\"LaunchPad\",\"Tunnel2\",3).\nedge(\"Tunnel1\",\"StationA\",1).\nedge(\"StationA\",\"Tunnel3\",1).\nedge(\"Tunnel3\",\"Tunnel2\",1).\nedge(\"Tunnel2\",\"StationB\",1).\nedge(\"Tunnel2\",\"CalibEdge\",2).\nedge(\"CalibEdge\",\"StationC\",1).\nedge(\"StationC\",\"Tunnel1\",2).\ntime(0..10).",
+  "generator": "1 { at(L, T) : loc(L) } 1 :- time(T).\n{ sampled(L, T) : loc(L), time(T) }.\n{ refill(T) : at(\"CalibEdge\", T), time(T), T < 9 }.",
   "hard_constraints": [
     {
-      "description": "Business Requirements: All missions must commence at the designated LaunchPad at minute zero.",
-      "asp_rule": ":- not at(\"LaunchPad\", 0)."
+      "description": "Business Requirements: Rover must start at the LaunchPad at time 0.",
+      "asp_rule": ":- at(L, 0), L != \"LaunchPad\"."
     },
     {
-      "description": "Business Requirements: Rover movement is restricted to the established tunnel network and defined directions.",
-      "asp_rule": ":- at(L1, T), at(L2, T+1), L1 != L2, not edge(L1, L2, _)."
+      "description": "Business Requirements: Movements between locations must follow the designated tunnel network and directed edges.",
+      "asp_rule": ":- at(L1, T), at(L2, T+1), L1 != L2, not edge(L1, L2, _), time(T), T < 10."
     },
     {
-      "description": "Business Requirements: The rover must remain stationary at the specific location for the entire duration of a sampling operation (1 minute).",
-      "asp_rule": ":- sampled(L, T), not at(L, T). :- sampled(L, T), not at(L, T+1)."
+      "description": "Business Requirements: Sampling operations require the rover to remain stationary for exactly one minute.",
+      "asp_rule": ":- sampled(L, T), not at(L, T).\n:- sampled(L, T), not at(L, T+1)."
     },
     {
-      "description": "Business Requirements: The rover must remain stationary at the CalibEdge for two consecutive minutes to perform a water refill.",
-      "asp_rule": ":- refill(T), at(L, T), L != \"CalibEdge\". :- refill(T), at(L, T+1), L != \"CalibEdge\". :- refill(T), at(L, T+2), L != \"CalibEdge\"."
+      "description": "Business Requirements: Mandatory samples at StationA and StationB must be collected exactly once.",
+      "asp_rule": "1 { sampled(L, T) : time(T) } 1 :- L = (\"StationA\"; \"StationB\")."
     },
     {
-      "description": "Business Requirements: Water tank levels must be tracked accurately based on consumption, sampling recovery, and refill actions, never exceeding 16 liters or dropping below zero.",
-      "asp_rule": "tank(0, 16). tank(T+1, W-C) :- tank(T, W), action(move(L1, L2), T), edge(L1, L2, C). tank(T+1, W+1) :- tank(T, W), action(sample(L), T), W < 16, max_capacity(16). tank(T+1, 16) :- tank(T, W), action(sample(L), T), W == 16, max_capacity(16). tank(T+1, W) :- tank(T, W), refill(T). tank(T+2, W+3) :- tank(T+1, W), refill(T), W < 13, max_capacity(16). tank(T+2, 16) :- tank(T+1, W), refill(T), W >= 13, max_capacity(16). tank(T+1, W) :- tank(T, W), at(L, T), at(L, T+1), not sampled(L, T), not refill(T), not refill(T-1). :- tank(T, W), W < 0."
+      "description": "Business Requirements: Collection at StationA must be completed no later than minute 6.",
+      "asp_rule": "finish_time(L, T+1) :- sampled(L, T).\n:- finish_time(\"StationA\", T), T > 6."
     },
     {
-      "description": "Business Requirements: Mandatory sampling at StationA and StationB must be performed exactly once.",
-      "asp_rule": ":- { sampled(L, T) : time(T) } != 1, is_mandatory(L)."
+      "description": "Business Requirements: StationC must be sampled if and only if both primary stations are sampled by minute 8.",
+      "asp_rule": "max_mandatory_finish(M) :- M = #max { T : finish_time(\"StationA\", T); T : finish_time(\"StationB\", T) }.\nmand_ready :- max_mandatory_finish(M), M <= 8.\nsampled_c :- sampled(\"StationC\", _).\n:- mand_ready, not sampled_c.\n:- not mand_ready, sampled_c."
     },
     {
-      "description": "Business Requirements: Due to rapid degradation, samples at StationA must be collected no later than minute 6.",
-      "asp_rule": ":- sampled(\"StationA\", T), T > 6."
+      "description": "Business Requirements: To avoid contamination, no two consecutive samples can be taken at the same station.",
+      "asp_rule": ":- sampled(L, T), sampled(L, T+1)."
     },
     {
-      "description": "Business Requirements: Compliance protocol: StationC must be sampled if and only if mandatory stations A and B are both sampled by minute 8.",
-      "asp_rule": "mandatory_done_by_8 :- sampled(\"StationA\", T1), T1 <= 8, sampled(\"StationB\", T2), T2 <= 8. :- mandatory_done_by_8, not sampled(\"StationC\", _). :- sampled(\"StationC\", _), not mandatory_done_by_8. :- { sampled(\"StationC\", T) } > 1."
+      "description": "Business Requirements: A water refill at CalibEdge requires two consecutive stationary minutes and is limited to one use.",
+      "asp_rule": ":- refill(T), not at(\"CalibEdge\", T).\n:- refill(T), not at(\"CalibEdge\", T+1).\n:- refill(T), not at(\"CalibEdge\", T+2).\n:- #count { T : refill(T) } > 1."
     },
     {
-      "description": "Business Requirements: To prevent cross-contamination, the rover is prohibited from taking two consecutive samples at the same station.",
-      "asp_rule": "sample_idx(L, T, N) :- sampled(L, T), N = #count { L1, T1 : sampled(L1, T1), T1 <= T }. :- sample_idx(L1, T1, N), sample_idx(L2, T2, N+1), L1 == L2."
+      "description": "Business Requirements: Track tank capacity constraints based on movements (consumption), sampling (recovery), and refills.",
+      "asp_rule": "tank(0, 16).\ntank(T+1, W-C) :- tank(T, W), at(L1, T), at(L2, T+1), edge(L1, L2, C).\ntank(T+1, W+1) :- tank(T, W), sampled(L, T), W < 16.\ntank(T+1, 16) :- tank(T, 16), sampled(L, T).\ntank(T+1, W) :- tank(T, W), refill(T).\ntank(T+2, W+3) :- tank(T+1, W), refill(T), W <= 13.\ntank(T+2, 16) :- tank(T+1, W), refill(T), W > 13.\nrefill_active(T) :- refill(T-1), time(T), T > 0.\ntank(T+1, W) :- tank(T, W), at(L, T), at(L, T+1), not sampled(L, T), not refill(T), not refill_active(T), time(T), T < 10.\n:- tank(T, W), W < 0."
     },
     {
-      "description": "Business Requirements: Lockdown protocols limit the emergency water reservoir at CalibEdge to a single use per mission.",
-      "asp_rule": ":- { refill(T) } > 1."
-    },
-    {
-      "description": "Business Requirements: Mechanical wear policies limit the total count of operational events (moves, samples, refills) to 18.",
-      "asp_rule": ":- #count { T, move : action(move(L1,L2), T); T, sample : action(sample(L), T); T, refill : action(refill, T) } > 18."
+      "description": "Business Requirements: Total mission events (movements, samples, refills) must not exceed 18 to prevent rover wear.",
+      "asp_rule": "move_e(T) :- at(L1, T-1), at(L2, T), L1 != L2, time(T).\nsample_e(T) :- sampled(L, T), time(T).\nrefill_e(T) :- refill(T), time(T).\ntotal_events(N) :- N = #count { T, 1 : move_e(T); T, 2 : sample_e(T); T, 3 : refill_e(T) }.\n:- total_events(N), N > 18."
     }
   ],
   "soft_constraints": [
     {
-      "description": "Business Requirements: The mission prioritizes the maximization of total samples collected across all stations.",
-      "asp_rule": "penalty(\"sample_yield\", 1, 2, -N) :- N = #count { L, T : sampled(L, T) }."
+      "description": "Business Requirements: The primary mission objective is to maximize the total number of samples collected.",
+      "asp_rule": "penalty(\"TotalSamples\", (L, T), -1) :- sampled(L, T)."
     },
     {
-      "description": "Business Requirements: For optimal performance, the time required to complete mandatory sampling operations should be minimized.",
-      "asp_rule": "penalty(\"mandatory_completion\", 1, 1, M) :- M = #max { T : sampled(L, T), is_mandatory(L) }."
+      "description": "Business Requirements: As a secondary objective, minimize the time taken to complete mandatory sampling operations.",
+      "asp_rule": "penalty(\"MandatoryTime\", 1, M) :- max_mandatory_finish(M)."
     }
   ],
-  "global_objective": "#minimize { Cost@Priority, Name, Tuple : penalty(Name, Tuple, Priority, Cost) }."
+  "global_objective": "#minimize { Cost@2, Name, ID : penalty(Name, ID, Cost), Name == \"TotalSamples\" ; Cost@1, Name, ID : penalty(Name, ID, Cost), Name == \"MandatoryTime\" }."
 }

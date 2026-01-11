@@ -1,16 +1,7 @@
 {
-  "instance_template": "#const n=100. num(2..n).",
-  "generator": "{ prime(X) : num(X) }. composite(X) :- num(X), num(Y), Y < X, X \\ Y = 0.",
-  "hard_constraints": [
-    {
-      "description": "We must ensure that any number identified as prime truly meets the criteria: it must not have any divisors other than one and itself, meaning it cannot be a composite number.",
-      "asp_rule": ":- prime(X), composite(X)."
-    },
-    {
-      "description": "Conversely, we must ensure that no prime numbers are missed; if a number in our domain has no divisors and is therefore not composite, it must be included in our set of primes.",
-      "asp_rule": ":- num(X), not prime(X), not composite(X)."
-    }
-  ],
+  "instance_template": "num(2..n).",
+  "generator": "composite(N) :- num(N), num(D), D < N, N \\ D = 0. prime(N) :- num(N), not composite(N).",
+  "hard_constraints": [],
   "soft_constraints": [],
-  "global_objective": ""
+  "global_objective": null
 }

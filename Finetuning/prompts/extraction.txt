@@ -66,7 +66,7 @@ Structure the JSON exactly like this:
   "hard_constraints": [
     {{
       "description": "A description of this specific check.",
-      "asp_rule": "The integrity constraint ONLY (:- ...). Refactored/Optimized. Do NOT define new helper predicates here. No comments. Raw code only."
+      "asp_rule": "The the code for the integrity constraint ONLY. Refactored/Optimized. Do NOT define new helper predicates here. No comments. Raw code only."
     }}
   ],
   

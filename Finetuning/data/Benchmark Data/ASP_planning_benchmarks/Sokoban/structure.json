@@ -1,37 +1,41 @@
 {
-  "instance_template": "player(pusher). stone(s1..s2). location(c1..c10). is_goal(c5). is_goal(c6). adj(c1, c2, north). at(pusher, c1, 0). at(s1, c2, 0). clear(c3, 0). horizon(20).",
-  "generator": "{ move(P, From, To, Dir, T) : player(P), adj(From, To, Dir); push(P, S, PPos, SFrom, STo, Dir, T) : player(P), stone(S), adj(PPos, SFrom, Dir), adj(SFrom, STo, Dir) ; noop(T) } = 1 :- T = 1..H, horizon(H).\n\nat(P, To, T) :- move(P, From, To, Dir, T).\nat(P, SFrom, T) :- push(P, S, PPos, SFrom, STo, Dir, T).\nat(S, STo, T) :- push(P, S, PPos, SFrom, STo, Dir, T).\n\nat(Thing, Loc, T) :- at(Thing, Loc, T-1), not moved(Thing, T), T = 1..H, horizon(H).\nmoved(P, T) :- move(P, From, To, Dir, T).\nmoved(P, T) :- push(P, S, PPos, SFrom, STo, Dir, T).\nmoved(S, T) :- push(P, S, PPos, SFrom, STo, Dir, T).\n\nclear(Loc, T) :- not occupied(Loc, T), location(Loc), T = 1..H, horizon(H).\noccupied(Loc, T) :- at(Thing, Loc, T).",
+  "instance_template": "player(p1). stone(s1). stone(s2). loc(1..10). adj(1, 2, n). is_goal(5). is_wall(6). step(1..20). at(p1, 1, 0). at(s1, 2, 0).",
+  "generator": "{ move(L1, L2, T) : adj(L1, L2, D); push(L1, L2, L3, T) : adj(L1, L2, D), adj(L2, L3, D) } <= 1 :- step(T).\nat(P, L2, T) :- move(L1, L2, T), player(P).\nat(P, L2, T) :- push(L1, L2, L3, T), player(P).\nat(S, L3, T) :- push(L1, L2, L3, T), at(S, L2, T-1), stone(S).\nat(E, L, T) :- at(E, L, T-1), not moved(E, T), step(T).\nmoved(P, T) :- move(L1, L2, T), player(P).\nmoved(P, T) :- push(L1, L2, L3, T), player(P).\nmoved(S, T) :- push(L1, L2, L3, T), at(S, L2, T-1), stone(S).",
   "hard_constraints": [
     {
-      "description": "Business Requirements: Policy dictates that a move action can only occur if the player is currently at the source location and the target location is clear of obstacles.",
-      "asp_rule": ":- move(P, From, To, Dir, T), not at(P, From, T-1)."
+      "description": "A player can only initiate a move if they are currently standing at the starting location of that move.",
+      "asp_rule": ":- move(L1, L2, T), not at(P, L1, T-1), player(P)."
     },
     {
-      "description": "Business Requirements: Security protocols prohibit moving into a square that is already occupied by a stone or a wall.",
-      "asp_rule": ":- move(P, From, To, Dir, T), occupied(To, T-1)."
+      "description": "Movement is restricted to clear spaces; a player cannot move into a square that is currently occupied by a stone.",
+      "asp_rule": ":- move(L1, L2, T), at(S, L2, T-1), stone(S)."
     },
     {
-      "description": "Business Requirements: Compliance rules for stone manipulation require the player to be adjacent to the stone and the path behind the stone to be clear.",
-      "asp_rule": ":- push(P, S, PPos, SFrom, STo, Dir, T), not at(P, PPos, T-1)."
+      "description": "The grid contains static obstacles; neither the player nor a stone can ever enter a square designated as a wall.",
+      "asp_rule": ":- move(L1, L2, T), is_wall(L2)."
     },
     {
-      "description": "Business Requirements: Strategic constraints require the stone being pushed to actually be present at the designated pivot point before the action is executed.",
-      "asp_rule": ":- push(P, S, PPos, SFrom, STo, Dir, T), not at(S, SFrom, T-1)."
+      "description": "A push action requires the player to be positioned directly adjacent to a stone and for that stone to be at the expected location.",
+      "asp_rule": ":- push(L1, L2, L3, T), not at(P, L1, T-1), player(P)."
     },
     {
-      "description": "Business Requirements: Operational safety prohibits pushing a stone into a location that is currently occupied by another object.",
-      "asp_rule": ":- push(P, S, PPos, SFrom, STo, Dir, T), occupied(STo, T-1)."
+      "description": "You cannot push a stone into another stone; the square behind the stone being pushed must be completely clear.",
+      "asp_rule": ":- push(L1, L2, L3, T), at(S2, L3, T-1), stone(S2)."
     },
     {
-      "description": "Business Requirements: Project completion status requires that every stone in the inventory must be positioned on a valid goal square at the final time step.",
-      "asp_rule": ":- stone(S), horizon(H), not on_goal(S, H).\non_goal(S, T) :- at(S, L, T), is_goal(L)."
+      "description": "The destination square of a push must not be a wall.",
+      "asp_rule": ":- push(L1, L2, L3, T), is_wall(L3)."
+    },
+    {
+      "description": "The puzzle is solved only if every designated goal location contains a stone at the final time step.",
+      "asp_rule": ":- is_goal(L), M = #max { Ts : step(Ts) }, not stone_at(L, M).\nstone_at(L, T) :- at(S, L, T), stone(S)."
     }
   ],
   "soft_constraints": [
     {
-      "description": "Business Requirements: To ensure operational efficiency, the system should minimize the total number of actions performed by the pusher.",
-      "asp_rule": "penalty(\"step_cost\", (T), 1) :- move(P, From, To, Dir, T).\npenalty(\"step_cost\", (T), 1) :- push(P, S, PP, SF, ST, Dir, T)."
+      "description": "To find the most efficient solution, we prefer sequences with the fewest number of actions.",
+      "asp_rule": "penalty(\"action\", T, 1) :- move(L1, L2, T).\npenalty(\"action\", T, 1) :- push(L1, L2, L3, T)."
     }
   ],
-  "global_objective": "#minimize { Cost,Name,Args : penalty(Name,Args,Cost) }."
+  "global_objective": "#minimize { C,T,N : penalty(N, T, C) }."
 }

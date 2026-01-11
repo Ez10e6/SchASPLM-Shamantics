@@ -1,17 +1,17 @@
 {
   "instance_template": "node(1..5). edge(1,2). edge(2,3). edge(3,4). edge(4,5). edge(5,1).",
-  "generator": "{ set(X) } :- node(X). edge(X,Y) :- edge(Y,X).",
+  "generator": "{ selected(X) } :- node(X). edge(Y,X) :- edge(X,Y).",
   "hard_constraints": [
     {
-      "description": "Business policy dictates that no two nodes sharing an edge may be concurrently selected for the independent set to ensure independence compliance.",
-      "asp_rule": ":- set(X), set(Y), edge(X,Y)."
+      "description": "It is formally required that for any pair of vertices adjacent in the graph, no more than one vertex from said pair is included in the candidate independent set.",
+      "asp_rule": ":- edge(X,Y), selected(X), selected(Y), X < Y."
     }
   ],
   "soft_constraints": [
     {
-      "description": "To maximize resource utilization, project management requires the inclusion of as many nodes as possible; excluding a node from the set incurs a penalty.",
-      "asp_rule": "penalty(\"node_exclusion\", X, 1) :- node(X), not set(X)."
+      "description": "To satisfy the global objective of maximizing the set cardinality, a negative unit penalty is assigned to each node included in the independent set.",
+      "asp_rule": "penalty(\"maximize_set_size\", X, -1) :- selected(X)."
     }
   ],
-  "global_objective": "#minimize { Cost, Name, X : penalty(Name, X, Cost) }."
+  "global_objective": "#minimize { Cost, Name, Node : penalty(Name, Node, Cost) }."
 }

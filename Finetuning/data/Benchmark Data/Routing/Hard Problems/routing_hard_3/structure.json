@@ -1,41 +1,41 @@
 {
-  "instance_template": "loc(\"SubDock\"; \"CoralPass\"; \"VentStream\"; \"BeaconAlpha\"; \"DeepLoop\"; \"BeaconBeta\"; \"NodeX\"; \"BeaconGamma\"). beacon(\"BeaconAlpha\"; \"BeaconBeta\"; \"BeaconGamma\"; \"NodeX\"). edge(\"SubDock\",\"CoralPass\",2). edge(\"CoralPass\",\"SubDock\",2). edge(\"SubDock\",\"VentStream\",4). edge(\"VentStream\",\"SubDock\",4). edge(\"CoralPass\",\"BeaconAlpha\",1). edge(\"BeaconAlpha\",\"CoralPass\",1). edge(\"CoralPass\",\"DeepLoop\",1). edge(\"DeepLoop\",\"CoralPass\",1). edge(\"DeepLoop\",\"VentStream\",1). edge(\"VentStream\",\"DeepLoop\",1). edge(\"VentStream\",\"BeaconBeta\",2). edge(\"BeaconBeta\",\"VentStream\",2). edge(\"VentStream\",\"NodeX\",1). edge(\"NodeX\",\"VentStream\",1). edge(\"NodeX\",\"BeaconGamma\",3). edge(\"BeaconGamma\",\"NodeX\",3). edge(\"BeaconGamma\",\"BeaconAlpha\",4). edge(\"BeaconAlpha\",\"BeaconGamma\",4). step(0..15).",
-  "generator": "at(\"SubDock\", 0). time(0, 0). heat(0, 0). 1 { act(move(V2), S) : edge(V1, V2, C); act(pulse(V1), S) : beacon(V1); act(cool, S) : V1 = \"NodeX\"; act(done, S) } 1 :- at(V1, S), S < 16. at(V2, S+1) :- act(move(V2), S). at(V1, S+1) :- act(pulse(V1), S), at(V1, S). at(V1, S+1) :- act(cool, S), at(V1, S). at(V1, S+1) :- act(done, S), at(V1, S). time(S+1, T+1) :- act(move(V2), S), time(S, T). time(S+1, T+2) :- act(pulse(V), S), time(S, T). time(S+1, T+2) :- act(cool, S), time(S, T). time(S+1, T) :- act(done, S), time(S, T). heat(S+1, H+C) :- act(move(V2), S), at(V1, S), edge(V1, V2, C), heat(S, H). heat(S+1, H+1) :- act(pulse(V), S), heat(S, H). heat(S+1, 0) :- act(cool, S). heat(S+1, H) :- act(done, S), heat(S, H). act(done, S) :- act(done, S-1), S < 16.",
+  "instance_template": "loc(\"SubDock\"; \"CoralPass\"; \"VentStream\"; \"BeaconAlpha\"; \"DeepLoop\"; \"BeaconBeta\"; \"NodeX\"; \"BeaconGamma\").\nedge(\"SubDock\",\"CoralPass\",2). edge(\"CoralPass\",\"SubDock\",2).\nedge(\"SubDock\",\"VentStream\",4). edge(\"VentStream\",\"SubDock\",4).\nedge(\"CoralPass\",\"BeaconAlpha\",1). edge(\"BeaconAlpha\",\"CoralPass\",1).\nedge(\"CoralPass\",\"DeepLoop\",1). edge(\"DeepLoop\",\"CoralPass\",1).\nedge(\"DeepLoop\",\"VentStream\",1). edge(\"VentStream\",\"DeepLoop\",1).\nedge(\"VentStream\",\"BeaconBeta\",2). edge(\"BeaconBeta\",\"VentStream\",2).\nedge(\"VentStream\",\"NodeX\",1). edge(\"NodeX\",\"VentStream\",1).\nedge(\"NodeX\",\"BeaconGamma\",3). edge(\"BeaconGamma\",\"NodeX\",3).\nedge(\"BeaconGamma\",\"BeaconAlpha\",4). edge(\"BeaconAlpha\",\"BeaconGamma\",4).\ntime(0..32).\nmax_heat(10).\nlimit(16).",
+  "generator": "at(\"SubDock\", 0).\nheat(0, 0).\n{ move(L2, T) : edge(L1, L2, C) ; pulse(L1, T) ; cooldown(T) : L1 == \"NodeX\" ; stay(T) } 1 :- at(L1, T), time(T), T < 32, not occupied_ongoing(T).\noccupied_ongoing(T+1) :- pulse(_, T).\noccupied_ongoing(T+1) :- cooldown(T).\nat(L2, T+1) :- move(L2, T).\nat(L, T+1) :- pulse(L, T).\nat(L, T+2) :- pulse(L, T), T+2 <= 32.\nat(L, T+1) :- cooldown(T), at(L, T).\nat(L, T+2) :- cooldown(T), at(L, T), T+2 <= 32.\nat(L, T+1) :- at(L, T), stay(T).\nheat(T+1, H+C) :- move(L2, T), at(L1, T), edge(L1, L2, C), heat(T, H).\nheat(T+1, H) :- pulse(_, T), heat(T, H).\nheat(T+2, H+1) :- pulse(_, T), heat(T, H), T+2 <= 32.\nheat(T+1, H) :- cooldown(T), heat(T, H).\nheat(T+2, 0) :- cooldown(T), T+2 <= 32.\nheat(T+1, H) :- heat(T, H), stay(T).",
   "hard_constraints": [
     {
-      "description": "Heat levels must stay within drone tolerance.",
-      "asp_rule": ":- heat(S, H), H > 10."
+      "description": "The accumulated thermal load of the drone must not exceed the specified maximum tolerance at any point in the mission.",
+      "asp_rule": ":- heat(T, H), max_heat(M), H > M."
     },
     {
-      "description": "Pulse at BeaconAlpha is mandatory.",
-      "asp_rule": ":- not act(pulse(\"BeaconAlpha\"), _)."
+      "description": "Acoustic pulses at BeaconAlpha and BeaconBeta are mandatory components of the survey mission.",
+      "asp_rule": ":- not pulse(\"BeaconAlpha\", _). :- not pulse(\"BeaconBeta\", _)."
     },
     {
-      "description": "Pulse at BeaconBeta is mandatory.",
-      "asp_rule": ":- not act(pulse(\"BeaconBeta\"), _)."
+      "description": "The acoustic pulse at BeaconAlpha must be concluded no later than the fifth minute of the mission.",
+      "asp_rule": ":- pulse(\"BeaconAlpha\", T), T + 2 > 5."
     },
     {
-      "description": "BeaconAlpha pulse must start before minute 5.",
-      "asp_rule": ":- act(pulse(\"BeaconAlpha\"), S), time(S, T), T >= 5."
+      "description": "An acoustic pulse at BeaconGamma is required if and only if all mandatory survey pulses are completed within an eight-minute window.",
+      "asp_rule": "mandatory_finished_by_8 :- pulse(\"BeaconAlpha\", T1), pulse(\"BeaconBeta\", T2), T1+2 <= 8, T2+2 <= 8.\n:- mandatory_finished_by_8, not pulse(\"BeaconGamma\", _).\n:- pulse(\"BeaconGamma\", _), not mandatory_finished_by_8."
     },
     {
-      "description": "Pulse BeaconGamma iff mandatory pulses finish by minute 8.",
-      "asp_rule": "mand_done_by_8 :- act(pulse(\"BeaconAlpha\"), S1), time(S1, T1), T1+2 <= 8, act(pulse(\"BeaconBeta\"), S2), time(S2, T2), T2+2 <= 8. :- act(pulse(\"BeaconGamma\"), _), not mand_done_by_8. :- mand_done_by_8, not act(pulse(\"BeaconGamma\"), _)."
+      "description": "Upon arrival at the sensor hub NodeX, the drone is required to either initiate an acoustic pulse or commence a thermal cooldown sequence before proceeding to another node.",
+      "asp_rule": "entry(\"NodeX\", T) :- at(\"NodeX\", T), not at(\"NodeX\", T-1).\n:- entry(\"NodeX\", T), not pulse(\"NodeX\", T), not cooldown(T)."
     },
     {
-      "description": "If NodeX entered, next action must be pulse or cooldown.",
-      "asp_rule": "entered(S) :- at(\"NodeX\", S), act(move(\"NodeX\"), S-1). :- entered(S), not act(pulse(\"NodeX\"), S), not act(cool, S)."
+      "description": "The total number of discrete actions, encompassing movements, acoustic pulses, and thermal cooldowns, must not exceed sixteen.",
+      "asp_rule": ":- #count { T : move(_, _, T); T : pulse(_, T); T : cooldown(T) } > 16."
     },
     {
-      "description": "VentStream visit required between any two pulses.",
-      "asp_rule": "visited_vent(S1, S2) :- at(\"VentStream\", S), S1 < S, S < S2, step(S1), step(S2), step(S). :- act(pulse(_), S1), act(pulse(_), S2), S1 < S2, not visited_vent(S1, S2)."
+      "description": "To prevent signal interference, consecutive acoustic pulses are prohibited unless the drone reconfigures its systems by visiting the VentStream between pulse events.",
+      "asp_rule": "visited_vent(T1, T2) :- at(\"VentStream\", T), time(T1), time(T2), T1 < T, T < T2.\n:- pulse(_, T1), pulse(_, T2), T1 < T2, not visited_vent(T1, T2)."
     }
   ],
   "soft_constraints": [
     {
-      "description": "Minimize time not spent performing acoustic pulses.",
-      "asp_rule": "is_pulsing(T) :- act(pulse(_), S), time(S, T_S), T_S <= T, T < T_S+2, T = 0..32. mission_end(T_End) :- time(16, T_End). penalty(\"Idle\", T, 1) :- mission_end(T_Max), T < T_Max, not is_pulsing(T), T = 0..32."
+      "description": "The primary objective is to maximize operational efficiency by minimizing the total duration of time steps in which the drone is not actively engaged in an acoustic pulse.",
+      "asp_rule": "pulse_active(T) :- pulse(_, T).\npulse_active(T+1) :- pulse(_, T).\npenalty(\"TimeWaste\", (T), 1) :- time(T), not pulse_active(T), T < Tend, Tend = #max { T1+2 : pulse(_, T1) }."
     }
   ],
-  "global_objective": "#minimize { C,T : penalty(N,T,C) }."
+  "global_objective": "#minimize { C,T : penalty(\"TimeWaste\", T, C) }."
 }

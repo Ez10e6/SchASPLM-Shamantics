@@ -1,20 +1,20 @@
 {
-  "instance_template": "session(1..4). topic(\"Networking\"). topic(\"Security\"). room(1..2). slot(\"morning\"). slot(\"afternoon\").",
+  "instance_template": "session(1..4). topic(\"Networking\"; \"Security\"). room(1..2). slot(\"morning\"; \"afternoon\").",
   "generator": "1 { topicOf(S, T) : topic(T) } 1 :- session(S). 1 { scheduled(S, R, Sl) : room(R), slot(Sl) } 1 :- session(S).",
   "hard_constraints": [
     {
-      "description": "Gotta make sure we don't double-book a room. One session at a time, people!",
-      "asp_rule": ":- scheduled(S1, R, Sl), scheduled(S2, R, Sl), S1 != S2."
+      "description": "Single session per room-slot.",
+      "asp_rule": ":- scheduled(S1, R, Sl), scheduled(S2, R, Sl), S1 < S2."
     },
     {
-      "description": "Sanity check: security sessions are strictly afternoon only.",
-      "asp_rule": ":- scheduled(S, _, Sl), topicOf(S, \"Security\"), Sl != \"afternoon\"."
+      "description": "Security sessions: afternoon only.",
+      "asp_rule": ":- topicOf(S, \"Security\"), scheduled(S, _, Sl), Sl != \"afternoon\"."
     },
     {
-      "description": "Networking in Room 1? Big nope. Keep them elsewhere.",
-      "asp_rule": ":- scheduled(S, 1, _), topicOf(S, \"Networking\")."
+      "description": "Networking sessions: room 1 prohibited.",
+      "asp_rule": ":- topicOf(S, \"Networking\"), scheduled(S, 1, _)."
     }
   ],
   "soft_constraints": [],
-  "global_objective": null
+  "global_objective": ""
 }

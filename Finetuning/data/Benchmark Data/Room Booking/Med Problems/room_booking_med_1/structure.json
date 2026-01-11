@@ -1,41 +1,41 @@
 {
-  "instance_template": "seminar(1..10). day(1..2). timeslot(\"morning\";\"midday\";\"afternoon\"). room(1..4). topic(\"AI\";\"Bio\";\"Math\").",
-  "generator": "1 { topicOf(S, T) : topic(T) } 1 :- seminar(S). 1 { scheduled(S, R, T, D) : room(R), timeslot(T), day(D) } 1 :- seminar(S).",
+  "instance_template": "seminar(1..10). topic(\"AI\"; \"Bio\"; \"Math\"). day(1..2). timeslot(\"morning\"; \"midday\"; \"afternoon\"). room(1..4).",
+  "generator": "1 { topicOf(S, T) : topic(T) } 1 :- seminar(S).\n1 { scheduled(S, R, T, D) : room(R), timeslot(T), day(D) } 1 :- seminar(S).",
   "hard_constraints": [
     {
-      "description": "Room occupied by at most one seminar per slot.",
-      "asp_rule": ":- scheduled(S1, R, T, D), scheduled(S2, R, T, D), S1 != S2."
+      "description": "Ensure that every room can host at most one seminar at any given time to avoid scheduling conflicts.",
+      "asp_rule": ":- scheduled(S1, R, T, D), scheduled(S2, R, T, D), S1 < S2."
     },
     {
-      "description": "AI seminars restricted to morning or midday.",
+      "description": "Limit AI seminars to morning or midday slots, as these topics are not permitted for afternoon sessions.",
       "asp_rule": ":- topicOf(S, \"AI\"), scheduled(S, _, \"afternoon\", _)."
     },
     {
-      "description": "Biology seminars must use multiple rooms.",
-      "asp_rule": ":- topicOf(_, \"Bio\"), #count { R : scheduled(S, R, T, D), topicOf(S, \"Bio\") } < 2."
+      "description": "Confirm that Biology seminars are spread out across at least two different rooms.",
+      "asp_rule": ":- N = #count { R : scheduled(S, R, T, D), topicOf(S, \"Bio\") }, N < 2."
     },
     {
-      "description": "Room 4 unavailable midday.",
+      "description": "Enforce that Room 4 is completely unavailable during the midday slot on any day.",
       "asp_rule": ":- scheduled(_, 4, \"midday\", _)."
     },
     {
-      "description": "Mathematics seminars cannot overlap.",
-      "asp_rule": ":- topicOf(S1, \"Math\"), topicOf(S2, \"Math\"), scheduled(S1, _, T, D), scheduled(S2, _, T, D), S1 < S2."
+      "description": "Guarantee that no two Mathematics seminars overlap in time, regardless of which room they are held in.",
+      "asp_rule": ":- topicOf(S1, \"Math\"), topicOf(S2, \"Math\"), S1 < S2, scheduled(S1, _, T, D), scheduled(S2, _, T, D)."
     },
     {
-      "description": "Seminar 5 must be day 2.",
+      "description": "Assign Seminar 5 specifically to the second day of the event.",
       "asp_rule": ":- scheduled(5, _, _, D), D != 2."
     },
     {
-      "description": "Seminar 5 cannot be morning.",
+      "description": "Prevent Seminar 5 from being scheduled during the morning time slot.",
       "asp_rule": ":- scheduled(5, _, \"morning\", _)."
     },
     {
-      "description": "Seminars 6 and 7 must share room.",
+      "description": "Ensure that Seminars 6 and 7 are assigned to the exact same room.",
       "asp_rule": ":- scheduled(6, R1, _, _), scheduled(7, R2, _, _), R1 != R2."
     },
     {
-      "description": "Seminars 6 and 7 must be different days.",
+      "description": "Require that Seminars 6 and 7 occur on different days to provide proper spacing.",
       "asp_rule": ":- scheduled(6, _, _, D), scheduled(7, _, _, D)."
     }
   ],

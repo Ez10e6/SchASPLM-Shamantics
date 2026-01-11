@@ -1,65 +1,65 @@
 {
-  "instance_template": "presentation(1..10). topic(\"AI\"). topic(\"Cloud\"). topic(\"IoT\"). topic(\"VR\"). day(1..4). slot(1..4). room(1..5).",
-  "generator": "1 { topicOf(P, T) : topic(T) } 1 :- presentation(P). 1 { scheduled(P, R, S, D) : room(R), slot(S), day(D) } 1 :- presentation(P).",
+  "instance_template": "presentation(1..10).\ntopic(\"AI\"; \"Cloud\"; \"IoT\"; \"VR\").\nday(1..4).\nslot(1..4).\nroom(1..5).",
+  "generator": "{ topicOf(P, T) : topic(T) } = 1 :- presentation(P).\n{ scheduled(P, R, S, D) : room(R), slot(S), day(D) } = 1 :- presentation(P).",
   "hard_constraints": [
     {
-      "description": "Business Requirements: Ensure total policy compliance by allowing only one presentation per room-time pairing across the entire event schedule.",
-      "asp_rule": ":- scheduled(P1, R, S, D), scheduled(P2, R, S, D), P1 < P2."
+      "description": "Sanity check for room double-booking; one talk at a time.",
+      "asp_rule": ":- scheduled(P1, R, S, D), scheduled(P2, R, S, D), P1 != P2."
     },
     {
-      "description": "Business Requirements: Enforce room occupancy limits where no room exceeds three presentations on any single day.",
+      "description": "Don't overwork the rooms; 3 sessions max per day.",
       "asp_rule": ":- room(R), day(D), #count { S : scheduled(_, R, S, D) } > 3."
     },
     {
-      "description": "Business Requirements: Maintain non-consecutive scheduling policy; rooms must not be assigned to back-to-back sessions within the same day.",
-      "asp_rule": ":- scheduled(_, R, S, D), scheduled(_, R, S+1, D)."
+      "description": "Give the rooms a break; no back-to-back sessions in the same room.",
+      "asp_rule": ":- scheduled(_, R, S, D), scheduled(_, R, S + 1, D)."
     },
     {
-      "description": "Business Requirements: Restrict AI and Cloud presentations from Room 2 due to equipment limitations regarding projector availability.",
-      "asp_rule": ":- scheduled(P, 2, S, D), topicOf(P, \"AI\").\n:- scheduled(P, 2, S, D), topicOf(P, \"Cloud\")."
+      "description": "Room 2 is low-tech, so no AI or Cloud sessions allowed there.",
+      "asp_rule": ":- scheduled(P, 2, S, D), topicOf(P, T), T = (\"AI\"; \"Cloud\")."
     },
     {
-      "description": "Business Requirements: Enforce venue-specific restrictions prohibiting any Virtual Reality sessions from being held in Room 1.",
+      "description": "VR is strictly banned from Room 1.",
       "asp_rule": ":- scheduled(P, 1, S, D), topicOf(P, \"VR\")."
     },
     {
-      "description": "Business Requirements: Compliance rule requiring IoT presentations to be distributed across a minimum of three distinct days to ensure topical separation.",
-      "asp_rule": ":- #count { D : topicOf(P, \"IoT\"), scheduled(P, R, S, D) } < 3."
+      "description": "Keep IoT moving; it needs to be spread across at least 3 different days.",
+      "asp_rule": ":- #count { D : scheduled(P, R, S, D), topicOf(P, \"IoT\") } < 3."
     },
     {
-      "description": "Business Requirements: Spatial separation policy forbids AI and VR presentations from sharing the same physical room on the same day.",
-      "asp_rule": ":- topicOf(P1, \"AI\"), scheduled(P1, R, S1, D), topicOf(P2, \"VR\"), scheduled(P2, R, S2, D)."
+      "description": "AI and VR don't play nice; they can't share a room on the same day.",
+      "asp_rule": ":- scheduled(P1, R, S1, D), topicOf(P1, \"AI\"), scheduled(P2, R, S2, D), topicOf(P2, \"VR\")."
     },
     {
-      "description": "Business Requirements: Regulate simultaneous activity by capping the overlap of Cloud and IoT sessions to a maximum of two per time slot across all rooms.",
-      "asp_rule": ":- day(D), slot(S), #count { P : topicOf(P, \"Cloud\"), scheduled(P, R, S, D) ; P : topicOf(P, \"IoT\"), scheduled(P, R, S, D) } > 2."
+      "description": "Don't crowd the Cloud and IoT sessions; no more than 2 in the same slot.",
+      "asp_rule": ":- day(D), slot(S), #count { P : scheduled(P, R, S, D), topicOf(P, T), T = (\"Cloud\"; \"IoT\") } > 2."
     },
     {
-      "description": "Business Requirements: The early morning session on Day 1 is strictly reserved for AI presentations; no other subject matter is permitted.",
-      "asp_rule": ":- not scheduled(_, _, 1, 1).\n:- scheduled(P, R, 1, 1), not topicOf(P, \"AI\")."
+      "description": "Day 1 bright and early must be an AI session, and nothing else.",
+      "asp_rule": ":- #count { P, R : scheduled(P, R, 1, 1), topicOf(P, \"AI\") } = 0.\n:- scheduled(P, R, 1, 1), not topicOf(P, \"AI\")."
     },
     {
-      "description": "Business Requirements: The early afternoon session on Day 4 is exclusively designated for VR presentations; all other topics are prohibited in this slot.",
-      "asp_rule": ":- not scheduled(_, _, 3, 4).\n:- scheduled(P, R, 3, 4), not topicOf(P, \"VR\")."
+      "description": "Day 4 early afternoon is strictly reserved for VR.",
+      "asp_rule": ":- #count { P, R : scheduled(P, R, 3, 4), topicOf(P, \"VR\") } = 0.\n:- scheduled(P, R, 3, 4), not topicOf(P, \"VR\")."
     },
     {
-      "description": "Business Requirements: Ensure consistent daily event activity by requiring at least one presentation to be scheduled on every day of the event.",
-      "asp_rule": ":- day(D), not scheduled(_, _, _, D)."
+      "description": "No ghost days; every day needs to host at least one presentation.",
+      "asp_rule": ":- day(D), #count { P : scheduled(P, R, S, D) } = 0."
     },
     {
-      "description": "Business Requirements: Promote topic diversity by requiring that every utilized time slot features at least two distinct subject areas.",
-      "asp_rule": ":- day(D), slot(S), scheduled(_, _, S, D), #count { T : topicOf(P, T), scheduled(P, R, S, D) } < 2."
+      "description": "No topic monopolies; any time slot that's active needs at least two different topics (excluding restricted kick-off/closing slots).",
+      "asp_rule": ":- day(D), slot(S), (S, D) != (1, 1), (S, D) != (3, 4), #count { P, R : scheduled(P, R, S, D) } > 0, N = #count { T : topicOf(P, T), scheduled(P, R, S, D) }, N < 2."
     }
   ],
   "soft_constraints": [
     {
-      "description": "Business Requirements: Optimize room utilization by maximizing the number of physical spaces occupied during every session.",
-      "asp_rule": "penalty(\"UnusedRoomsInSession\", (S, D), 5 - N) :- slot(S), day(D), N = #count { R : scheduled(_, R, S, D) }."
+      "description": "Priority 1: Let's try to maximize how many rooms are buzzing during each active session.",
+      "asp_rule": "penalty(\"rooms_in_use\", (D, S), 5 - N) :- day(D), slot(S), N = #count { R : scheduled(_, R, S, D) }."
     },
     {
-      "description": "Business Requirements: Minimize overall resource inefficiency by reducing the total number of idle room-time slots across the event.",
-      "asp_rule": "penalty(\"IdleSlot\", (R, S, D), 1) :- room(R), slot(S), day(D), not scheduled(_, R, S, D)."
+      "description": "Priority 2: Try to keep the total number of idle slots to a minimum.",
+      "asp_rule": "penalty(\"idle_slot\", (R, D, S), 1) :- room(R), day(D), slot(S), not scheduled(_, R, S, D)."
     }
   ],
-  "global_objective": "#minimize { C@2,S,D : penalty(\"UnusedRoomsInSession\", (S, D), C); C@1,R,S,D : penalty(\"IdleSlot\", (R, S, D), C) }."
+  "global_objective": "#minimize { C@2, D, S : penalty(\"rooms_in_use\", (D, S), C); C@1, R, D, S : penalty(\"idle_slot\", (R, D, S), C) }."
 }

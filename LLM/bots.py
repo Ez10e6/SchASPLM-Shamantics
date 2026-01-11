@@ -144,23 +144,19 @@ class Local_Bot():
 
         # If a seed is provided, create a torch.Generator for reproducible sampling
         if self.seed is not None:
-            # DYNAMIC DEVICE SELECTION
+            s=int(self.seed)
             if torch.cuda.is_available():
-                device = 'cuda'
+                gen=torch.Generator(device="cuda").manual_seed(s)
+                outputs=self.pipe(self.messages, do_sample=do_sample, generator=gen, **pipe_kwargs)
             elif torch.backends.mps.is_available():
-                device = 'mps'
+                torch.mps.manual_seed(s)
+                outputs=self.pipe(self.messages, do_sample=do_sample, **pipe_kwargs)
             else:
-                device = 'cpu'
-
-            try:
-                gen = torch.Generator(device=device).manual_seed(int(self.seed))
-                outputs = self.pipe(self.messages, do_sample=do_sample, generator=gen, **pipe_kwargs)
-            except Exception as e:
-                print(f"Warning: Failed to create generator on {device}. Fallback to CPU. Error: {e}")
-                gen = torch.Generator(device='cpu').manual_seed(int(self.seed))
-                outputs = self.pipe(self.messages, do_sample=do_sample, generator=gen, **pipe_kwargs)
+                gen=torch.Generator(device="cpu").manual_seed(s)
+                outputs=self.pipe(self.messages, do_sample=do_sample, generator=gen, **pipe_kwargs)
         else:
-            outputs = self.pipe(self.messages, do_sample=do_sample, **pipe_kwargs)
+            outputs=self.pipe(self.messages, do_sample=do_sample, **pipe_kwargs)
+
 
         response = outputs[0]["generated_text"][-1]
         response_text = response['content']
@@ -297,7 +293,7 @@ def load_pipe(model_checkpoint="meta-llama/Meta-Llama-3-8B-Instruct", local_dir=
         #os.environ.setdefault('HUGGINGFACE_HUB_TOKEN', HF_KEY)
     
     is_cuda = torch.cuda.is_available()
-    is_mps = torch.mps.is_available()
+    is_mps = torch.backends.mps.is_available()
 
     # Clear Cache dynamically
     if is_cuda:

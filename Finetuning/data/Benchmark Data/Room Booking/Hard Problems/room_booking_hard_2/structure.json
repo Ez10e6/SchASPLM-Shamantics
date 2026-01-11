@@ -1,69 +1,65 @@
 {
-  "instance_template": "workshop(1..12). topic(\"AI\"; \"Physics\"; \"Math\"; \"Linguistics\"). day(1..3). slot(\"morning\"; \"midday\"; \"evening\"). room(1..4). slotOrder(\"morning\", 1). slotOrder(\"midday\", 2). slotOrder(\"evening\", 3). adjacent(\"morning\", \"midday\"). adjacent(\"midday\", \"evening\").",
-  "generator": "{ topicOf(W, T) : topic(T) } = 1 :- workshop(W). { scheduled(W, R, S, D) : room(R), slot(S), day(D) } :- workshop(W).",
+  "instance_template": "workshop(1..12). topic(\"AI\"; \"Physics\"; \"Math\"; \"Linguistics\"). day(1..3). slot(\"morning\"; \"midday\"; \"evening\"). room(1..4). slotOrder(\"morning\", 1). slotOrder(\"midday\", 2). slotOrder(\"evening\", 3). timeIndex(D, S, ((D-1)*3) + O) :- day(D), slotOrder(S, O).",
+  "generator": "{ topicOf(W, T) : topic(T) } = 1 :- workshop(W). { scheduled(W, R, S, D) : room(R), slot(S), day(D) } = 1 :- workshop(W).",
   "hard_constraints": [
     {
-      "description": "sanity check: make sure every single workshop is on the calendar somewhere.",
-      "asp_rule": ":- workshop(W), not scheduled(W, _, _, _)."
-    },
-    {
-      "description": "no double-booking rooms. just one workshop per room per slot.",
+      "description": "Business Requirements: Ensure strict adherence to the venue policy that no more than one workshop occupies a room during any given timeslot.",
       "asp_rule": ":- scheduled(W1, R, S, D), scheduled(W2, R, S, D), W1 != W2."
     },
     {
-      "description": "don't burn out the rooms. max two sessions per day per room.",
-      "asp_rule": ":- #count{ S,W : scheduled(W, R, S, D) } > 2, room(R), day(D)."
+      "description": "Business Requirements: Policy dictates a maximum of two workshops per room per day to manage venue maintenance and staff workload.",
+      "asp_rule": ":- room(R), day(D), N = #count { W : scheduled(W, R, S, D) }, N > 2."
     },
     {
-      "description": "rooms need a breather. no back-to-back sessions in the same room.",
-      "asp_rule": ":- scheduled(_, R, S1, D), scheduled(_, R, S2, D), adjacent(S1, S2)."
+      "description": "Business Requirements: To ensure adequate preparation time, a mandatory break must separate any two sessions held in the same room on the same day.",
+      "asp_rule": ":- scheduled(_, R, S1, D), scheduled(_, R, S2, D), slotOrder(S1, O1), slotOrder(S2, O2), |O1 - O2| == 1."
     },
     {
-      "description": "room 2 is off-limits in the evening.",
+      "description": "Business Requirements: Comply with facility management's restriction that Room 2 is unavailable for use during the evening sessions.",
       "asp_rule": ":- scheduled(_, 2, \"evening\", _)."
     },
     {
-      "description": "room 4 is too small for the AI and Physics crowds.",
-      "asp_rule": ":- scheduled(W, 4, _, _), topicOf(W, \"AI\").\n:- scheduled(W, 4, _, _), topicOf(W, \"Physics\")."
+      "description": "Business Requirements: Observe capacity limitations by prohibiting Artificial Intelligence or Physics workshops from being scheduled in Room 4.",
+      "asp_rule": ":- scheduled(W, 4, S, D), topicOf(W, T), T = (\"AI\"; \"Physics\")."
     },
     {
-      "description": "AI folks are early birds. morning sessions only.",
+      "description": "Business Requirements: Follow the thematic programming rule that all Artificial Intelligence workshops must be scheduled during morning sessions.",
       "asp_rule": ":- scheduled(W, _, S, _), topicOf(W, \"AI\"), S != \"morning\"."
     },
     {
-      "description": "physics is done by day 3. keep it to the first two days.",
-      "asp_rule": ":- scheduled(W, R, S, 3), topicOf(W, \"Physics\")."
+      "description": "Business Requirements: Adhere to the curriculum timeline requiring all Physics workshops to be completed by the end of Day 2.",
+      "asp_rule": ":- scheduled(W, _, _, 3), topicOf(W, \"Physics\")."
     },
     {
-      "description": "math belongs in rooms 1 or 3.",
+      "description": "Business Requirements: Ensure logistics compliance by restricting all Mathematics workshops to Room 1 or Room 3.",
       "asp_rule": ":- scheduled(W, R, _, _), topicOf(W, \"Math\"), R != 1, R != 3."
     },
     {
-      "description": "linguistics doesn't share well. no two linguistics talks at the same time.",
-      "asp_rule": ":- 2 { scheduled(W, R, S, D) : topicOf(W, \"Linguistics\"), room(R) }, slot(S), day(D)."
+      "description": "Business Requirements: To prevent scheduling conflicts for the target audience, no two Linguistics workshops may be held concurrently.",
+      "asp_rule": ":- scheduled(W1, R1, S, D), scheduled(W2, R2, S, D), topicOf(W1, \"Linguistics\"), topicOf(W2, \"Linguistics\"), W1 != W2."
     },
     {
-      "description": "keep the vibe consistent. only one discipline per room per day.",
+      "description": "Business Requirements: Maintain thematic consistency by ensuring each room hosts only one specific discipline per day.",
       "asp_rule": ":- scheduled(W1, R, S1, D), scheduled(W2, R, S2, D), topicOf(W1, T1), topicOf(W2, T2), T1 != T2."
     },
     {
-      "description": "we need variety. every topic needs to show up at least once every day.",
-      "asp_rule": ":- day(D), topic(T), not scheduled(_, _, _, D) : topicOf(_, T)."
+      "description": "Business Requirements: Guarantee program breadth by including at least one session from every discipline on each day of the symposium.",
+      "asp_rule": ":- day(D), topic(T), #count { W : topicOf(W, T), scheduled(W, R, S, D) } = 0."
     },
     {
-      "description": "kick things off with AI. any workshop in the very first slot used must be AI.",
-      "asp_rule": "timeVal(W, I) :- scheduled(W, _, S, D), slotOrder(S, O), I = (D-1)*3 + O. minVal(M) :- M = #min { I : timeVal(_, I) }. :- timeVal(W, I), minVal(I), not topicOf(W, \"AI\")."
+      "description": "Business Requirements: The symposium's opening presentation\u2014defined as the workshop at the earliest scheduled time\u2014must be an Artificial Intelligence session.",
+      "asp_rule": ":- scheduled(W, R, S, D), timeIndex(D, S, I), M = #min { TI : scheduled(_, _, TS, DS), timeIndex(DS, TS, TI) }, I = M, not topicOf(W, \"AI\")."
     },
     {
-      "description": "wrap it up with linguistics. the last workshop scheduled has to be from that field.",
-      "asp_rule": "maxVal(M) :- M = #max { I : timeVal(_, I) }. :- timeVal(W, I), maxVal(I), not topicOf(W, \"Linguistics\")."
+      "description": "Business Requirements: The symposium's closing session\u2014defined as the workshop at the latest scheduled time\u2014must be a Linguistics presentation.",
+      "asp_rule": ":- scheduled(W, R, S, D), timeIndex(D, S, I), M = #max { TI : scheduled(_, _, TS, DS), timeIndex(DS, TS, TI) }, I = M, not topicOf(W, \"Linguistics\")."
     }
   ],
   "soft_constraints": [
     {
-      "description": "try to keep the rooms busy. mark every empty slot as a penalty.",
-      "asp_rule": "penalty(\"idle_slot\", (R, S, D), 1) :- room(R), slot(S), day(D), not scheduled(_, R, S, D)."
+      "description": "Business Requirements: Maximize venue utilization by identifying and penalizing any unoccupied room slots during the symposium.",
+      "asp_rule": "penalty(\"IdleSlot\", (R, S, D), 1) :- room(R), slot(S), day(D), not scheduled(_, R, S, D)."
     }
   ],
-  "global_objective": "#minimize { Cost,Name,Args : penalty(Name, Args, Cost) }."
+  "global_objective": "#minimize { Cost, Name, Tuple : penalty(Name, Tuple, Cost) }."
 }

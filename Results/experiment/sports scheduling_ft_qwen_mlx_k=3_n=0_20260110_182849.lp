@@ -7,17 +7,17 @@ availability(Venue, Date).
 
 % Generator
 
-1 { game(Team1, Team2, Venue, Gameday) : team(Team1), team(Team2), venue(Venue), gameday(Gameday) } 1 :- team(Team1), team(Team2).
+1 { game(Team1, Team2, Venue, Gameday) : team(Team1), team(Team2), venue(Venue), gameday(Gameday) }.
 
 
 % Hard Constraints
 
 % No team plays each other more than once at different gamedays.
-:- game(Team1, Team2, _, Gameday1), game(Team1, Team2, _, Gameday2), Gameday1 != Gameday2.
+:- game(Team1, Team2, _, Gameday), game(Team1, Team2, _, Gameday2), Gameday != Gameday2.
 
 
 % Every team plays every other team at least once.
-:- team(Team1), team(Team2), not game(Team1, Team2, _, _).
+:- team(Team1), team(Team2), Team1 != Team2, N = #count { game(Team1, Team2, _, _), game(Team2, Team1, _, _) }.
 
 
 % No team plays itself.
@@ -29,7 +29,7 @@ availability(Venue, Date).
 % Soft Constraints
 
 % Teams should play at the same venue as little as possible.
-penalty("VenueStability",using_venue(Team,Venue),2) :- game(Team1,Team2,Venue,Gameday), game(Team1,Team3,Venue,Gameday), Team2 != Team3.
+penalty("VenueChange",game(Team1,Team2,Venue1,Gameday),1) :- game(Team1,Team2,Venue1,Gameday), game(Team1,Team2,Venue2,Gameday), Venue1 != Venue2.
 
 
 

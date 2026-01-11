@@ -1,61 +1,61 @@
 {
-  "instance_template": "node(1..10, 1..10). direction((0,1); (0,-1); (1,0); (-1,0)). robot(r1). shelf(s1). station(p1). product(a1). order(o1, a1, 5). product_on_shelf(a1, s1, 10). order_station(o1, p1). position(r1, (1,1), 0). position(s1, (1,2), 0). station_at(p1, (5,5)). horizon(20).",
-  "generator": "time(1..H) :- horizon(H). isRobot(R) :- position(R,_,0). isShelf(S) :- position(S,_,0). nextto((X,Y), (DX,DY), (X+DX,Y+DY)) :- node(X,Y), direction((DX,DY)), node(X+DX,Y+DY). { move(R,D,T) : direction(D); pickup(R,S,T) : isShelf(S); putdown(R,S,T) : isShelf(S); deliver(R,O,A,Q,T) : order(O,A,Q) } 1 :- isRobot(R), time(T). position(R,C,T) :- move(R,D,T), position(R,C_Old,T-1), nextto(C_Old,D,C). position(R,C,T) :- position(R,C,T-1), not move(R,_,T), isRobot(R), time(T). carries(R,S,T) :- pickup(R,S,T). carries(R,S,T) :- carries(R,S,T-1), not putdown(R,S,T), time(T). position(S,C,T) :- position(R,C,T), carries(R,S,T). position(S,C,T) :- position(S,C,T-1), not carries(_,S,T), isShelf(S), time(T). delivered(O,A,T) :- deliver(_,O,A,_,T). delivered(O,A,T) :- delivered(O,A,T-1), time(T).",
+  "instance_template": "robot(1). shelf(1). station(1). product(1). order(1). ordered(order(1), product(1)). shelf_inventory(shelf(1), product(1)). position(node(1,1)). time(1..10). horizon(10).",
+  "generator": "direction((0,1);(0,-1);(1,0);(-1,0)). nextto((X,Y),(DX,DY),(X+DX,Y+DY)) :- direction((DX,DY)), position(node(X,Y)), position(node(X+DX,Y+DY)). { move(R,D,T) : direction(D) ; pickup(R,S,T) : shelf(S) ; putdown(R,S,T) : shelf(S) ; deliver(R,S,O,A,T) : shelf_inventory(S,A), ordered(O,A) } 1 :- robot(R), time(T). position(R,C,T) :- move(R,D,T), position(R,C',T-1), nextto(C',D,C). position(R,C,T) :- position(R,C,T-1), not move(R,_,T), robot(R), time(T). carries(R,S,T) :- pickup(R,S,T). carries(R,S,T) :- carries(R,S,T-1), not putdown(R,S,T), time(T). position(S,C,T) :- carries(R,S,T), position(R,C,T). position(S,C,T) :- position(S,C,T-1), N = #count { R : carries(R,S,T) }, N = 0, shelf(S), time(T). processed(A,O,T) :- deliver(R,S,O,A,T). processed(A,O,T) :- processed(A,O,T-1), time(T).",
   "hard_constraints": [
     {
-      "description": "The spatial trajectory of a robotic agent is restricted to movements between adjacent nodes as defined by the grid topology.",
+      "description": "The cardinality of robots occupying a single grid vertex at any discrete temporal index must not exceed one.",
+      "asp_rule": ":- position(node(X,Y)), time(T), N = #count { R : position(R,node(X,Y),T) }, N > 1."
+    },
+    {
+      "description": "The cardinality of shelves occupying a single grid vertex at any discrete temporal index must not exceed one.",
+      "asp_rule": ":- position(node(X,Y)), time(T), N = #count { S : position(S,node(X,Y),T) }, N > 1."
+    },
+    {
+      "description": "The movement of a robot is restricted to adjacent grid vertices defined by cardinal directions.",
       "asp_rule": ":- move(R,D,T), position(R,C,T-1), not nextto(C,D,_)."
     },
     {
-      "description": "A pickup operation requires the robotic agent and the targeted shelf to be co-located at the same spatial vertex at the preceding temporal index.",
-      "asp_rule": ":- pickup(R,S,T), position(R,C,T-1), not position(S,C,T-1)."
+      "description": "A robot may only perform a pickup action if its current grid location is identical to that of the target shelf.",
+      "asp_rule": ":- pickup(R,S,T), position(R,C,T-1), position(S,C',T-1), C != C'."
     },
     {
-      "description": "A robotic agent is prohibited from initiating a pickup action if it is already in possession of a shelf.",
+      "description": "A robot is prohibited from initiating a pickup action if it is already in possession of a shelf.",
       "asp_rule": ":- pickup(R,S,T), carries(R,_,T-1)."
     },
     {
-      "description": "A shelf cannot be the subject of a pickup action if it is currently being transported by another robotic agent.",
+      "description": "A shelf may not be picked up if it is currently being transported by another robot.",
       "asp_rule": ":- pickup(R,S,T), carries(_,S,T-1)."
     },
     {
-      "description": "The execution of a putdown action is contingent upon the robotic agent currently carrying the specified shelf.",
+      "description": "A robot may only perform a putdown action if it is currently transporting the specified shelf.",
       "asp_rule": ":- putdown(R,S,T), not carries(R,S,T-1)."
     },
     {
-      "description": "A product delivery action is valid only if the robotic agent is carrying a shelf that contains a sufficient quantity of the required product.",
-      "asp_rule": ":- deliver(R,O,A,Q,T), not carries(R,S,T-1) : product_on_shelf(A,S,QS), QS >= Q."
+      "description": "The simultaneous exchange of spatial coordinates between two distinct robots within a single temporal transition is forbidden.",
+      "asp_rule": ":- position(R1,C1,T-1), position(R1,C2,T), position(R2,C2,T-1), position(R2,C1,T), R1 < R2."
     },
     {
-      "description": "Product delivery must occur when the robotic agent is positioned at the specific picking station designated for the order.",
-      "asp_rule": ":- deliver(R,O,A,Q,T), position(R,C,T), not station_at(P,C), order_station(O,P)."
+      "description": "Product delivery is strictly permitted only when the robot transporting the requisite shelf is situated at a designated picking station.",
+      "asp_rule": ":- deliver(R,S,O,A,T), position(R,C,T), not station(C)."
     },
     {
-      "description": "The simultaneous occupation of a single spatial vertex by multiple distinct robotic agents is strictly prohibited.",
-      "asp_rule": ":- { position(R,C,T) : isRobot(R) } > 1, node(C), time(T)."
+      "description": "A delivery action requires the robot to be actively carrying the shelf containing the ordered product.",
+      "asp_rule": ":- deliver(R,S,O,A,T), not carries(R,S,T)."
     },
     {
-      "description": "The simultaneous occupation of a single spatial vertex by multiple distinct shelves is strictly prohibited.",
-      "asp_rule": ":- { position(S,C,T) : isShelf(S) } > 1, node(C), time(T)."
+      "description": "Every product specified in a customer order must reach a processed state by the terminal time index of the horizon.",
+      "asp_rule": ":- ordered(O,A), horizon(H), not processed(A,O,H)."
     },
     {
-      "description": "The reciprocal exchange of adjacent positions by two robotic agents within a single temporal interval (edge collision) is prohibited.",
-      "asp_rule": ":- move(R1,D,T), position(R1,C1,T-1), nextto(C1,D,C2), move(R2,D_Rev,T), position(R2,C2,T-1), nextto(C2,D_Rev,C1), R1 < R2."
-    },
-    {
-      "description": "All customer orders must be satisfied by the successful delivery of the required product quantities within the defined planning horizon.",
-      "asp_rule": ":- order(O,A,Q), not delivered(O,A,H), horizon(H)."
-    },
-    {
-      "description": "All shelves must be returned to a stable storage state, such that no robotic agent is carrying a shelf at the terminal temporal index.",
+      "description": "All shelves must be released from robot possession and placed on the grid by the terminal temporal index.",
       "asp_rule": ":- carries(_,_,H), horizon(H)."
     }
   ],
   "soft_constraints": [
     {
-      "description": "Preference is given to minimizing the total cumulative number of actions executed by all robotic agents to maximize operational efficiency.",
-      "asp_rule": "penalty(\"TotalActions\", (R,T), 1) :- move(R,_,T). penalty(\"TotalActions\", (R,T), 1) :- pickup(R,_,T). penalty(\"TotalActions\", (R,T), 1) :- putdown(R,_,T). penalty(\"TotalActions\", (R,T), 1) :- deliver(R,_,_,_,T)."
+      "description": "A penalty is incurred for every active movement, pickup, or putdown action to minimize the total energy expenditure.",
+      "asp_rule": "penalty(\"action_cost\", (R,T), 1) :- move(R,D,T). penalty(\"action_cost\", (R,T), 1) :- pickup(R,S,T). penalty(\"action_cost\", (R,T), 1) :- putdown(R,S,T)."
     }
   ],
-  "global_objective": "#minimize { Cost,Name,Tuple : penalty(Name,Tuple,Cost) }."
+  "global_objective": "#minimize { C,Name,Args : penalty(Name,Args,C) }."
 }

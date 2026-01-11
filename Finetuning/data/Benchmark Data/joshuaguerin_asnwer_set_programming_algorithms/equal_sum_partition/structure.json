@@ -1,13 +1,13 @@
 {
-  "instance_template": "value(1..10).",
-  "generator": "subset(\"a\"). subset(\"b\"). { partition(V, S) : subset(S) } :- value(V).",
+  "instance_template": "value(1..4).",
+  "generator": "{ partition(V, \"a\"); partition(V, \"b\") } :- value(V).",
   "hard_constraints": [
     {
-      "description": "Class, it is fundamental that every single number from our input set is assigned to a group. You must ensure that each value belongs to exactly one subset\u2014either 'a' or 'b'\u2014meaning no number is left unassigned and no number is included in both groups simultaneously.",
-      "asp_rule": ":- value(V), #count{ S : partition(V, S) } != 1."
+      "description": "Gotta make sure every number picks exactly one side\u2014no ghosts and no double-agent numbers.",
+      "asp_rule": ":- value(V), C = #count{ S : partition(V, S) }, C != 1."
     },
     {
-      "description": "Now, we must achieve a perfect balance between the two groups. This means the total sum of all integers assigned to subset 'a' must be precisely equal to the total sum of those in subset 'b'. We use aggregate functions to calculate these sums and discard any partition where they do not match.",
+      "description": "Sanity check: the total sum for group A better match group B exactly or the partition is a bust.",
       "asp_rule": ":- S1 = #sum{ V : partition(V, \"a\") }, S2 = #sum{ V : partition(V, \"b\") }, S1 != S2."
     }
   ],

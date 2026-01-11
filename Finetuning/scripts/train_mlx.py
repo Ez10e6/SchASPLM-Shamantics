@@ -59,14 +59,12 @@ def run_mlx_training(model_path, data_folder, adapter_path, iters=1000, num_laye
         
         # LoRA Config
         "num_layers": num_layers, 
-        "lora_parameters": {
-            "rank": 16,
-            "dropout": 0.1,
-            "scale": 2.0
-        },
+        # "lora_parameters": {
+        #     "rank": 16,
+        #     "dropout": 0.1,
+        #     "scale": 2.0
+        # },
 
-        # This ensures Loss is only calculated on the ASP Code (Assistant response),
-        # not the User Prompt or System Message.
         "mask_prompt": True
     }
 

@@ -140,7 +140,7 @@ def clean_gemini_code(text):
     
     return text.strip()
 
-def repair_with_gemini(code, description, error_message, context):
+def repair_with_gemini(code, description, error_message, context=""):
     """Calls Gemini to fix invalid code, providing the specific error."""
     try:
         # We pass the error message into the prompt
@@ -150,8 +150,6 @@ def repair_with_gemini(code, description, error_message, context):
             code=code, 
             error=error_message
         )
-        
-        print(f"REPAIR PROMPT: {content}")
 
         response = client.models.generate_content(
             model=MODEL_ID,
@@ -162,7 +160,6 @@ def repair_with_gemini(code, description, error_message, context):
             )
         )
         clean_code = clean_gemini_code(response.text)
-        print(f"Repair response: {clean_code}")
         return clean_code
     except Exception as e:
         print(f"    [Repair Error] {e}")

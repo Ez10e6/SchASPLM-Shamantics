@@ -1,12 +1,12 @@
 {
-  "instance_template": "node(1..3). edge(1,2). edge(2,3). start_node(1). target_node(3). horizon(5).",
-  "generator": "at_node(S,0) :- start_node(S). time(1..H) :- horizon(H). { move(U,V,T) : edge(U,V) } = 1 :- at_node(U,T-1), time(T). at_node(V,T) :- move(U,V,T).",
+  "instance_template": "node(1..5). connected(1,2). connected(2,3). connected(3,4). connected(4,5). at(1). visit(5). #const horizon=10.",
+  "generator": "atrobot(X, 0) :- at(X). 1 { move(X, Y, T) : connected(X, Y) } 1 :- atrobot(X, T-1), T = 1..horizon. atrobot(Y, T) :- move(X, Y, T), T = 1..horizon. visited(X) :- atrobot(X, T), T = 0..horizon.",
   "hard_constraints": [
     {
-      "description": "To ensure the robot fulfills its mission, we must verify that every designated target location has been visited at least once. We enforce this by stating that it is a violation if the count of time steps the robot spent at a target location is exactly zero.",
-      "asp_rule": ":- target_node(L), #count { T : at_node(L, T) } = 0."
+      "description": "In accordance with organizational mission objectives, it is mandatory that every location designated as a visit target is logged as visited by the robot at least once within the specified time horizon.",
+      "asp_rule": ":- visit(X), not visited(X)."
     }
   ],
   "soft_constraints": [],
-  "global_objective": ""
+  "global_objective": null
 }

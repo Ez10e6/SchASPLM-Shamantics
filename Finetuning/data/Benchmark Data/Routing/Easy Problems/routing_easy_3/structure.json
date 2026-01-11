@@ -1,17 +1,17 @@
 {
-  "instance_template": "loc(\"A\";\"B\";\"C\";\"D\";\"E\"). deliver_to(\"C\";\"E\"). edge(\"A\",\"B\"). edge(\"A\",\"D\"). edge(\"B\",\"C\"). edge(\"D\",\"E\"). time(0..6).",
+  "instance_template": "loc(\"A\"). loc(\"B\"). loc(\"C\"). loc(\"D\"). loc(\"E\"). edge(\"A\", \"B\"). edge(\"A\", \"D\"). edge(\"B\", \"C\"). edge(\"D\", \"E\"). time(0..6). deliver_to(\"C\"). deliver_to(\"E\").",
   "generator": "1 { at(L, T) : loc(L) } 1 :- time(T).",
   "hard_constraints": [
     {
-      "description": "Every journey must start from the beginning; therefore, we require the bot to be at station A at the initial time step 0.",
+      "description": "We must ensure that the warehouse robot starts its journey specifically at station A at the beginning of the timeline (time zero).",
       "asp_rule": ":- not at(\"A\", 0)."
     },
     {
-      "description": "To ensure valid movement, the robot is only allowed to transition between two stations if they are connected by a marked path. We forbid any move between non-adjacent stations.",
+      "description": "To maintain physical consistency, the robot is only permitted to move between stations that are connected by a defined edge in the facility map.",
       "asp_rule": ":- at(L1, T), at(L2, T+1), not edge(L1, L2), not edge(L2, L1), time(T), time(T+1)."
     },
     {
-      "description": "The mission objectives are specific: the robot must visit each of the delivery stations, such as C and E, exactly one time during its entire operation.",
+      "description": "The robot must fulfill its mission requirements by visiting each designated delivery station exactly once during its scheduled route.",
       "asp_rule": ":- deliver_to(L), N = #count { T : at(L, T) }, N != 1."
     }
   ],

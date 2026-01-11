@@ -1,12 +1,12 @@
 {
-  "instance_template": "value(1..10). target(15).",
-  "generator": "{ selected(V) : value(V) }.",
+  "instance_template": "item(1, 10). item(2, 20). item(3, 30). item(4, 40). target(60).",
+  "generator": "{ selected(ID) : item(ID, Value) }.",
   "hard_constraints": [
     {
-      "description": "Alright, sanity check: we need the sum of our picked values to hit the target number exactly, or it's a no-go.",
-      "asp_rule": ":- S = #sum { V : selected(V) }, target(T), S != T."
+      "description": "The arithmetic sum of the numerical values associated with the selected items must be strictly equal to the specified target constant.",
+      "asp_rule": ":- S = #sum { Value, ID : selected(ID), item(ID, Value) }, target(N), S != N."
     }
   ],
   "soft_constraints": [],
-  "global_objective": ""
+  "global_objective": null
 }

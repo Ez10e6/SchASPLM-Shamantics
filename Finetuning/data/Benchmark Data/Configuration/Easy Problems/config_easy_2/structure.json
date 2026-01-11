@@ -1,17 +1,29 @@
 {
   "instance_template": "speaker(\"Alpha\"). speaker(\"Beta\"). amplifier(\"AmpX\"). amplifier(\"AmpY\"). player(\"Streamer1\"). player(\"Streamer2\").",
-  "generator": "1 { selected_speaker(S) : speaker(S) } 1. 1 { selected_amplifier(A) : amplifier(A) } 1. 1 { selected_player(P) : player(P) } 1.",
+  "generator": "{ selected_speaker(S) : speaker(S) }. { selected_amplifier(A) : amplifier(A) }. { selected_player(P) : player(P) }.",
   "hard_constraints": [
     {
-      "description": "It is required that if the speaker designated as \"Alpha\" is selected, the associated amplifier must be exclusively \"AmpX\".",
+      "description": "System configuration policies require that exactly one speaker is active at all times.",
+      "asp_rule": ":- N = #count { S : selected_speaker(S) }, N != 1."
+    },
+    {
+      "description": "To ensure electrical compliance, exactly one amplifier must be selected for the configuration.",
+      "asp_rule": ":- N = #count { A : selected_amplifier(A) }, N != 1."
+    },
+    {
+      "description": "The project management standards mandate that exactly one media player is incorporated into the setup.",
+      "asp_rule": ":- N = #count { P : selected_player(P) }, N != 1."
+    },
+    {
+      "description": "Compatibility rules dictate that if the Alpha speaker is chosen, the system must use AmpX to maintain safety standards.",
       "asp_rule": ":- selected_speaker(\"Alpha\"), selected_amplifier(A), A != \"AmpX\"."
     },
     {
-      "description": "The simultaneous selection of amplifier \"AmpY\" and media player \"Streamer1\" is strictly prohibited.",
+      "description": "Company policy prohibits the configuration of AmpY with Streamer1 to prevent signal failure.",
       "asp_rule": ":- selected_amplifier(\"AmpY\"), selected_player(\"Streamer1\")."
     },
     {
-      "description": "It is required that if the media player designated as \"Streamer2\" is selected, the associated speaker must be exclusively \"Beta\".",
+      "description": "Regulatory compliance requires that Streamer2 only be operated in conjunction with Speaker Beta.",
       "asp_rule": ":- selected_player(\"Streamer2\"), selected_speaker(S), S != \"Beta\"."
     }
   ],

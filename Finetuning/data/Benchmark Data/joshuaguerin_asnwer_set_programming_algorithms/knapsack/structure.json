@@ -1,17 +1,17 @@
 {
-  "instance_template": "item(10,2). item(20,5). item(30,10). capacity(15).",
-  "generator": "{ selected(V,W) : item(V,W) }.",
+  "instance_template": "item(1, 10, 5). item(2, 15, 7). item(3, 20, 10). limit(15).",
+  "generator": "{ selected(I) : item(I, V, W) }.",
   "hard_constraints": [
     {
-      "description": "Total weight must not exceed capacity.",
-      "asp_rule": ":- TotalWeight = #sum { W,V : selected(V,W) }, capacity(MaxWeight), TotalWeight > MaxWeight."
+      "description": "sanity check: make sure we don't bust the weight limit or the bag's gonna rip.",
+      "asp_rule": ":- S = #sum { W, I : selected(I), item(I, V, W) }, limit(N), S > N."
     }
   ],
   "soft_constraints": [
     {
-      "description": "Maximize total value of selected items.",
-      "asp_rule": "penalty(\"ValueGain\", (V,W), -V) :- selected(V,W)."
+      "description": "the whole point is to get rich, so we gotta maximize that value.",
+      "asp_rule": "penalty(\"MaximizeValue\", I, -V) :- selected(I), item(I, V, W)."
     }
   ],
-  "global_objective": "#minimize { Weight,Tuple,Name : penalty(Name,Tuple,Weight) }."
+  "global_objective": "#minimize { Cost, Name, Tuple : penalty(Name, Tuple, Cost) }."
 }

@@ -1,45 +1,37 @@
 {
-  "instance_template": "leg(1, \"PointA\", \"PointB\").\nlegTime(1).\nlegDist(1, 5).\nlegAscent(1, 100).\nlegDescent(1, 20).\nparticipant(\"Alice\").\npreferredDistance(\"Alice\", 10).\npreferredPace(\"Alice\", 5).\nobjective(1, \"dist-pref\").\nobjective(2, \"duration\").\nobjective(3, \"pace-pref\").\nobjective(4, \"exchange-count\").",
-  "generator": "{ assignment(P, leg(T, S, E)) : participant(P) } >= 1 :- leg(T, S, E).\nrun(P, T) :- assignment(P, leg(T, S, E)).",
+  "instance_template": "participant(\"Alice\"). leg(1, \"Start\", \"Point A\"). legTime(1). legDist(1, 5). legAscent(1, 100). preferredDistance(\"Alice\", 10). preferredPace(\"Alice\", 6). objective(1, \"dist-pref\"). objective(2, \"duration\"). objective(3, \"pace-pref\"). objective(4, \"exchange-count\").",
+  "generator": "{ run(P, T) : participant(P) } = 1 :- legTime(T).",
   "hard_constraints": [
     {
-      "description": "Quick sanity check: every leg in the race needs at least one runner assigned to it.",
-      "asp_rule": ":- leg(T, S, E), not assignment(_, leg(T, S, E))."
+      "description": "Sanity check: every leg must be assigned to a runner.",
+      "asp_rule": ":- legTime(T), #count { P : run(P, T) } != 1."
     }
   ],
   "soft_constraints": [
     {
-      "description": "Total up the distance for each runner so we can see how much ground they're covering.",
-      "asp_rule": "participantDist(P, Total) :- participant(P), Total = #sum{ D, T : run(P, T), legDist(T, D) }."
+      "description": "Let's calculate the total distance each runner covers.",
+      "asp_rule": "participantDist(P, Total) :- participant(P), Total = #sum { D, T : run(P, T), legDist(T, D) }."
     },
     {
-      "description": "Hit those distance goals. We punish any deviation from the runner's preferred mileage.",
-      "asp_rule": "penalty(\"dist-pref\", P, Act - Pref, Pri) :- participantDist(P, Act), preferredDistance(P, Pref), Act >= Pref, objective(Pri, \"dist-pref\").\npenalty(\"dist-pref\", P, Pref - Act, Pri) :- participantDist(P, Act), preferredDistance(P, Pref), Pref > Act, objective(Pri, \"dist-pref\")."
+      "description": "Keep runners happy by minimizing the gap between their preferred distance and what they actually ran.",
+      "asp_rule": "penalty(\"dist_pref\", P, Diff, Priority) :- participantDist(P, Act), preferredDistance(P, Pref), Diff = Act - Pref, Act >= Pref, objective(Priority, \"dist-pref\"). penalty(\"dist_pref\", P, Diff, Priority) :- participantDist(P, Act), preferredDistance(P, Pref), Diff = Pref - Act, Pref > Act, objective(Priority, \"dist-pref\")."
     },
     {
-      "description": "Determine the leg pace based on the slowest runner (the one with the highest pace value) in that leg.",
-      "asp_rule": "legPace(T, MaxPace) :- legTime(T), MaxPace = #max{ P : run(R, T), preferredPace(R, P) }."
+      "description": "Calculate how long a leg takes based on the runner's pace.",
+      "asp_rule": "legDuration(T, D * P) :- legDist(T, D), run(P, T), preferredPace(P, P), legTime(T)."
     },
     {
-      "description": "Calculate how long the leg takes based on distance and the calculated pace.",
-      "asp_rule": "legDuration(T, Duration) :- legDist(T, Dist), legPace(T, Pace), Duration = Dist * Pace."
+      "description": "Try to keep the total race time as low as possible.",
+      "asp_rule": "penalty(\"duration\", T, Dur, Priority) :- legDuration(T, Dur), objective(Priority, \"duration\")."
     },
     {
-      "description": "Minimize the total time on the clock for the whole race by penalizing leg durations.",
-      "asp_rule": "penalty(\"duration\", T, Dur, Pri) :- legDuration(T, Dur), objective(Pri, \"duration\")."
+      "description": "Minimize the difference between the runner's preferred pace and the actual leg pace.",
+      "asp_rule": "penalty(\"pace_pref\", (P, T), Diff, Priority) :- run(P, T), preferredPace(P, Pref), legDuration(T, Dur), legDist(T, Dist), Dist > 0, ActPace = Dur / Dist, Diff = ActPace - Pref, ActPace >= Pref, objective(Priority, \"pace-pref\"). penalty(\"pace_pref\", (P, T), Diff, Priority) :- run(P, T), preferredPace(P, Pref), legDuration(T, Dur), legDist(T, Dist), Dist > 0, ActPace = Dur / Dist, Diff = Pref - ActPace, Pref > ActPace, objective(Priority, \"pace-pref\")."
     },
     {
-      "description": "Keep everyone happy with the speed. If the leg pace is slower than their preference, they get a penalty.",
-      "asp_rule": "penalty(\"pace-pref\", (P, T), Act - Pref, Pri) :- run(P, T), preferredPace(P, Pref), legPace(T, Act), Act > Pref, objective(Pri, \"pace-pref\")."
-    },
-    {
-      "description": "Mark every time a runner starts or stops a stint. Too many handoffs make the logistics messy.",
-      "asp_rule": "exchange(P, T) :- run(P, T), not run(P, T-1), legTime(T).\nexchange(P, T) :- run(P, T), not run(P, T+1), legTime(T).\npenalty(\"exchange-count\", (P, T), 1, Pri) :- exchange(P, T), objective(Pri, \"exchange-count\")."
-    },
-    {
-      "description": "Calculate the total vertical climb for each runner for the record books.",
-      "asp_rule": "participantAscent(P, Total) :- participant(P), Total = #sum{ A, T : run(P, T), legAscent(T, A) }."
+      "description": "Gotta minimize handoffs so the baton doesn't hit the dirt.",
+      "asp_rule": "handoff(T) :- run(P1, T), run(P2, T+1), P1 != P2, legTime(T), legTime(T+1). penalty(\"exchange_count\", T, 1, Priority) :- handoff(T), objective(Priority, \"exchange-count\")."
     }
   ],
-  "global_objective": "#minimize { Cost@Priority, Name, Id : penalty(Name, Id, Cost, Priority) }."
+  "global_objective": "#minimize { Cost @ Priority, Type, Id : penalty(Type, Id, Cost, Priority) }."
 }

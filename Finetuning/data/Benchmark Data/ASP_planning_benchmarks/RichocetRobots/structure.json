@@ -1,29 +1,25 @@
 {
-  "instance_template": "grid_size(16). robot(red; blue; green; yellow). direction(north; south; east; west). delta(north, -1, 0). delta(south, 1, 0). delta(east, 0, 1). delta(west, 0, -1). horizon(20). pos(red, 1, 1, 0). pos(blue, 1, 16, 0). barrier(1, 1, south). target(red, 5, 5).",
-  "generator": "step(1..H) :- horizon(H). { move(R, D, T) : robot(R), direction(D) } = 1 :- step(T). boundary_blocked(Row, Col, D) :- delta(D, DR, DC), Row = 1..N, Col = 1..N, grid_size(N), Row + DR < 1. boundary_blocked(Row, Col, D) :- delta(D, DR, DC), Row = 1..N, Col = 1..N, grid_size(N), Row + DR > N. boundary_blocked(Row, Col, D) :- delta(D, DR, DC), Row = 1..N, Col = 1..N, grid_size(N), Col + DC < 1. boundary_blocked(Row, Col, D) :- delta(D, DR, DC), Row = 1..N, Col = 1..N, grid_size(N), Col + DC > N. is_blocked(Row, Col, D, T) :- barrier(Row, Col, D), Row = 1..N, Col = 1..N, grid_size(N), step(T). is_blocked(Row, Col, D, T) :- boundary_blocked(Row, Col, D), Row = 1..N, Col = 1..N, grid_size(N), step(T). is_blocked(Row, Col, D, T) :- delta(D, DR, DC), pos(_, Row + DR, Col + DC, T-1), Row = 1..N, Col = 1..N, grid_size(N), step(T). can_step(R, Row, Col, D, T) :- pos(R, Row, Col, T-1), move(R, D, T). can_step(R, R2, C2, D, T) :- can_step(R, R1, C1, D, T), delta(D, DR, DC), R2 = R1 + DR, C2 = C1 + DC, not is_blocked(R1, C1, D, T), R2 = 1..N, C2 = 1..N, grid_size(N). pos(R, Row, Col, T) :- can_step(R, Row, Col, D, T), is_blocked(Row, Col, D, T). pos(R, Row, Col, T) :- pos(R, Row, Col, T-1), move(R_other, _, T), R != R_other, robot(R).",
+  "instance_template": "dim_x(1..16). dim_y(1..16). robot(r1; r2; r3; r4). robot_at(r1, 1, 1, 0). target(r1, 5, 5). wall(1, 1, east). horizon(15).",
+  "generator": "dir(north, 0, -1). dir(south, 0, 1). dir(east, 1, 0). dir(west, -1, 0). opp(north, south). opp(south, north). opp(east, west). opp(west, east). direction(D) :- dir(D, _, _). step(1..H) :- horizon(H). time(0..H) :- horizon(H). 1 { move(R, D, T) : robot(R), direction(D) } 1 :- step(T). full_wall(X, Y, D) :- wall(X, Y, D). full_wall(NX, NY, O) :- wall(X, Y, D), dir(D, DX, DY), opp(D, O), NX = X + DX, NY = Y + DY, dim_x(NX), dim_y(NY). full_wall(X, 1, north) :- dim_x(X). full_wall(X, Y, south) :- Y = #max { Y1 : dim_y(Y1) }, dim_x(X), dim_y(Y). full_wall(1, Y, west) :- dim_y(Y). full_wall(X, Y, east) :- X = #max { X1 : dim_x(X1) }, dim_x(X), dim_y(Y). obstacle(X, Y, D, T) :- full_wall(X, Y, D), time(T). obstacle(X, Y, D, T) :- dir(D, DX, DY), NX = X + DX, NY = Y + DY, robot_at(_, NX, NY, T - 1), time(T), dim_x(X), dim_y(Y). reached(R, X, Y, T) :- move(R, D, T), robot_at(R, X, Y, T - 1). reached(R, NX, NY, T) :- reached(R, X, Y, T), move(R, D, T), dir(D, DX, DY), NX = X + DX, NY = Y + DY, dim_x(NX), dim_y(NY), not full_wall(X, Y, D), not robot_at(_, NX, NY, T - 1). robot_at(R, X, Y, T) :- reached(R, X, Y, T), move(R, D, T), dir(D, DX, DY), obstacle(X, Y, D, T). robot_at(R, X, Y, T) :- robot_at(R, X, Y, T - 1), not moving(R, T), step(T). moving(R, T) :- move(R, _, T).",
   "hard_constraints": [
     {
-      "description": "Business Requirements: Policy dictates that every command must result in physical displacement. Static moves that do not change a robot's coordinates are prohibited.",
-      "asp_rule": ":- move(R, _, T), pos(R, Row, Col, T-1), pos(R, Row, Col, T)."
+      "description": "Only one robot can be shoved in a direction at any given time step.",
+      "asp_rule": ":- step(T), C = #count { R, D : move(R, D, T) }, C > 1."
     },
     {
-      "description": "Business Requirements: All target robots must occupy their specific designated grid locations upon the completion of the operational sequence.",
-      "asp_rule": ":- target(R, Row, Col), not pos(R, Row, Col, H), horizon(H)."
+      "description": "Sanity check: did we actually move? If you slide and end up where you started, that's a wasted move.",
+      "asp_rule": ":- move(R, D, T), robot_at(R, X, Y, T - 1), robot_at(R, X, Y, T)."
     },
     {
-      "description": "Business Requirements: Internal safety protocols prevent two physical assets from occupying the same grid coordinate simultaneously.",
-      "asp_rule": ":- pos(R1, Row, Col, T), pos(R2, Row, Col, T), R1 != R2."
-    },
-    {
-      "description": "Business Requirements: Barrier symmetry must be enforced; if cell A is blocked from moving to B, then cell B must be blocked from moving to A.",
-      "asp_rule": "barrier(R2, C2, opposite_north) :- barrier(R1, C1, north), R2 = R1 - 1, C2 = C1. barrier(R2, C2, opposite_south) :- barrier(R1, C1, south), R2 = R1 + 1, C2 = C1. barrier(R2, C2, opposite_east) :- barrier(R1, C1, east), R2 = R1, C2 = C1 + 1. barrier(R2, C2, opposite_west) :- barrier(R1, C1, west), R2 = R1, C2 = C1 - 1."
+      "description": "The goal is the whole point. The target robot better be at the target coordinates by the end of the line.",
+      "asp_rule": ":- target(R, TX, TY), horizon(H), not robot_at(R, TX, TY, H)."
     }
   ],
   "soft_constraints": [
     {
-      "description": "Business Requirements: Operational efficiency is prioritized; minimize the total count of move commands executed to reach the goal state.",
-      "asp_rule": "penalty(\"step_count\", T, 1) :- move(_, _, T)."
+      "description": "We want the quickest path possible, so every move costs us points.",
+      "asp_rule": "penalty(\"step_cost\", T, 1) :- move(R, D, T)."
     }
   ],
-  "global_objective": "#minimize { C,Name,T : penalty(Name,T,C) }."
+  "global_objective": "#minimize { C,T,N : penalty(N, T, C) }."
 }

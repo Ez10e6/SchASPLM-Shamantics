@@ -1,37 +1,37 @@
 {
-  "instance_template": "workshop(1..6). topic(\"Data\"; \"DevOps\"; \"UI\"). slot(\"morning\"; \"midday\"; \"afternoon\"). room(1..3).",
+  "instance_template": "workshop(1..6).\ntopic(\"Data\"; \"DevOps\"; \"UI\").\nslot(\"morning\"; \"midday\"; \"afternoon\").\nroom(1..3).",
   "generator": "1 { topicOf(W, T) : topic(T) } 1 :- workshop(W).\n1 { scheduled(W, R, Sl) : room(R), slot(Sl) } 1 :- workshop(W).",
   "hard_constraints": [
     {
-      "description": "Please ensure that no two workshops are scheduled in the same room at the same time, as rooms cannot be shared.",
+      "description": "Double-booking is a disaster, so no two workshops in the same room at the same time.",
       "asp_rule": ":- scheduled(W1, R, Sl), scheduled(W2, R, Sl), W1 != W2."
     },
     {
-      "description": "To maintain the venue's policy, we must limit the use of each room to no more than two sessions across the entire day.",
-      "asp_rule": ":- room(R), #count { W, Sl : scheduled(W, R, Sl) } > 2."
+      "description": "Each room has a capacity limit of two sessions total for the day, sanity check.",
+      "asp_rule": ":- room(R), N = #count { W, Sl : scheduled(W, R, Sl) }, N > 2."
     },
     {
-      "description": "The DevOps workshops are restricted strictly to the midday time slot; they cannot be scheduled in the morning or afternoon.",
-      "asp_rule": ":- scheduled(W, _, Sl), topicOf(W, \"DevOps\"), Sl != \"midday\"."
+      "description": "DevOps crew is strictly midday only, no exceptions.",
+      "asp_rule": ":- topicOf(W, \"DevOps\"), scheduled(W, _, Sl), Sl != \"midday\"."
     },
     {
-      "description": "Due to equipment requirements, workshops focusing on Data must not be placed in Room 3.",
-      "asp_rule": ":- scheduled(W, 3, _), topicOf(W, \"Data\")."
+      "description": "Data workshops are banned from Room 3, probably because of the bad WiFi.",
+      "asp_rule": ":- topicOf(W, \"Data\"), scheduled(W, 3, _)."
     },
     {
-      "description": "We must prevent UI and Data workshops from occurring at the same time, regardless of which room they are in.",
-      "asp_rule": ":- scheduled(W1, _, Sl), scheduled(W2, _, Sl), topicOf(W1, \"UI\"), topicOf(W2, \"Data\")."
+      "description": "UI and Data workshops cannot happen at the same time, they'll just argue.",
+      "asp_rule": ":- topicOf(W1, \"UI\"), topicOf(W2, \"Data\"), scheduled(W1, _, Sl), scheduled(W2, _, Sl)."
     },
     {
-      "description": "To ensure a diverse agenda, we require that at least one workshop for every topic is included in the final schedule.",
-      "asp_rule": "topic_represented(T) :- scheduled(W, _, _), topicOf(W, T).\n:- topic(T), not topic_represented(T)."
+      "description": "Gotta make sure at least one workshop for every topic actually exists.",
+      "asp_rule": ":- topic(T), N = #count { W : topicOf(W, T) }, N = 0."
     }
   ],
   "soft_constraints": [
     {
-      "description": "In the interest of efficiency, we should try to avoid leaving room-time slots empty whenever possible.",
+      "description": "Empty rooms are a waste of money, let's track the idle slots.",
       "asp_rule": "penalty(\"idle_slot\", R, Sl, 1) :- room(R), slot(Sl), not scheduled(_, R, Sl)."
     }
   ],
-  "global_objective": "#minimize { P, N, R, Sl : penalty(N, R, Sl, P) }."
+  "global_objective": "#minimize { Cost, R, Sl : penalty(\"idle_slot\", R, Sl, Cost) }."
 }

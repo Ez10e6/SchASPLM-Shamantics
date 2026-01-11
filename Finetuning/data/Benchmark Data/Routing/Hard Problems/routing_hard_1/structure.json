@@ -1,49 +1,41 @@
 {
-  "instance_template": "loc(\"CommandCenter\"; \"PathA\"; \"PathB\"; \"TowerX\"; \"TowerY\"; \"MidRelay\"; \"TowerZ\").\nedge(\"CommandCenter\",\"PathA\",2).\nedge(\"CommandCenter\",\"PathB\",3).\nedge(\"PathA\",\"TowerX\",2).\nedge(\"PathB\",\"TowerY\",2).\nedge(\"PathB\",\"PathA\",1).\nedge(\"TowerX\",\"PathB\",2).\nedge(\"TowerY\",\"MidRelay\",3).\nedge(\"MidRelay\",\"TowerZ\",2).\nedge(\"TowerZ\",\"TowerX\",4).\nhorizon(19).",
-  "generator": "at(\"CommandCenter\", 0).\n1 { at(L, T) : loc(L) } 1 :- T = 1..H, horizon(H).\n{ scan_at(L, T) : loc(L), T = 0..H-2, horizon(H) }.\nstep_cost(T, C) :- at(L1, T), at(L2, T+1), edge(L1, L2, C).\nstep_cost(T, 0) :- at(L, T), at(L, T+1).\nrecharge_gain(T+2, 4) :- at(\"MidRelay\", T), at(\"MidRelay\", T+1), at(\"MidRelay\", T+2).\nrecharge_gain(T, 0) :- T = 1..H, horizon(H), not recharge_gain(T, 4).\nbatt(0, 0).\nbatt(T+1, B + C - G) :- batt(T, B), step_cost(T, C), recharge_gain(T+1, G).",
+  "instance_template": "loc(\"CommandCenter\"; \"PathA\"; \"PathB\"; \"TowerX\"; \"TowerY\"; \"MidRelay\"; \"TowerZ\").\nedge(\"CommandCenter\",\"PathA\",2).\nedge(\"CommandCenter\",\"PathB\",3).\nedge(\"PathA\",\"TowerX\",2).\nedge(\"PathB\",\"TowerY\",2).\nedge(\"PathB\",\"PathA\",1).\nedge(\"TowerX\",\"PathB\",2).\nedge(\"TowerY\",\"MidRelay\",3).\nedge(\"MidRelay\",\"TowerZ\",2).\nedge(\"TowerZ\",\"TowerX\",4).\nat(\"CommandCenter\",0).\ntime(0..20).",
+  "generator": "{ at(L, T) : loc(L) } = 1 :- time(T).\n{ scan_at(L, T) : loc(L), time(T) }.\nat(L, T+1) :- scan_at(L, T), T < 20.\nat(L, T+2) :- scan_at(L, T), T < 19.",
   "hard_constraints": [
     {
-      "description": "Don't just teleport; follow the flight corridors or stay put.",
+      "description": "Don't let the drone teleport; it's gotta use a corridor or stay put.",
       "asp_rule": ":- at(L1, T), at(L2, T+1), L1 != L2, not edge(L1, L2, _)."
     },
     {
-      "description": "If you're scanning, stay still for two whole minutes. No twitching.",
-      "asp_rule": ":- scan_at(L, T), at(L, T+1) != L. :- scan_at(L, T), at(L, T+2) != L."
+      "description": "Sanity check: make sure the drone actually scans TowerX and TowerY at some point.",
+      "asp_rule": ":- not scan_at(\"TowerX\", _).\n:- not scan_at(\"TowerY\", _)."
     },
     {
-      "description": "Gotta scan TowerX and TowerY. Non-negotiable.",
-      "asp_rule": ":- not scan_at(\"TowerX\", _). :- not scan_at(\"TowerY\", _)."
+      "description": "TowerX has a deadline! Must be finished by minute 5, so it has to start by minute 3.",
+      "asp_rule": ":- scan_at(\"TowerX\", T), T > 3."
     },
     {
-      "description": "TowerX scan has to be done and dusted by minute 5.",
-      "asp_rule": ":- #count{ T : scan_at(\"TowerX\", T), T+2 <= 5 } == 0."
+      "description": "Watch the battery level. If we exceed 14 units after travel or recharge, it's game over.",
+      "asp_rule": "used_batt(0, 0).\nused_batt(T+1, B+C) :- used_batt(T, B), at(L1, T), at(L2, T+1), edge(L1, L2, C).\nused_batt(T+1, B-4) :- used_batt(T, B), recharge_event(T+1).\nused_batt(T+1, B) :- used_batt(T, B), at(L, T), at(L, T+1), not recharge_event(T+1), T < 20.\nrecharge_event(T+1) :- at(\"MidRelay\", T-1), at(\"MidRelay\", T), at(\"MidRelay\", T+1), not recharge_event(T).\n:- used_batt(T, B), B > 14."
     },
     {
-      "description": "Keep an eye on the juice; 14 units is the hard ceiling.",
-      "asp_rule": ":- batt(T, B), B > 14."
+      "description": "No double-dipping at the same tower back-to-back. Cool the sensors down.",
+      "asp_rule": "next_scan(T1, T2) :- scan_at(_, T1), scan_at(_, T2), T1 < T2, not scan_between(T1, T2).\nscan_between(T1, T2) :- scan_at(_, T1), scan_at(_, T), scan_at(_, T2), T1 < T, T < T2.\n:- scan_at(L, T1), next_scan(T1, T2), scan_at(L, T2)."
     },
     {
-      "description": "MidRelay exit protocol: if you leave MidRelay, you better be heading to TowerZ.",
+      "description": "MidRelay is a one-way street once you leave; you gotta hit TowerZ next.",
       "asp_rule": ":- at(\"MidRelay\", T), at(L, T+1), L != \"MidRelay\", L != \"TowerZ\"."
-    },
-    {
-      "description": "Exactly two minutes for recharging at MidRelay. Don't loiter.",
-      "asp_rule": ":- at(\"MidRelay\", T), at(\"MidRelay\", T+1), at(\"MidRelay\", T+2), at(\"MidRelay\", T+3)."
-    },
-    {
-      "description": "Sanity check: no double-scanning the same spot back-to-back. Let the sensors cool down.",
-      "asp_rule": ":- scan_at(L, T1), scan_at(L, T2), T2 > T1, T2 < T1+3."
     }
   ],
   "soft_constraints": [
     {
-      "description": "Priority one: squeeze in as many tower scans as possible.",
-      "asp_rule": "penalty(\"scans\", (L, T), -1) :- scan_at(L, T)."
+      "description": "Maximize the total number of scans we pull off.",
+      "asp_rule": "penalty(\"scan_count\", (L, T), -1) :- scan_at(L, T)."
     },
     {
-      "description": "Secondary goal: wrap up those mandatory scans ASAP.",
-      "asp_rule": "mandatory_finish(F) :- F = #max{ T+2 : scan_at(\"TowerX\", T); T2+2 : scan_at(\"TowerY\", T2) }.\npenalty(\"time\", F, 1) :- mandatory_finish(F)."
+      "description": "Minimize the time it takes to finish all mandatory tower scans.",
+      "asp_rule": "mandatory_finish(T) :- T = #max { TX+2 : scan_at(\"TowerX\", TX); TY+2 : scan_at(\"TowerY\", TY) }.\npenalty(\"completion_speed\", T, 1) :- mandatory_finish(T)."
     }
   ],
-  "global_objective": "#minimize { P@2, T : penalty(\"scans\", T, P); P@1, T : penalty(\"time\", T, P) }."
+  "global_objective": "#minimize { P@2, L, T : penalty(\"scan_count\", (L, T), P); P@1, T : penalty(\"completion_speed\", T, P) }."
 }

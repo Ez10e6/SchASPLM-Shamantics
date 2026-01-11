@@ -1,17 +1,17 @@
 {
   "instance_template": "node(1..5). edge(1,2). edge(2,3). edge(3,1). edge(3,4). edge(4,5).",
-  "generator": "node(X) :- edge(X,_). node(X) :- edge(_,X). adj(X,Y) :- edge(X,Y). adj(Y,X) :- edge(X,Y). { in_clique(X) : node(X) }.",
+  "generator": "{ in_clique(X) : node(X) }.",
   "hard_constraints": [
     {
-      "description": "sanity check: if we pick two nodes for our clique, they better have an edge between them or it is not a clique.",
-      "asp_rule": ":- in_clique(X), in_clique(Y), X < Y, not adj(X,Y)."
+      "description": "Clique completeness.",
+      "asp_rule": ":- in_clique(X), in_clique(Y), X < Y, not edge(X,Y), not edge(Y,X)."
     }
   ],
   "soft_constraints": [
     {
-      "description": "every node we leave out of the clique is a bummer, so let's track those misses.",
-      "asp_rule": "penalty(\"exclude_node\", X, 1) :- node(X), not in_clique(X)."
+      "description": "Maximize nodes.",
+      "asp_rule": "penalty(\"node_in_clique\", X, -1) :- in_clique(X)."
     }
   ],
-  "global_objective": "#minimize { Cost,Name,X : penalty(Name,X,Cost) }."
+  "global_objective": "#minimize { Cost, Tag, X : penalty(Tag, X, Cost) }."
 }

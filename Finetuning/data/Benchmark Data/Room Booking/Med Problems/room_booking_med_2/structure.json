@@ -1,41 +1,41 @@
 {
-  "instance_template": "workshop(1..8). topic(\"AI\"; \"Math\"; \"Bio\"). day(1..2). slot(\"morning\"; \"midday\"; \"afternoon\"). room(1..3).",
-  "generator": "1 { topicOf(W, T) : topic(T) } 1 :- workshop(W). 1 { scheduled(W, R, S, D) : room(R), slot(S), day(D) } 1 :- workshop(W).",
+  "instance_template": "workshop(1..8).\ntopic(\"AI\"; \"Math\"; \"Bio\").\nday(1..2).\nslot(\"morning\"; \"midday\"; \"afternoon\").\nroom(1..3).",
+  "generator": "1 { topicOf(W, T) : topic(T) } 1 :- workshop(W).\n1 { scheduled(W, R, S, D) : room(R), slot(S), day(D) } :- workshop(W).",
   "hard_constraints": [
     {
-      "description": "Quick sanity check to make sure two workshops don't try to squeeze into the same room at the same time.",
+      "description": "Ensure that no more than one workshop is scheduled in the same room at the same time on any given day.",
       "asp_rule": ":- scheduled(W1, R, S, D), scheduled(W2, R, S, D), W1 != W2."
     },
     {
-      "description": "Cap it at two workshops per room each day so things don't get too crowded.",
-      "asp_rule": ":- room(R), day(D), #count { W, S : scheduled(W, R, S, D) } > 2."
+      "description": "Each room is strictly limited to a maximum of two workshop sessions per day to ensure at least one slot remains unused.",
+      "asp_rule": ":- room(R), day(D), C = #count { W, S : scheduled(W, R, S, D) }, C > 2."
     },
     {
-      "description": "Stay away from room 2 in the afternoon, it is totally off-limits.",
+      "description": "Room 2 must remain empty during the afternoon time slots on both scheduled days.",
       "asp_rule": ":- scheduled(W, 2, \"afternoon\", D)."
     },
     {
-      "description": "AI folks are strictly morning people, so no midday or afternoon sessions for them.",
+      "description": "Workshops focusing on Artificial Intelligence are restricted to morning sessions and cannot be scheduled at any other time.",
       "asp_rule": ":- topicOf(W, \"AI\"), scheduled(W, R, S, D), S != \"morning\"."
     },
     {
-      "description": "Math workshops are solo acts; keep them from overlapping at the same time even in different rooms.",
-      "asp_rule": ":- topicOf(W1, \"Math\"), topicOf(W2, \"Math\"), W1 < W2, scheduled(W1, R1, S, D), scheduled(W2, R2, S, D)."
+      "description": "Mathematics workshops are prohibited from overlapping in time; no two math sessions can occur simultaneously, even in different rooms.",
+      "asp_rule": ":- topicOf(W1, \"Math\"), topicOf(W2, \"Math\"), (W1, R1) != (W2, R2), scheduled(W1, R1, S, D), scheduled(W2, R2, S, D)."
     },
     {
-      "description": "Don't put AI and Bio in the same room on the same day; they need their space.",
+      "description": "To prevent scheduling conflicts between departments, Artificial Intelligence and Biology workshops are not allowed to share the same room on the same day.",
       "asp_rule": ":- topicOf(W1, \"AI\"), topicOf(W2, \"Bio\"), scheduled(W1, R, S1, D), scheduled(W2, R, S2, D)."
     },
     {
-      "description": "Every day needs to have at least one session of AI, Math, and Bio to keep things balanced.",
-      "asp_rule": ":- day(D), topic(T), #count { W : topicOf(W, T), scheduled(W, R, S, D) } == 0."
+      "description": "Every subject\u2014AI, Math, and Biology\u2014must be represented by at least one workshop on each of the two days.",
+      "asp_rule": ":- day(D), topic(T), C = #count { W, R, S : topicOf(W, T), scheduled(W, R, S, D) }, C = 0."
     }
   ],
   "soft_constraints": [
     {
-      "description": "Try to keep the rooms busy and minimize those empty time slots.",
-      "asp_rule": "penalty(\"idle_slot\", (R, S, D), 1) :- room(R), slot(S), day(D), not scheduled(_, R, S, D)."
+      "description": "We prefer a schedule that uses space efficiently by minimizing the number of idle or unused room-time slots.",
+      "asp_rule": "occupied(R, S, D) :- scheduled(W, R, S, D).\npenalty(\"idle\", (R, S, D), 1) :- room(R), slot(S), day(D), not occupied(R, S, D)."
     }
   ],
-  "global_objective": "#minimize { Cost, Name, Tuple : penalty(Name, Tuple, Cost) }."
+  "global_objective": "#minimize { Cost, R, S, D : penalty(\"idle\", (R, S, D), Cost) }."
 }

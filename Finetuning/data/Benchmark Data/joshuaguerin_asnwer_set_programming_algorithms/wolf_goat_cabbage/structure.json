@@ -1,22 +1,22 @@
 {
-  "instance_template": "#const n=7. item(wolf; goat; cabbage). side(left; right). opposite(left, right). opposite(right, left). time(0..n).",
-  "generator": "at(farmer, left, 0). at(I, left, 0) :- item(I). 0 { boat(I, T) : item(I), at(I, S, T) } 1 :- at(farmer, S, T), time(T), T < n. at(farmer, S2, T+1) :- at(farmer, S1, T), opposite(S1, S2), time(T), T < n. at(I, S2, T+1) :- boat(I, T), at(I, S1, T), opposite(S1, S2), time(T), T < n. at(I, S1, T+1) :- item(I), at(I, S1, T), not boat(I, T), time(T), T < n.",
+  "instance_template": "passenger(w; g; c). side(l; r). other(l, r). other(r, l). #const n=7. time(0..n).",
+  "generator": "at(f, l, 0). at(P, l, 0) :- passenger(P). { load(P, T) : passenger(P), at(P, S, T), at(f, S, T) } 1 :- time(T), T < n. at(f, S2, T+1) :- at(f, S1, T), other(S1, S2), T < n. at(P, S2, T+1) :- load(P, T), at(P, S1, T), other(S1, S2), T < n. at(P, S, T+1) :- passenger(P), at(P, S, T), not load(P, T), T < n.",
   "hard_constraints": [
     {
-      "description": "The wolf and the goat are prohibited from occupying the same bank in the absence of the farmer's supervision.",
-      "asp_rule": ":- at(wolf, S, T), at(goat, S, T), not at(farmer, S, T)."
+      "description": "It is strictly prohibited for the wolf and the goat to occupy the same bank in the absence of the farmer's presence.",
+      "asp_rule": ":- at(w, S, T), at(g, S, T), not at(f, S, T), side(S), time(T)."
     },
     {
-      "description": "The goat and the cabbage are prohibited from occupying the same bank in the absence of the farmer's supervision.",
-      "asp_rule": ":- at(goat, S, T), at(cabbage, S, T), not at(farmer, S, T)."
+      "description": "It is mandatory that the goat and the cabbage are not situated on the same bank unless the farmer is also present on that bank.",
+      "asp_rule": ":- at(g, S, T), at(c, S, T), not at(f, S, T), side(S), time(T)."
     },
     {
-      "description": "The farmer is required to be positioned on the right bank at the terminal time step.",
-      "asp_rule": ":- not at(farmer, right, n)."
+      "description": "The farmer must be located on the right bank at the terminal time step.",
+      "asp_rule": ":- not at(f, r, n)."
     },
     {
-      "description": "All transportable items are required to be positioned on the right bank at the terminal time step.",
-      "asp_rule": ":- item(I), not at(I, right, n)."
+      "description": "Every passenger must be located on the right bank at the terminal time step.",
+      "asp_rule": ":- passenger(P), not at(P, r, n)."
     }
   ],
   "soft_constraints": [],

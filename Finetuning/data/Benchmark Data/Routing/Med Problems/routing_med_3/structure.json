@@ -1,37 +1,45 @@
 {
-  "instance_template": "loc(\"BaseCamp\"; \"Fork1\"; \"Fork2\"; \"OutpostX\"; \"OutpostY\"; \"RelayStation\").\nedge(\"BaseCamp\", \"Fork1\").\nedge(\"BaseCamp\", \"Fork2\").\nedge(\"Fork1\", \"OutpostX\").\nedge(\"Fork1\", \"RelayStation\").\nedge(\"Fork2\", \"OutpostY\").\nedge(\"Fork2\", \"RelayStation\").\ntime(0..10).",
-  "generator": "1 { at(L, T) : loc(L) } 1 :- time(T).\n1 { inspect_at(\"OutpostX\", T) : time(T) } 1.\n1 { inspect_at(\"OutpostY\", T) : time(T) } 1.\n0 { inspect_at(\"RelayStation\", T) : time(T) } 1.\nmove(T) :- at(L1, T), at(L2, T+1), L1 != L2.",
+  "instance_template": "loc(\"BaseCamp\"). loc(\"Fork1\"). loc(\"Fork2\"). loc(\"OutpostX\"). loc(\"OutpostY\"). loc(\"RelayStation\"). edge(\"BaseCamp\", \"Fork1\"). edge(\"Fork1\", \"BaseCamp\"). edge(\"BaseCamp\", \"Fork2\"). edge(\"Fork2\", \"BaseCamp\"). edge(\"Fork1\", \"OutpostX\"). edge(\"OutpostX\", \"Fork1\"). edge(\"Fork1\", \"RelayStation\"). edge(\"RelayStation\", \"Fork1\"). edge(\"Fork2\", \"OutpostY\"). edge(\"OutpostY\", \"Fork2\"). edge(\"Fork2\", \"RelayStation\"). edge(\"RelayStation\", \"Fork2\"). time(0..10).",
+  "generator": "at(\"BaseCamp\", 0). { at(L, T) : loc(L) } = 1 :- time(T). { inspect_at(L, T) : loc(L), time(T) }.",
   "hard_constraints": [
     {
-      "description": "The rover is required to occupy the BaseCamp location at the initial temporal index.",
-      "asp_rule": ":- not at(\"BaseCamp\", 0)."
+      "description": "Need to hit OutpostX exactly once, no more, no less.",
+      "asp_rule": ":- #count { T : inspect_at(\"OutpostX\", T) } != 1."
     },
     {
-      "description": "Transitions between distinct locations are restricted to pairs defined by the adjacency matrix of the terrain.",
-      "asp_rule": ":- at(L1, T), at(L2, T+1), L1 != L2, not edge(L1, L2), not edge(L2, L1)."
+      "description": "Sanity check: make sure OutpostY is inspected exactly once.",
+      "asp_rule": ":- #count { T : inspect_at(\"OutpostY\", T) } != 1."
     },
     {
-      "description": "An inspection operation requires the rover to be physically present at the target location during the designated time step.",
+      "description": "If we decide to scan the RelayStation, we only do it once.",
+      "asp_rule": ":- #count { T : inspect_at(\"RelayStation\", T) } > 1."
+    },
+    {
+      "description": "Can't just scan thin air; the rover has to actually be at the location to inspect it.",
       "asp_rule": ":- inspect_at(L, T), not at(L, T)."
     },
     {
-      "description": "Temporal continuity of location is mandatory during the execution of an inspection task, necessitating a stationary state for one full minute.",
-      "asp_rule": ":- inspect_at(L, T), move(T)."
+      "description": "Scanning takes a full minute, so the rover has to stay put during the inspection process.",
+      "asp_rule": ":- inspect_at(L, T), not at(L, T+1), T < 10."
     },
     {
-      "description": "The cumulative energy consumption, calculated as the total number of movements between distinct locations, must not exceed the maximum storage capacity of six units.",
-      "asp_rule": ":- #count { T : move(T) } > 6."
+      "description": "Basic movement rules: the rover can only move between connected nodes on the map.",
+      "asp_rule": ":- at(L1, T), at(L2, T+1), L1 != L2, not edge(L1, L2), T < 10."
     },
     {
-      "description": "An inspection at the RelayStation is permissible only if the remaining energy capacity exceeds two units upon the conclusion of all mandatory scanning tasks.",
-      "asp_rule": ":- inspect_at(\"RelayStation\", _), T_max = #max { T+1 : inspect_at(L, T), L != \"RelayStation\" }, #count { Tm : move(Tm), Tm < T_max } >= 4."
+      "description": "The battery is crappy, so we're capped at 6 movement units total.",
+      "asp_rule": ":- B = #count { T : at(L1, T), at(L2, T+1), L1 != L2, T < 10 }, B > 6."
+    },
+    {
+      "description": "RelayStation rule: you can only grab that data if you finish mandatory sites with at least 3 battery units left.",
+      "asp_rule": ":- inspect_at(\"RelayStation\", _), TM = #max { T : inspect_at(L, T), L != \"RelayStation\" }, B = #count { T1 : at(L1, T1), at(L2, T1+1), L1 != L2, T1 < TM }, B >= 4."
     }
   ],
   "soft_constraints": [
     {
-      "description": "A penalty is associated with the failure to collect bonus diagnostic data from the RelayStation, incentivizing its inclusion in the rover's itinerary.",
-      "asp_rule": "penalty(\"RelayStationBonusForegone\", (), 1) :- not inspect_at(\"RelayStation\", _)."
+      "description": "It's a bummer if we miss the bonus data at the RelayStation.",
+      "asp_rule": "penalty(\"missed_bonus\", \"RelayStation\", 1) :- not inspect_at(\"RelayStation\", _)."
     }
   ],
-  "global_objective": "#minimize { Cost,Name,Tuple : penalty(Name,Tuple,Cost) }."
+  "global_objective": "#minimize { C, Name, Tuple : penalty(Name, Tuple, C) }."
 }

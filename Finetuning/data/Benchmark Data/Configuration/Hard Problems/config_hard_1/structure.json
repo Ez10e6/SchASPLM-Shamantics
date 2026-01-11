@@ -1,32 +1,32 @@
 {
-  "instance_template": "cpu(\"X9\"; \"ZetaCore\"; \"Alpha8\"). gpu(\"QuasarRTX\"; \"NovaX\"; \"GammaGTX\"). storage(\"UltraSSD\"; \"MegaHDD\"; \"FusionDrive\"). cost(\"X9\", 300; \"ZetaCore\", 500; \"Alpha8\", 450; \"QuasarRTX\", 700; \"NovaX\", 600; \"GammaGTX\", 450; \"UltraSSD\", 250; \"MegaHDD\", 200; \"FusionDrive\", 300). perf(\"X9\", 95; \"ZetaCore\", 120; \"Alpha8\", 110; \"QuasarRTX\", 130; \"NovaX\", 125; \"GammaGTX\", 90; \"UltraSSD\", 100; \"MegaHDD\", 60; \"FusionDrive\", 95).",
-  "generator": "1 { selected_cpu(C) : cpu(C) } 1. 1 { selected_gpu(G) : gpu(G) } 1. 1 { selected_storage(S) : storage(S) } 1. selected(X) :- selected_cpu(X). selected(X) :- selected_gpu(X). selected(X) :- selected_storage(X).",
+  "instance_template": "cpu(\"X9\"). cpu(\"ZetaCore\"). cpu(\"Alpha8\"). gpu(\"QuasarRTX\"). gpu(\"NovaX\"). gpu(\"GammaGTX\"). storage(\"UltraSSD\"). storage(\"FusionDrive\"). storage(\"MegaHDD\"). cost(\"X9\", 300). cost(\"ZetaCore\", 500). cost(\"Alpha8\", 450). cost(\"QuasarRTX\", 700). cost(\"NovaX\", 600). cost(\"GammaGTX\", 450). cost(\"UltraSSD\", 250). cost(\"FusionDrive\", 300). cost(\"MegaHDD\", 200). perf(\"X9\", 95). perf(\"ZetaCore\", 120). perf(\"Alpha8\", 110). perf(\"QuasarRTX\", 130). perf(\"NovaX\", 125). perf(\"GammaGTX\", 90). perf(\"UltraSSD\", 100). perf(\"FusionDrive\", 95). perf(\"MegaHDD\", 60).",
+  "generator": "1 { selected(C) : cpu(C) } 1. 1 { selected(G) : gpu(G) } 1. 1 { selected(S) : storage(S) } 1.",
   "hard_constraints": [
     {
-      "description": "Our policy dictates that the component requiring the largest financial investment must also demonstrate the highest performance rating to justify the expenditure.",
-      "asp_rule": "max_selected_cost(V) :- V = #max { VC : selected(X), cost(X, VC) }. max_selected_perf(V) :- V = #max { VP : selected(X), perf(X, VP) }. :- selected(C), cost(C, V), max_selected_cost(V), perf(C, P), max_selected_perf(MP), P < MP."
+      "description": "Sanity check: make sure the most expensive part you picked is actually the performance leader of the pack.",
+      "asp_rule": ":- selected(X), cost(X, CX), MX = #max { V : selected(I), cost(I, V) }, CX = MX, perf(X, PX), MP = #max { V : selected(I), perf(I, V) }, PX < MP."
     },
     {
-      "description": "To ensure compliance with procurement guidelines, we must avoid over-specified builds; therefore, selecting the top-performing item in all three categories simultaneously is strictly prohibited.",
-      "asp_rule": "is_top(C) :- cpu(C), perf(C, V), V = #max { VP : cpu(X), perf(X, VP) }. is_top(C) :- gpu(C), perf(C, V), V = #max { VP : gpu(X), perf(X, VP) }. is_top(C) :- storage(C), perf(C, V), V = #max { VP : storage(X), perf(X, VP) }. :- selected_cpu(C), is_top(C), selected_gpu(G), is_top(G), selected_storage(S), is_top(S)."
+      "description": "Don't go overboard; picking the absolute best of everything is frowned upon.",
+      "asp_rule": ":- selected(C), cpu(C), M1 = #max { P : cpu(X), perf(X, P) }, perf(C, M1), selected(G), gpu(G), M2 = #max { P : gpu(X), perf(X, P) }, perf(G, M2), selected(S), storage(S), M3 = #max { P : storage(X), perf(X, P) }, perf(S, M3)."
     },
     {
-      "description": "Technical standards require that the graphics processor performance score does not exceed that of the central processing unit.",
-      "asp_rule": ":- selected_gpu(G), selected_cpu(C), perf(G, PG), perf(C, PC), PG > PC."
+      "description": "GPU can't be outrunning the CPU, that's just common sense.",
+      "asp_rule": ":- selected(G), gpu(G), selected(C), cpu(C), perf(G, PG), perf(C, PC), PG > PC."
     },
     {
-      "description": "IT support has flagged a compatibility issue; the Alpha8 CPU and NovaX GPU cannot be used in the same configuration due to BIOS limitations.",
-      "asp_rule": ":- selected_cpu(\"Alpha8\"), selected_gpu(\"NovaX\")."
+      "description": "The BIOS on Alpha8 is a mess, so NovaX is a no-go with that chip.",
+      "asp_rule": ":- selected(\"Alpha8\"), selected(\"NovaX\")."
     },
     {
-      "description": "Inventory rules state that the FusionDrive unit is exclusively reserved for configurations featuring the ZetaCore processor.",
-      "asp_rule": ":- selected_storage(\"FusionDrive\"), not selected_cpu(\"ZetaCore\")."
+      "description": "FusionDrive is picky, it'll only work if you've got a ZetaCore CPU in there.",
+      "asp_rule": ":- selected(\"FusionDrive\"), not selected(\"ZetaCore\")."
     }
   ],
   "soft_constraints": [
     {
-      "description": "Financial audits require that the cost variance between any two selected components does not exceed $250 to maintain budget balance.",
-      "asp_rule": "penalty(\"CostImbalance\", (C1, C2), 1) :- selected(C1), selected(C2), cost(C1, V1), cost(C2, V2), V1 - V2 > 250."
+      "description": "Management wants costs to be balanced, so try to keep the gaps between parts under $250.",
+      "asp_rule": "penalty(\"cost_imbalance\", (C1, C2), 1) :- selected(C1), selected(C2), cost(C1, V1), cost(C2, V2), V1 > V2 + 250."
     }
   ],
   "global_objective": "#minimize { Cost, Name, Tuple : penalty(Name, Tuple, Cost) }."

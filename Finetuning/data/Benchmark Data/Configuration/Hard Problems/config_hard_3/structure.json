@@ -1,30 +1,34 @@
 {
-  "instance_template": "cpu(\"FalconX\"). cpu(\"CoreZen\"). cpu(\"EcoMini\").\ngpu(\"TitanZ\"). gpu(\"MidlineGT\"). gpu(\"Pixie\").\ndrive(\"FlashNova\"). drive(\"Terabox\"). drive(\"BudgetDisk\").\n\ncost(\"FalconX\", 600). cost(\"CoreZen\", 500). cost(\"EcoMini\", 300).\ncost(\"TitanZ\", 700). cost(\"MidlineGT\", 500). cost(\"Pixie\", 400).\ncost(\"FlashNova\", 250). cost(\"Terabox\", 300). cost(\"BudgetDisk\", 150).\n\nperf(\"FalconX\", 125). perf(\"CoreZen\", 115). perf(\"EcoMini\", 90).\nperf(\"TitanZ\", 135). perf(\"MidlineGT\", 100). perf(\"Pixie\", 95).\nperf(\"FlashNova\", 110). perf(\"Terabox\", 100). perf(\"BudgetDisk\", 60).",
-  "generator": "1 { selected(C) : cpu(C) } 1.\n1 { selected(G) : gpu(G) } 1.\n1 { selected(D) : drive(D) } 1.",
+  "instance_template": "component(\"cpu\", \"FalconX\", 600, 125). component(\"cpu\", \"CoreZen\", 500, 115). component(\"cpu\", \"EcoMini\", 300, 90). component(\"gpu\", \"TitanZ\", 700, 135). component(\"gpu\", \"MidlineGT\", 500, 100). component(\"gpu\", \"Pixie\", 400, 95). component(\"drive\", \"FlashNova\", 250, 110). component(\"drive\", \"Terabox\", 300, 100). component(\"drive\", \"BudgetDisk\", 150, 60).",
+  "generator": "1 { selected(Type, Name) : component(Type, Name, Cost, Perf) } 1 :- Type = (\"cpu\"; \"gpu\"; \"drive\").",
   "hard_constraints": [
     {
-      "description": "Make sure the component with middle-of-the-road performance is actually the cheapest one in the box.",
-      "asp_rule": ":- selected(X), perf(X, PX), HI = #max { P : selected(Z), perf(Z, P) }, LO = #min { P : selected(Z), perf(Z, P) }, PX < HI, PX > LO, selected(Y), cost(X, CX), cost(Y, CY), CX > CY."
+      "description": "The performance score of the selected GPU must be strictly greater than the minimum performance score among all selected components.",
+      "asp_rule": ":- selected(\"gpu\", G), component(\"gpu\", G, _, PG), P_min = #min { P : selected(T, N), component(T, N, _, P) }, PG <= P_min."
     },
     {
-      "description": "If the CPU is a high-roller costing over 500 bucks, you can't go cheap with the Pixie GPU.",
-      "asp_rule": ":- selected(C), cpu(C), cost(C, V), V > 500, selected(\"Pixie\")."
+      "description": "The performance score of the selected GPU must be strictly less than the maximum performance score among all selected components.",
+      "asp_rule": ":- selected(\"gpu\", G), component(\"gpu\", G, _, PG), P_max = #max { P : selected(T, N), component(T, N, _, P) }, PG >= P_max."
     },
     {
-      "description": "Performance spread sanity check: can't have the best and worst parts more than 50 points apart.",
-      "asp_rule": ":- HI = #max { P : selected(X), perf(X, P) }, LO = #min { P : selected(X), perf(X, P) }, HI > LO + 50."
+      "description": "The component characterized by a performance score strictly between the minimum and maximum performance scores must be assigned the minimum cost among the selected set.",
+      "asp_rule": ":- selected(T1, N1), component(T1, N1, C1, P1), P_max = #max { P : selected(T, N), component(T, N, _, P) }, P_min = #min { P : selected(T, N), component(T, N, _, P) }, C_min = #min { C : selected(T, N), component(T, N, C, _) }, P1 > P_min, P1 < P_max, C1 != C_min."
     },
     {
-      "description": "If you're rocking the FlashNova SSD, the GPU better have a performance score of at least 100.",
-      "asp_rule": ":- selected(\"FlashNova\"), selected(G), gpu(G), perf(G, P), P < 100."
+      "description": "If a CPU with a unit cost exceeding 500 USD is selected, the GPU designated as 'Pixie' is prohibited.",
+      "asp_rule": ":- selected(\"cpu\", N), component(\"cpu\", N, C, _), C > 500, selected(\"gpu\", \"Pixie\")."
     },
     {
-      "description": "Strictly two components must have a price tag higher than 300 dollars.",
-      "asp_rule": ":- #count { X : selected(X), cost(X, V), V > 300 } != 2."
+      "description": "The absolute difference between the maximum and minimum performance scores within the selected configuration must not exceed 50 points.",
+      "asp_rule": ":- P_max = #max { P : selected(T, N), component(T, N, _, P) }, P_min = #min { P : selected(T, N), component(T, N, _, P) }, P_max - P_min > 50."
     },
     {
-      "description": "The GPU has to be the middle child\u2014it can't be the top performer or the bottom performer.",
-      "asp_rule": ":- selected(G), gpu(G), perf(G, PG), HI = #max { P : selected(Z), perf(Z, P) }, PG >= HI.\n:- selected(G), gpu(G), perf(G, PG), LO = #min { P : selected(Z), perf(Z, P) }, PG <= LO."
+      "description": "If the FlashNova drive is selected, the GPU performance score must be greater than or equal to 100.",
+      "asp_rule": ":- selected(\"drive\", \"FlashNova\"), selected(\"gpu\", G), component(\"gpu\", G, _, PG), PG < 100."
+    },
+    {
+      "description": "The configuration must contain exactly two components whose individual costs are strictly greater than 300 USD.",
+      "asp_rule": ":- N = #count { T, Name : selected(T, Name), component(T, Name, C, _), C > 300 }, N != 2."
     }
   ],
   "soft_constraints": [],

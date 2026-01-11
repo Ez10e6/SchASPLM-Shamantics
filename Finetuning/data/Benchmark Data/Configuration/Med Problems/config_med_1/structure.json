@@ -3,45 +3,45 @@
   "generator": "1 { selected_cpu(C) : cpu(C, Cost) } 1. 1 { selected_gpu(G) : gpu(G, Cost) } 1. 1 { selected_mobo(M) : mobo(M, Cost) } 1. 1 { selected_psu(P) : psu(P, Cost) } 1.",
   "hard_constraints": [
     {
-      "description": "The utilization of a high-power graphics processing unit is prohibited in conjunction with a Bronze-rated power supply unit.",
+      "description": "Ensure that power-intensive graphics cards are not paired with a low-efficiency Bronze PSU to prevent power failure.",
       "asp_rule": ":- selected_gpu(G), high_power(G), selected_psu(\"Bronze\")."
     },
     {
-      "description": "The selection of a Xeon processor necessitates the selection of a C621 architectural motherboard.",
-      "asp_rule": ":- selected_cpu(\"Xeon\"), selected_mobo(M), M != \"C621\"."
+      "description": "Verify that the Xeon processor is only used with its designated workstation-class C621 motherboard.",
+      "asp_rule": ":- selected_cpu(\"Xeon\"), not selected_mobo(\"C621\")."
     },
     {
-      "description": "An AMD Ryzen 7 processor must be paired exclusively with an X670 chipset motherboard.",
-      "asp_rule": ":- selected_cpu(\"Ryzen7\"), selected_mobo(M), M != \"X670\"."
+      "description": "Confirm that the Ryzen7 processor is paired strictly with the X670 motherboard.",
+      "asp_rule": ":- selected_cpu(\"Ryzen7\"), not selected_mobo(\"X670\")."
     },
     {
-      "description": "The concurrent selection of an Intel i9 processor and an X670 motherboard is logically excluded.",
+      "description": "Check that the i9 processor is never assigned to an X670 motherboard, as they are incompatible.",
       "asp_rule": ":- selected_cpu(\"i9\"), selected_mobo(\"X670\")."
     },
     {
-      "description": "Provision of a Quadro graphics card implies the mandatory inclusion of a Xeon central processing unit.",
-      "asp_rule": ":- selected_gpu(\"Quadro\"), selected_cpu(C), C != \"Xeon\"."
+      "description": "A Quadro graphics card requires a server-grade Xeon CPU to satisfy professional hardware requirements.",
+      "asp_rule": ":- selected_gpu(\"Quadro\"), not selected_cpu(\"Xeon\")."
     },
     {
-      "description": "A Quadro graphics card is incompatible with the Z690 motherboard configuration.",
+      "description": "Ensure the Quadro graphics card is not installed in a Z690 motherboard due to hardware limitations.",
       "asp_rule": ":- selected_gpu(\"Quadro\"), selected_mobo(\"Z690\")."
     }
   ],
   "soft_constraints": [
     {
-      "description": "A penalty is incurred equivalent to the financial cost of the selected central processing unit.",
+      "description": "Account for the cost of the selected CPU to include it in the overall budget minimization.",
       "asp_rule": "penalty(\"cpu_cost\", C, Cost) :- selected_cpu(C), cpu(C, Cost)."
     },
     {
-      "description": "A penalty is incurred equivalent to the financial cost of the selected graphics processing unit.",
+      "description": "Account for the cost of the selected GPU to include it in the overall budget minimization.",
       "asp_rule": "penalty(\"gpu_cost\", G, Cost) :- selected_gpu(G), gpu(G, Cost)."
     },
     {
-      "description": "A penalty is incurred equivalent to the financial cost of the selected motherboard component.",
+      "description": "Account for the cost of the selected motherboard to include it in the overall budget minimization.",
       "asp_rule": "penalty(\"mobo_cost\", M, Cost) :- selected_mobo(M), mobo(M, Cost)."
     },
     {
-      "description": "A penalty is incurred equivalent to the financial cost of the selected power supply unit.",
+      "description": "Account for the cost of the selected power supply unit to include it in the overall budget minimization.",
       "asp_rule": "penalty(\"psu_cost\", P, Cost) :- selected_psu(P), psu(P, Cost)."
     }
   ],

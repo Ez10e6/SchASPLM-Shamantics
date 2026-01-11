@@ -3,18 +3,18 @@
   "generator": "1 { selected_cpu(C) : cpu(C) } 1. 1 { selected_gpu(G) : gpu(G) } 1. 1 { selected_mobo(M) : mobo(M) } 1.",
   "hard_constraints": [
     {
-      "description": "It is required that the selection of a Ryzen5 central processing unit implies the exclusive compatibility with a B450 motherboard; any configuration where a Ryzen5 is paired with an alternative motherboard is prohibited.",
+      "description": "Ryzen5 incompatible with non-B450 motherboards.",
       "asp_rule": ":- selected_cpu(\"Ryzen5\"), selected_mobo(M), M != \"B450\"."
     },
     {
-      "description": "It is mandated that the selection of an i5 central processing unit necessitates the selection of a Z390 motherboard; selections involving the i5 and motherboards other than the Z390 model are invalid.",
+      "description": "i5 incompatible with non-Z390 motherboards.",
       "asp_rule": ":- selected_cpu(\"i5\"), selected_mobo(M), M != \"Z390\"."
     },
     {
-      "description": "The logical conjunction of a selected RX580 graphics processing unit and a Z390 motherboard is strictly forbidden due to hardware incompatibility.",
+      "description": "RX580 incompatible with Z390 motherboard.",
       "asp_rule": ":- selected_gpu(\"RX580\"), selected_mobo(\"Z390\")."
     }
   ],
   "soft_constraints": [],
-  "global_objective": null
+  "global_objective": ""
 }

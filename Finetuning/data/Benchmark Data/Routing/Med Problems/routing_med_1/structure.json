@@ -1,29 +1,37 @@
 {
-  "instance_template": "loc(\"Station1\"; \"Junction1\"; \"Junction2\"; \"SubstationA\"; \"SubstationB\").\nedge(\"Station1\", \"Junction1\"). edge(\"Junction1\", \"Station1\").\nedge(\"Station1\", \"Junction2\"). edge(\"Junction2\", \"Station1\").\nedge(\"Junction1\", \"SubstationA\"). edge(\"SubstationA\", \"Junction1\").\nedge(\"Junction2\", \"SubstationB\"). edge(\"SubstationB\", \"Junction2\").\nedge(\"Junction1\", \"Junction2\"). edge(\"Junction2\", \"Junction1\").\ntarget(\"SubstationA\"; \"SubstationB\").\nenergy_limit(8).",
-  "generator": "energy(0..L) :- energy_limit(L).\n1 { visit(Loc, P) : loc(Loc) } 1 :- energy(P).\nvisit(\"Station1\", 0).\n{ inspect_at(Target, P) : energy(P), P < 8 } :- target(Target).",
+  "instance_template": "loc(\"Station1\"). loc(\"Junction1\"). loc(\"Junction2\"). loc(\"SubstationA\"). loc(\"SubstationB\"). edge(\"Station1\", \"Junction1\"). edge(\"Station1\", \"Junction2\"). edge(\"Junction1\", \"SubstationA\"). edge(\"Junction2\", \"SubstationB\"). edge(\"Junction1\", \"Junction2\"). adj(X, Y) :- edge(X, Y). adj(X, Y) :- edge(Y, X). inspect(\"SubstationA\"). inspect(\"SubstationB\"). power(0..8).",
+  "generator": "1 { at(L, P) : loc(L) } 1 :- power(P). 1 { inspect_at(L, P) : power(P), P < 8 } :- inspect(L).",
   "hard_constraints": [
     {
-      "description": "Spatial transitions between non-adjacent locations are prohibited; a move between distinct facilities at consecutive energy increments is only valid if a direct edge connection exists.",
-      "asp_rule": ":- visit(L1, P), visit(L2, P+1), L1 != L2, not edge(L1, L2)."
+      "description": "Business Requirements: All inspection drones must initialize their route at Station1 at time zero to comply with site safety protocols.",
+      "asp_rule": ":- not at(\"Station1\", 0)."
     },
     {
-      "description": "Each designated facility in the inspection set must be inspected at least once within the operational energy budget.",
-      "asp_rule": ":- target(T), #count{ P : inspect_at(T, P) } < 1."
+      "description": "Business Requirements: Drone movement between non-adjacent facilities is strictly prohibited; consecutive positions must be connected via defined edges or represent a stationary inspection event.",
+      "asp_rule": ":- at(L1, P), at(L2, P+1), L1 != L2, not adj(L1, L2), power(P), power(P+1)."
     },
     {
-      "description": "An inspection action requires the agent to be physically present at the target location for the duration of the energy expenditure, spanning from the start of the action to its completion.",
-      "asp_rule": ":- inspect_at(L, P), visit(L, P) != L.\n:- inspect_at(L, P), visit(L, P+1) != L."
+      "description": "Business Requirements: To ensure data integrity, every designated facility in the inspection list must be visited at least once during the power cycle.",
+      "asp_rule": ":- inspect(L), not inspect_at(L, _)."
     },
     {
-      "description": "To prevent signal interference, the traversal of Junction1 is strictly forbidden at any temporal point that occurs after a visit to Junction2 but before the initiation of an inspection at SubstationA.",
-      "asp_rule": ":- visit(\"Junction2\", P1), inspect_at(\"SubstationA\", P2), visit(\"Junction1\", P3), P1 < P3, P3 < P2."
+      "description": "Business Requirements: During an inspection, the drone is required to maintain a stationary position for exactly one power unit to complete sensor calibration.",
+      "asp_rule": ":- inspect_at(L, P), not at(L, P+1), power(P+1)."
+    },
+    {
+      "description": "Business Requirements: Drone sensors must be active at the target facility; an inspection cannot be logged if the drone is not physically present at the site at the start of the inspection.",
+      "asp_rule": ":- inspect_at(L, P), not at(L, P)."
+    },
+    {
+      "description": "Business Requirements: Due to signal interference policies, if the route visits Junction2 prior to inspecting SubstationA, the drone is forbidden from passing through Junction1 during that specific interval.",
+      "asp_rule": ":- at(\"Junction2\", P1), inspect_at(\"SubstationA\", P2), at(\"Junction1\", P3), P1 < P3, P3 < P2."
     }
   ],
   "soft_constraints": [
     {
-      "description": "Preference is given to routes that minimize the cumulative energy consumption recorded at the point of completing the final required inspection.",
-      "asp_rule": "completion_power(P) :- P = #max{ T+1 : inspect_at(L, T) }.\npenalty(\"energy_efficiency\", \"total\", P) :- completion_power(P)."
+      "description": "Business Requirements: Mission efficiency is a high priority; the system must prioritize routes that minimize the total battery units consumed by the time all mandatory inspections are finalized.",
+      "asp_rule": "penalty(\"PowerUsage\", (P), P) :- P = #max { T+1 : inspect_at(L, T) }, power(P)."
     }
   ],
-  "global_objective": "#minimize { Cost, Tag, Tuple : penalty(Tag, Tuple, Cost) }."
+  "global_objective": "#minimize { P,N : penalty(N, (P), P) }."
 }

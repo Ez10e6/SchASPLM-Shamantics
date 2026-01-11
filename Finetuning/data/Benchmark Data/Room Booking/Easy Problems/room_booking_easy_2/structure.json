@@ -3,16 +3,16 @@
   "generator": "1 { topicOf(L, T) : topic(T) } 1 :- lecture(L). 1 { scheduled(L, R, S) : room(R), slot(S) } 1 :- lecture(L).",
   "hard_constraints": [
     {
-      "description": "Prevent room double-booking.",
+      "description": "sanity check: make sure we don't double-book a room by putting two different lectures in the same room and slot.",
       "asp_rule": ":- scheduled(L1, R, S), scheduled(L2, R, S), L1 != L2."
     },
     {
-      "description": "Restrict AI lectures to morning slots.",
-      "asp_rule": ":- topicOf(L, \"AI\"), scheduled(L, R, S), S != \"morning\"."
+      "description": "Math and Physics are like oil and water; they can't ever share a room, even at different times of the day.",
+      "asp_rule": ":- scheduled(L1, R, S1), topicOf(L1, \"Math\"), scheduled(L2, R, S2), topicOf(L2, \"Physics\")."
     },
     {
-      "description": "Prohibit Math and Physics lectures in the same room.",
-      "asp_rule": ":- topicOf(L1, \"Math\"), scheduled(L1, R, S1), topicOf(L2, \"Physics\"), scheduled(L2, R, S2)."
+      "description": "AI lectures are morning-only stuff, so keep them out of the afternoon slots.",
+      "asp_rule": ":- topicOf(L, \"AI\"), scheduled(L, R, S), S != \"morning\"."
     }
   ],
   "soft_constraints": [],
