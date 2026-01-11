@@ -1,0 +1,85 @@
+
+exam(Exam, Duration, Is_Large).
+
+student(Student, Exam).
+
+period(P, Date, Time, Duration, Is_Late, Penalty).
+
+room(Room, Capacity, Penalty).
+
+order_constrain(Exam1, Exam2).
+
+same_time_constraint(Exam1, Exam2).
+
+different_time_constraint(Exam1, Exam2).
+
+own_room_constraint(Exam).
+
+% Generator
+
+{ scheduled(Exam, P, R) : exam(Exam, _, _, _, _), period(P, _, _, _, _, _), room(R, _, _) }.
+
+
+% Hard Constraints
+
+% No student sits more than one examination at the same time.
+:- scheduled(Exam1, P, R), scheduled(Exam2, P, R), student(Student, Exam1), student(Student, Exam2), Exam1 != Exam2.
+
+
+% The number of students taking exams in a room at the same time should not exceed the capacity of the room.
+:- scheduled(Exam1, P, R), scheduled(Exam2, P, R), Exam1 != Exam2, student(Student, Exam1), student(Student, Exam2), #count{Exam : scheduled(Exam, P, R), student(Student, Exam)} > room(R, Capacity).
+
+
+% Period Lengths are not violated.
+:- scheduled(Exam, P, _), period(P, _, _, Duration, _, _), scheduled(Exam, P2, _), period(P2, _, _, _, _, _), P < P2.
+
+
+% Some exams must be before other exams.
+:- order_constrain(Exam1, Exam2), not scheduled(Exam1, P1, _), scheduled(Exam2, P2, _), P1 < P2.
+
+
+% Some exams must be at the same time as other exams.
+:- scheduled(Exam1, P1, R1), scheduled(Exam2, P2, R2), same_time_constraint(Exam1, Exam2), P1 != P2.
+
+
+% Some exams must be at a differen time than other exams.
+:- scheduled(Exam1, P1, _), scheduled(Exam2, P2, _), different_time_constraint(Exam1, Exam2), P1 != P2.
+
+
+% Some exams must take place in a room with no other exams.
+:- scheduled(Exam1, P, R), scheduled(Exam2, P, R), Exam1 != Exam2, not own_room_constraint(Exam1).
+
+
+
+
+% Soft Constraints
+
+% Students should not have more than one exam in the same day
+penalty("ExamOverlap",student(Student,E1),7) :- student(Student,E1), student(Student,E2), E1 < E2, scheduled(E1,P1,R), scheduled(E2,P2,R), P1 < P2, P2 - P1 = 1, day_of_period(P1,D1), day_of_period(P2,D2), D1 = D2.
+penalty("ExamOverlap",student(Student,E1),5) :- student(Student,E1), student(Student,E2), E1 < E2, scheduled(E1,P1,R), scheduled(E2,P2,R), P1 < P2, P2 - P1 > 1, day_of_period(P1,D1), day_of_period(P2,D2), D1 = D2.
+
+
+% Exams of different lengths should not be scheduled in the same room in the same period
+penalty("DifferentLength", scheduled(Exam1, P, R), 10) :- scheduled(Exam1, P, R), scheduled(Exam2, P, R), exam(Exam1, D1, _, _, _), exam(Exam2, D2, _, _, _), D1 != D2.
+
+
+% Some periods have associated penalties
+penalty("PeriodPenalty", Exam, P, Penalty) :- scheduled(Exam, P, _), period(P, _, _, _, _, Penalty).
+
+
+% Some rooms have associated penalties
+penalty("RoomPenalty",exam(Exam,P,R),PEN) :- scheduled(Exam,P,R), room(R,_,PEN).
+
+
+% Students should not have more than one exam within a spread of 7 periods.
+penalty("ExamSpread",student(S,E),3) :- student(S,E), M = #max { P : scheduled(E,P,R) }, m = #min { P : scheduled(E,P,R) }, M - m > 7.
+
+
+% An exam that is large should not be scheduled in a period that is late.
+:- exam(Exam, _, _, _, Is_Large), period(P, _, _, _, Is_Late, _), Is_Large = 1, Is_Late = 1.
+
+
+
+
+% Objective function
+#minimize { Penalty,Reason,SoftConstraint : penalty(SoftConstraint,Reason,Penalty) }.

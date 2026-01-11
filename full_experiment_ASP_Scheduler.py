@@ -18,7 +18,7 @@ from utils import logger
 # GENERAL SETTINGS
 RUN_LOCAL_MODEL = True         # Set to True to run a local model, False to run a remote model via OpenAI API
 PRINT = True                    # Set to True to print intermediate outputs
-PROGRAM_FOLDER = 'Results/experiment'     # Folder to save programs (set to None to disable saving)
+PROGRAM_FOLDER = 'Results/experiments_2'     # Folder to save programs (set to None to disable saving)
 METRICS_LOG_FILE = 'metrics/metrics.csv'
 
 # REMOTE SETTINGS
@@ -29,9 +29,9 @@ METRICS_LOG_FILE = 'metrics/metrics.csv'
 
 # LOCAL SETTINGS
 # CHECKPOINT, CHECKPOINT_SHORT_NAME = "meta-llama/Meta-Llama-3-8B-Instruct", "Llama-3-8B-Instruct" 
-CHECKPOINT, CHECKPOINT_SHORT_NAME = "Qwen/Qwen2.5-7B-Instruct", "Qwen2.5-7B-Instruct"
+# CHECKPOINT, CHECKPOINT_SHORT_NAME = "Qwen/Qwen2.5-7B-Instruct", "Qwen2.5-7B-Instruct"
 # CHECKPOINT, CHECKPOINT_SHORT_NAME = "ft_llama_mlx", "ft_llama_mlx"
-# CHECKPOINT, CHECKPOINT_SHORT_NAME = "ft_qwen_mlx", "ft_qwen_mlx"
+CHECKPOINT, CHECKPOINT_SHORT_NAME = "ft_qwen_mlx", "ft_qwen_mlx"
 # CHECKPOINT_SEMANTICS, CHECKPOINT_SHORT_NAME_SEMANTICS = "meta-llama/Meta-Llama-3-8B-Instruct", "Llama-3-8B-Instruct" 
 CHECKPOINT_SEMANTICS, CHECKPOINT_SHORT_NAME_SEMANTICS = "Qwen/Qwen2.5-7B-Instruct", "Qwen2.5-7B-Instruct"
 
