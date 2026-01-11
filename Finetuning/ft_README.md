@@ -1,137 +1,64 @@
-# LLM Fine-Tuning for ASP Generation
+# ASP-Scheduler Fine-Tuning Pipeline
 
-This directory contains the pipeline for fine-tuning Large Language Models (LLMs) to generate Answer Set Programming (ASP) code from Natural Language descriptions. The pipeline leverages Apple MLX for efficient LoRA fine-tuning on Apple Silicon, and Google Gemini for structural distillation.
+This directory contains the implementation for fine-tuning Large Language Models (LLMs) to act as specialized **ASP Knowledge Engineers**. The pipeline is designed to transform Natural Language (NL) descriptions into syntactically valid and semantically correct Answer Set Programming (ASP) code.
 
-## Project Structure
+## 1. Overview: Modular Distillation
+Rather than training a model to generate a full program at once, we fine-tune models to handle the modular components used by the `ASP_Scheduler`:
+*   **Instance Templates:** Mapping NL objects to ASP predicates.
+*   **Generators:** Defining search spaces (Choice rules).
+*   **Constraints:** Implementing logic for Hard (Integrity) and Soft (Penalty) constraints.
+*   **Syntax Repair:** Correcting erroneous code based on compiler feedback.
 
-```text
-Finetuning/
-├── adapters/              # Stores LoRA adapters during/after training
-├── data/
-│   ├── Benchmark Data/    # Raw source problems (folders with NL.txt & ASP.txt)
-│   ├── train.jsonl        # Processed training dataset (Chat format)
-│   └── valid.jsonl        # Processed validation dataset
-├── local_models/          # Location for fused models (base + adapters)
-├── notebooks/             # Jupyter notebooks for interactive execution
-│   ├── data_converter.ipynb
-│   └── ft_mlx_lora.ipynb
-├── prompts/               # System prompts used for data distillation
-│   ├── extraction.txt     # Extracts JSON structure from NL/ASP pairs
-│   ├── generator.txt      # Prompt for generating choice rules
-│   ├── hard_constraint.txt
-│   ├── repair_gemini.txt  # Auto-repair logic prompt
-│   └── ...
-├── scripts/               # Core logic scripts
-│   ├── data_converter.py  # Converts raw data to training format
-│   ├── train_mlx.py       # MLX training wrapper
-├── requirements_ft.txt    # Python dependencies
-└── utils_ft.py            # Path and environment helpers
-```
+## 2. Data Pipeline (`scripts/data_converter.py`)
+The training data is generated using a "Teacher-Student" distillation approach with **Gemini-1.5-Flash** as the teacher and the **Clingo Compiler** as the ground-truth validator.
 
-## Prerequisites
+### Distillation Process
+1.  **Extraction:** Gemini deconstructs existing ASP benchmarks into structured JSON components (Instance, Generator, Constraints).
+2.  **Tone Variation:** To improve generalization, the NL descriptions are rewritten into five distinct tones: *Academic, Casual, Business, Succinct,* and *Didactic*.
+3.  **Auto-Repair:** Every extracted ASP snippet is passed through `clingo`. If the teacher (Gemini) generates invalid code, it is sent back for a "Distillation Repair" until it passes syntax checks.
 
-### Hardware
-This pipeline is optimized for Apple Silicon (M1/M2/M3) using the `mlx-lm` library.
+### Synthetic Corruption (The "Repair Task")
+To support the Scheduler's self-healing capabilities, we generate "Broken -> Fixed" training pairs:
+*   **Corruption:** We programmatically break valid ASP code by removing periods, using double braces `{{ }}`, creating unsafe variables, or using non-ASCII characters.
+*   **Feedback Integration:** We pair the broken code with the actual Clingo error message.
+*   **Task:** The model is trained to output the original valid code when presented with the error message and the broken snippet.
 
-### Environment Setup
-1. **Install Dependencies:**
-   ```bash
-   pip install -r requirements_ft.txt
-   ```
+## 3. Training Framework (`scripts/train_mlx.py`)
+We utilize the **Apple MLX** framework for efficient LoRA (Low-Rank Adaptation) on Apple Silicon.
 
-2. **Environment Variables:**
-   Create a `.env` file in the project root containing:
-   ```env
-   GOOGLE_API_KEY=your_gemini_api_key_here  # Required for data processing/distillation
-   HF_KEY=your_huggingface_token            # Required for downloading Llama/Qwen models
-   ```
+### Training Specifications
+*   **Base Models:** `Qwen2.5-7B-Instruct` and `Llama-3-8B-Instruct`.
+*   **Method:** LoRA (Low-Rank Adaptation).
+*   **Hyperparameters:**
+    *   **Rank:** 16 (default) / 32 (recommended for logic).
+    *   **Learning Rate:** $1e-5$ with Cosine Decay.
+    *   **Batch Size:** 1 with Gradient Accumulation (4 steps).
+    *   **Max Seq Length:** 4096 tokens.
+*   **Masking:** Prompt masking is enabled to ensure the model only learns from the ASP completions, not the user prompts.
 
-## How to Use
+## 4. Usage
 
-Follow these steps to go from raw data to a fully fine-tuned ASP generation model.
-
-### 1. Prepare the Data
-Before training, you must process the benchmark data into the JSONL format required by MLX.
-
-1. Open `notebooks/data_converter.ipynb`.
-2. Run all cells in the notebook.
-3. This will:
-   * Scan the `data/Benchmark Data` folder.
-   * Use Google Gemini to distill the ASP code into logical components.
-   * Generate synthetic repair tasks for robustness.
-   * Output `data/train.jsonl` and `data/valid.jsonl`.
-
-### 2. Fine-Tune the Model
-Once the data is ready, you can start the training process.
-
-1. Open `notebooks/ft_mlx_lora.ipynb`.
-2. Locate the configuration cell and select your base model (e.g., `MODEL_TYPE = "llama"` or `MODEL_TYPE = "qwen"`).
-3. Run the notebook.
-4. The script will:
-   * Download the base model from Hugging Face if not present.
-   * Train LoRA adapters using the parameters defined in `scripts/train_mlx.py`.
-   * Fuse the adapters into the base model.
-   * Save the final model to `local_models/ft_[model]_[framework]`.
-
-### 3. Run Inference
-You can test your fine-tuned model using the MLX command line interface or Python.
-
-**Using CLI:**
+### Step 1: Data Preparation
+Run the data converter to process the raw benchmarks into JSONL format.
 ```bash
-python -m mlx_lm generate \
-    --model local_models/ft_qwen_mlx \
-    --prompt "<|begin_of_text|><|start_header_id|>system<|end_header_id|>\n\nYou are an expert in Answer Set Programming. Task: Generate the choice rules and ONLY the absolutely essential auxiliary logic. Output: Provide ONLY the valid Clingo code.<|eot_id|><|start_header_id|>user<|end_header_id|>\n\nProblem Description: Create a graph coloring instance with 3 nodes. Adjacent nodes cannot have the same color. Available colors are red, green, and blue.\n\n### TASK\nCreate the generator.<|eot_id|><|start_header_id|>assistant<|end_header_id|>\n\n" \
-    --max-tokens 512
+python -m Finetuning.scripts.data_converter --input "data/Benchmark Data" --output "data"
 ```
 
-## Workflow
+### Step 2: Training
+Use the provided notebooks or the training script to begin fine-tuning.
+*   `notebooks/data_converter.ipynb`: Visualizing the extraction and corruption process.
+*   `notebooks/ft_mlx_lora.ipynb`: Executing the training run and monitoring loss.
 
-The workflow is divided into two distinct stages, managed via the Jupyter Notebooks described above.
-
-### 1. Data Conversion & Distillation
-**Notebook:** `notebooks/data_converter.ipynb`
-
-This step converts raw text/code pairs into a structured JSONL dataset suitable for instruction tuning.
-*   **Logic:** Uses `scripts/data_converter.py`.
-*   **Features:**
-    *   **Structure Extraction:** Uses Gemini to reverse-engineer the ASP solution into a JSON structure (Instance Template, Generator, Hard/Soft Constraints).
-    *   **Auto-Repair:** If the extracted ASP structure contains syntax errors, Gemini attempts to fix the Clingo code automatically.
-    *   **Synthetic Repair Tasks:** Randomly injects "broken" code examples into the training set to teach the model how to fix syntax errors (robustness training).
-*   **Output:** Generates `data/train.jsonl` and `data/valid.jsonl`.
-
-### 2. LoRA Fine-Tuning (MLX)
-**Notebook:** `notebooks/ft_mlx_lora.ipynb`
-
-Performs Parameter-Efficient Fine-Tuning (PEFT) using LoRA.
-*   **Logic:** Uses `scripts/train_mlx.py`.
-*   **Supported Models:** Llama 3 (8B) and Qwen 2.5 (7B).
-*   **Process:**
-    1.  Converts the JSONL data into MLX-compatible format.
-    2.  Trains adapters using LoRA (Low-Rank Adaptation).
-    3.  **Fusing:** Merges the trained adapters back into the base model.
-*   **Output:** A fine-tuned model saved in `local_models/ft_[model]_[framework]`.
-
-## Prompt Engineering Strategy
-
-The `prompts/` directory contains specific instructions used during the data conversion phase to break down complex ASP programs into manageable logic chunks.
-
-*   **`extraction.txt`**: Deconstructs a full ASP solution into JSON components.
-*   **`repair_gemini.txt`**: Used when the Python syntax checker detects invalid Clingo code; asks the LLM to fix it.
-*   **`repair_task.txt`**: Used to generate synthetic training data where the model acts as a debugger.
-
-## Dataset Format
-
-The final training data (`train.jsonl`) follows a standard Chat format:
-
-```json
-{
-  "messages": [
-    {"role": "system", "content": "You are an expert in Answer Set Programming..."},
-    {"role": "user", "content": "Problem Description: ..."},
-    {"role": "assistant", "content": "loc(1..4). edge(1,2). ..."}
-  ]
-}
+### Step 3: Model Fusing
+Once training is complete, fuse the LoRA adapters into the base model for deployment.
+```python
+from Finetuning.scripts.train_mlx import fuse_model
+fuse_model(base_model, adapter_path, save_path)
 ```
 
-## License
-This project uses benchmark data derived from various ASP competitions. Ensure compliance with original data licenses when distributing models.
+## 5. Directory Structure
+*   `adapters/`: Stores LoRA weights and training configurations.
+*   `data/`: Contains `train.jsonl` and `valid.jsonl` files.
+*   `prompts/`: System prompts used for data extraction and task-specific fine-tuning.
+*   `scripts/`: Core logic for conversion and training.
+*   `utils_ft.py`: Shared utilities for path management and environment setup.
